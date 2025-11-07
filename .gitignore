@@ -1,0 +1,53 @@
+# ...existing code...
+# Node / package managers
+node_modules/
+.pnpm-store/
+.pnpm-debug.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Next.js / frontend
+.next/
+.next/cache/
+out/
+.vercel/
+.next/*
+
+# Builds / dist
+dist/
+build/
+out/
+generated/
+
+# Prisma
+prisma/generated/
+prisma/migrations/
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Logs & coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+coverage/
+
+# IDEs & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+refre.pdf
+
+# Static uploads / user files
+public/uploads/
+uploads/
+
+# Misc
+*.tmp
+*.bak
