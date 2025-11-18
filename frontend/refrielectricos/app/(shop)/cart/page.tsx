@@ -4,6 +4,7 @@ import { useCart } from '@/context/CartContext';
 import Navbar from '@/components/layout/Navbar';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Trash2, Plus, Minus } from 'lucide-react';
 
 export default function CartPage() {
@@ -36,12 +37,13 @@ export default function CartPage() {
               <ul className="divide-y divide-gray-200">
                 {items.map((item) => (
                   <li key={item.id} className="p-6 flex items-center">
-                    <div className="h-24 w-24 shrink-0 overflow-hidden rounded-md border border-gray-200">
+                    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-gray-200">
                       {item.image_url ? (
-                        <img
+                        <Image
                           src={item.image_url}
                           alt={item.name}
-                          className="h-full w-full object-contain object-center"
+                          fill
+                          className="object-contain object-center"
                         />
                       ) : (
                         <div className="h-full w-full bg-gray-100 flex items-center justify-center text-gray-400">

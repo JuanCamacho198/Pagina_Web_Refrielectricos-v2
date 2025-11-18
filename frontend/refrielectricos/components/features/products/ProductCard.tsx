@@ -2,6 +2,7 @@
 
 import { Heart, ShoppingCart, Check } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -52,10 +53,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="relative w-full pt-[70%] bg-gray-100 overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-50">
             {product.image_url ? (
-              <img
+              <Image
                 src={product.image_url}
                 alt={product.name}
-                className="w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+                fill
+                className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
               />
             ) : (
               <span>Sin imagen</span>
