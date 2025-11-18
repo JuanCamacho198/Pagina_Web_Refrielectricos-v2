@@ -21,6 +21,8 @@ out/
 generated/
 
 # Prisma
+backend/prisma/generated/
+backend/prisma/migrations/
 prisma/generated/
 prisma/migrations/
 
