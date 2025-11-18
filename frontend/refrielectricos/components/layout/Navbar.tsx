@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, User } from 'lucide-react';
+import { ShoppingCart, User, LogOut } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
   const { totalItems } = useCart();
+  const { user, logout } = useAuth();
 
   return (
     <nav className="bg-white shadow-md">
@@ -33,9 +35,25 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-            <Link href="/login" className="text-gray-500 hover:text-gray-700">
-              <User className="h-6 w-6" />
-            </Link>
+            
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-700 hidden sm:block">
+                  {user.name}
+                </span>
+                <button 
+                  onClick={logout} 
+                  className="text-gray-500 hover:text-red-600 transition-colors"
+                  title="Cerrar sesión"
+                >
+                  <LogOut className="h-6 w-6" />
+                </button>
+              </div>
+            ) : (
+              <Link href="/login" className="text-gray-500 hover:text-gray-700">
+                <User className="h-6 w-6" />
+              </Link>
+            )}
           </div>
         </div>
       </div>

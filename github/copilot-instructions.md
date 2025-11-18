@@ -169,3 +169,147 @@ Crear una plataforma eCommerce moderna, con:
 **Proyecto:** Refrielectricos G&E S.A.S  
 **Stack:** Next.js + NestJS + Prisma + Neon  
 **Objetivo:** Aprender a construir y dominar todo el stack fullstack de un eCommerce.
+
+# Arquitectura y Diseño Frontend - Refrielectricos
+
+Este documento define los estándares de diseño, estructura de carpetas, paleta de colores y hooks globales para el desarrollo del frontend en Next js.
+
+---
+
+## 1. Identidad Visual (UI/UX)
+
+### Paleta de Colores
+Basada en el rubro de "Refrigeración y Electricidad", buscamos transmitir confianza, limpieza y energía.
+
+| Nombre | Variable Tailwind | Código Hex | Uso |
+| :--- | :--- | :--- | :--- |
+| **Primary Blue** | `bg-blue-600` | `#2563EB` | Botones principales, Navbar, Enlaces activos. |
+| **Deep Blue** | `bg-blue-900` | `#1E3A8A` | Footer, Encabezados oscuros. |
+| **Electric Cyan** | `text-cyan-500` | `#06B6D4` | Detalles, Iconos, Hovers sutiles. |
+| **Alert Orange** | `bg-orange-500` | `#F97316` | Ofertas, Badges de stock bajo, Call to Action secundario. |
+| **Success Green** | `text-green-600` | `#16A34A` | Mensajes de éxito, Stock disponible. |
+| **Error Red** | `text-red-600` | `#DC2626` | Errores de formulario, Sin stock. |
+| **Background** | `bg-gray-50` | `#F9FAFB` | Fondo general de la aplicación. |
+| **Surface** | `bg-white` | `#FFFFFF` | Tarjetas, Modales, Navbar. |
+
+### Tipografía
+- **Fuente Principal:** `Geist Sans` (Default Next.js) o `Inter`.
+- **Pesos:**
+  - Regular (400): Texto cuerpo.
+  - Medium (500): Botones, Enlaces.
+  - Bold (700): Títulos.
+
+---
+
+## 2. Estructura de Carpetas (App Router)
+
+Seguiremos una estructura modular y atómica para facilitar la escalabilidad.
+
+```
+frontend/refrielectricos/
+├── app/
+│   ├── (auth)/              # Grupo de rutas de autenticación (sin layout global si se requiere)
+│   │   ├── login/
+│   │   └── register/
+│   ├── (shop)/              # Grupo de rutas de tienda
+│   │   ├── products/
+│   │   │   └── [id]/        # Detalle de producto
+│   │   ├── cart/            # Carrito de compras
+│   │   └── checkout/        # Proceso de pago
+│   ├── admin/               # Panel de administración (protegido por rol)
+│   ├── layout.tsx           # Layout raíz (Providers, Navbar, Footer)
+│   └── page.tsx             # Home Page
+├── components/
+│   ├── ui/                  # Componentes base (átomos) sin lógica de negocio
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── Card.tsx
+│   │   ├── Modal.tsx
+│   │   └── Badge.tsx
+│   ├── layout/              # Componentes estructurales
+│   │   ├── Navbar.tsx
+│   │   ├── Footer.tsx
+│   │   └── Sidebar.tsx
+│   └── features/            # Componentes con lógica de negocio específica
+│       ├── products/
+│       │   ├── ProductCard.tsx
+│       │   └── ProductGrid.tsx
+│       ├── cart/
+│       │   ├── CartItem.tsx
+│       │   └── CartSummary.tsx
+│       └── auth/
+│           └── LoginForm.tsx
+├── lib/
+│   ├── api.ts               # Instancia de Axios configurada
+│   ├── utils.ts             # Utilidades (cn para tailwind-merge, formatCurrency)
+│   └── constants.ts         # Constantes globales (URLs, Configs)
+├── hooks/                   # Custom Hooks reutilizables
+│   ├── useAuth.ts           # Manejo de sesión y usuario
+│   ├── useCart.ts           # Lógica del carrito (añadir, quitar, total)
+│   └── useToast.ts          # Notificaciones emergentes
+├── context/                 # React Contexts
+│   ├── AuthContext.tsx      # Estado global de autenticación
+│   └── CartContext.tsx      # Estado global del carrito
+└── types/                   # Definiciones de TypeScript compartidas
+    ├── product.ts
+    ├── user.ts
+    └── api.ts
+```
+
+---
+
+## 3. Requisitos Funcionales Frontend
+
+### Core (Tienda)
+1.  **Catálogo:** Listado de productos con filtros básicos (categoría, precio).
+2.  **Búsqueda:** Barra de búsqueda en Navbar.
+3.  **Detalle:** Vista individual con imágenes, descripción, precio y stock.
+4.  **Carrito:**
+    - Persistencia en `localStorage`.
+    - Modificar cantidades.
+    - Resumen de costos.
+
+### Autenticación
+1.  **Login/Registro:** Formularios con validación.
+2.  **Protección de Rutas:** Middleware o HOC para redirigir si no hay sesión.
+3.  **Persistencia:** Token JWT en `localStorage` o Cookies.
+
+### Checkout
+1.  **Resumen:** Vista final antes de pagar.
+2.  **Envío de Orden:** Conexión con endpoint `POST /orders`.
+3.  **Feedback:** Pantalla de éxito o error tras la compra.
+
+---
+
+## 4. Hooks Globales Planeados
+
+### `useAuth`
+Abstrae la lógica de autenticación.
+- `user`: Datos del usuario actual o null.
+- `login(credentials)`: Llama a API y guarda token.
+- `logout()`: Limpia token y estado.
+- `register(data)`: Crea cuenta.
+
+### `useCart`
+Maneja el estado del carrito de compras.
+- `items`: Array de productos en carrito.
+- `addItem(product, quantity)`: Añade o actualiza cantidad.
+- `removeItem(productId)`: Elimina item.
+- `clearCart()`: Vacía el carrito.
+- `total`: Precio total calculado.
+
+### `useFetch` (Opcional o usar SWR/TanStack Query)
+Para peticiones de datos.
+- `data`, `loading`, `error`.
+- Revalidación automática.
+
+---
+
+## 5. Stack Tecnológico Confirmado
+- **Framework:** Next.js 16 (App Router).
+- **Estilos:** TailwindCSS 4 + `clsx` + `tailwind-merge`.
+- **Iconos:** Lucide React.
+- **HTTP:** Axios.
+- **Estado:** React Context + Hooks.
+- **Validación Formularios:** React Hook Form (Sugerido) + Zod (Sugerido).
+
