@@ -114,9 +114,11 @@ export default function CartPage() {
               </div>
 
               <div className="mt-6">
-                <Button className="w-full">
-                  Proceder al pago
-                </Button>
+                <Link href="/checkout">
+                  <Button className="w-full">
+                    Proceder al pago
+                  </Button>
+                </Link>
               </div>
               <div className="mt-4">
                 <button 
