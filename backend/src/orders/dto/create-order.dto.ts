@@ -1,6 +1,6 @@
 import { IsString, IsInt, Min, IsArray, ValidateNested, IsOptional, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '../../../generated/prisma/enums';
 
 class CreateOrderItemDto {
   @IsString()
