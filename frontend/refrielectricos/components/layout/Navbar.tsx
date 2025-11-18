@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShoppingCart, User, LogOut } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -20,6 +21,13 @@ export default function Navbar() {
               href="/" 
               className="shrink-0 flex items-center gap-2 hover:scale-105 transition-transform duration-200"
             >
+              <Image 
+                src="/icons/logoRefri.svg" 
+                alt="Refrielectricos Logo" 
+                width={32} 
+                height={32} 
+                className="w-8 h-8"
+              />
               <span className="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                 Refrielectricos
               </span>
