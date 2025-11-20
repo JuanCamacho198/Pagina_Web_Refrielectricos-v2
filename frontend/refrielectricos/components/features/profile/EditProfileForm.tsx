@@ -3,19 +3,12 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Loader2, Save } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-
-const profileSchema = z.object({
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string().email('Email inválido'),
-});
-
-type ProfileFormData = z.infer<typeof profileSchema>;
+import { profileSchema, ProfileFormData } from '@/schemas/profile';
 
 export default function EditProfileForm() {
   const { user, updateUser } = useAuth();
@@ -41,7 +34,7 @@ export default function EditProfileForm() {
     setMessage(null);
 
     try {
-      const response = await api.patch(`/users/${user.id}`, data);
+      await api.patch(`/users/${user.id}`, data);
       
       // Actualizar el contexto y localStorage
       // Asumimos que la respuesta devuelve el usuario actualizado.

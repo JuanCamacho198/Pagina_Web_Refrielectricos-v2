@@ -1,8 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
+interface RequestWithUser extends Request {
+  user: {
+    userId: string;
+    email: string;
+    role: string;
+  };
+}
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
@@ -17,6 +35,16 @@ export class OrdersController {
   @Get()
   findAll() {
     return this.ordersService.findAll();
+  }
+
+  @Get('mine')
+  findAllMyOrders(@Request() req: RequestWithUser) {
+    return this.ordersService.findAllByUser(req.user.userId);
+  }
+
+  @Get('user/:userId')
+  findAllByUser(@Param('userId') userId: string) {
+    return this.ordersService.findAllByUser(userId);
   }
 
   @Get(':id')

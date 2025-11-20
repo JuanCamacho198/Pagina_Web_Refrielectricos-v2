@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, LogOut, Settings } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Settings, MapPin, Package } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -106,6 +106,22 @@ export default function Navbar() {
                       >
                         <Settings className="h-4 w-4" />
                         Editar Perfil
+                      </Link>
+                      <Link
+                        href="/profile/addresses"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        <MapPin className="h-4 w-4" />
+                        Mis Direcciones
+                      </Link>
+                      <Link
+                        href="/profile/orders"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        <Package className="h-4 w-4" />
+                        Mis Pedidos
                       </Link>
                     </div>
                   )}

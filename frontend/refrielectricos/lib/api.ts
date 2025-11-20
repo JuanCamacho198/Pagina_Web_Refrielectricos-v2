@@ -18,4 +18,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Interceptor para manejar errores de respuesta (ej: token expirado)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Si el error es 401 (Unauthorized), probablemente el token expiró
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        // Redirigir al login para forzar re-autenticación
+        window.location.href = '/login?redirect=/checkout';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

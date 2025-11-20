@@ -94,6 +94,22 @@ export class OrdersService {
     });
   }
 
+  findAllByUser(userId: string): Promise<Order[]> {
+    return this.prisma.order.findMany({
+      where: { userId },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   findOne(id: string): Promise<Order | null> {
     return this.prisma.order.findUnique({
       where: { id },

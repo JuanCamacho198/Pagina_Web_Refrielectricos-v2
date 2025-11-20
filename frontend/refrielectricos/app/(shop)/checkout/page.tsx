@@ -50,6 +50,7 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (!user) return;
     
+    console.log('Iniciando proceso de orden...');
     setLoading(true);
     setError('');
 
@@ -62,15 +63,20 @@ export default function CheckoutPage() {
         }))
       };
 
-      await api.post('/orders', orderData);
+      console.log('Enviando datos de orden:', orderData);
+      const response = await api.post('/orders', orderData);
+      console.log('Respuesta del servidor:', response);
       
       clearCart();
       router.push('/checkout/success');
     } catch (err: unknown) {
-      console.error(err);
+      console.error('Error al crear la orden:', err);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const error = err as any;
-      setError(error.response?.data?.message || 'Error al procesar la orden');
+      const errorMessage = error.response?.data?.message || error.message || 'Error al procesar la orden';
+      setError(errorMessage);
+      // Scroll al error para que el usuario lo vea
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setLoading(false);
     }
