@@ -42,7 +42,7 @@ El objetivo es construir una tienda online moderna, escalable y mantenible, desa
   - Autenticación JWT implementada y rutas protegidas con `JwtAuthGuard`
 
 ### Frontend (Next.js) - 🚧 En desarrollo (Avanzado)
-- **Stack:** Next.js 15 (App Router), TailwindCSS.
+- **Stack:** Next.js 16 (App Router), TailwindCSS 4.
 - **Utilidades:** 
   - `axios` (Cliente HTTP con interceptores para JWT).
   - `clsx` + `tailwind-merge` (Manejo dinámico de clases).
@@ -106,7 +106,10 @@ frontend/refrielectricos/
 ├── components/          # Componentes React reutilizables (UI)
 ├── lib/                 # Lógica auxiliar: data fetching (`api.ts`), utilidades
 ├── node_modules/        # Dependencias del frontend
-├── public/              # Assets estáticos (imágenes, favicons)
+├── public/  
+│   ├── branding/        # Logos y favicons
+│   ├── icons/           # Iconos SVG personalizados
+│   └── images/             # Assets estáticos (imágenes, favicons)
 ├── bun.lock             # Archivo de bloqueo de dependencias (si se usa Bun)
 ├── eslint.config.mjs
 ├── next-env.d.ts
@@ -138,6 +141,7 @@ Copilot debe ayudar a:
 - Usar **TypeScript** en todo el proyecto.  
 - Actualizar el `copilot-instructions.md` con cada cambio 
 relevante.
+- **Validación Formularios:** React Hook Form + Zod 
 - Evitar lógica de negocio en controladores; delegarla a servicios.  
 - Usar **DTOs** y **class-validator** en NestJS.  
 - En Next.js, separar lógica de UI y data fetching (`/lib/api.ts`).  
@@ -159,11 +163,53 @@ relevante.
 ---
 
 ## Buenas prácticas para Copilot
-- Mantener consistencia entre entidades Prisma y DTOs.  
-- En React, preferir componentes funcionales con hooks (`useEffect`, `useState`, `useReducer`).  
-- Para datos del backend, usar `fetch` o `axios` con endpoints REST.  
-- Documentar funciones clave con JSDoc.  
-- Evitar sugerir dependencias no justificadas o sin tipado.
+
+### General
+- **DRY (Don't Repeat Yourself):** Extraer lógica reutilizable a hooks o utilidades.
+- **KISS (Keep It Simple, Stupid):** Preferir soluciones simples y legibles.
+- **Tipado Estricto:** No usar `any`. Definir interfaces/types para props, estados y respuestas de API.
+
+### Next.js (Frontend)
+- **Server Components:** Usar Server Components por defecto. Usar `'use client'` solo cuando sea necesario (hooks, interactividad).
+- **Optimización de Imágenes:** Usar siempre `next/image` con dimensiones o `fill`.
+- **Estructura de Carpetas:** Seguir la estructura de `app/` router. Colocar componentes específicos de una página dentro de su carpeta si no se reutilizan.
+- **Data Fetching:** Usar `fetch` con cache/revalidate en Server Components. Usar SWR o TanStack Query en Client Components si es complejo.
+- **Manejo de Errores:** Usar `error.tsx` y `not-found.tsx` para manejo de errores declarativo.
+
+### NestJS (Backend)
+- **Arquitectura Modular:** Mantener la separación clara: Controller (Rutas) -> Service (Lógica) -> Repository/Prisma (Datos).
+- **DTOs y Validación:** Usar `class-validator` y `class-transformer` en todos los DTOs de entrada.
+- **Inyección de Dependencias:** Usar siempre la inyección de dependencias del constructor.
+- **Manejo de Excepciones:** Usar `HttpException` y filtros de excepción personalizados. No devolver 500 genéricos si se conoce el error.
+- **Configuración:** Usar `ConfigService` para variables de entorno, nunca `process.env` directo en el código.
+
+### HTML & Accesibilidad
+- **Semántica:** Usar etiquetas semánticas (`<main>`, `<section>`, `<article>`, `<nav>`, `<header>`, `<footer>`) en lugar de `<div>` genéricos.
+- **Accesibilidad (a11y):**
+  - `alt` descriptivo en todas las imágenes.
+  - `aria-label` en botones sin texto visible (solo iconos).
+  - Estructura correcta de encabezados (`h1` -> `h2` -> `h3`).
+  - Formularios con `label` asociado a cada `input`.
+
+### Tailwind CSS 4 & UI
+- **Mobile First:** Escribir clases base para móvil y usar prefijos (`sm:`, `md:`, `lg:`) para pantallas más grandes.
+- **Clases Utilitarias:** Evitar `@apply` en CSS siempre que sea posible; usar clases directamente en el JSX.
+- **Consistencia:** Usar las variables de color definidas (`bg-blue-600`, `text-gray-900`) y no valores arbitrarios (`bg-[#123456]`) salvo excepciones justificadas.
+- **Modo Oscuro:** Usar siempre el prefijo `dark:` para definir estilos en modo oscuro.
+- **Componentes UI:** Usar `clsx` y `tailwind-merge` (o la utilidad `cn`) para combinar clases condicionales.
+- **Configuración:** Usar variables CSS nativas en `globals.css` para la configuración del tema (Tailwind v4).
+---
+
+## Variables de Entorno (Referencia para generación de código)
+Copilot debe asumir que estas variables existen:
+
+**Frontend (.env.local):**
+- `NEXT_PUBLIC_API_URL`: URL base del backend (ej. http://localhost:4000).
+
+**Backend (.env):**
+- `DATABASE_URL`: Conexión a Neon PostgreSQL.
+- `JWT_SECRET`: Clave para firmar tokens.
+- `PORT`: Puerto del servidor (default 4000).
 
 ---
 
@@ -335,5 +381,5 @@ Para peticiones de datos.
 - **Iconos:** Lucide React.
 - **HTTP:** Axios.
 - **Estado:** React Context + Hooks.
-- **Validación Formularios:** React Hook Form (Sugerido) + Zod (Sugerido).
+
 

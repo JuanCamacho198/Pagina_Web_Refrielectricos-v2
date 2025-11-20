@@ -1,8 +1,9 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, LogOut } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Settings } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -10,6 +11,20 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 export default function Navbar() {
   const { totalItems } = useCart();
   const { user, logout } = useAuth();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-gray-200/30 dark:border-gray-700/30 transition-all">
@@ -70,6 +85,32 @@ export default function Navbar() {
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
                   {user.name}
                 </span>
+                
+                <div className="relative" ref={profileRef}>
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="h-9 w-9 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:ring-2 hover:ring-blue-500 transition-all focus:outline-none cursor-pointer"
+                    aria-label="Menú de usuario"
+                  >
+                    <span className="font-bold text-sm">
+                      {user.name ? user.name.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
+                    </span>
+                  </button>
+
+                  {isProfileOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 ring-1 ring-black ring-opacity-5 border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+                      <Link
+                        href="/profile/edit"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        <Settings className="h-4 w-4" />
+                        Editar Perfil
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
                 <button 
                   onClick={logout} 
                   className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20 rounded-full transition-all duration-200"
