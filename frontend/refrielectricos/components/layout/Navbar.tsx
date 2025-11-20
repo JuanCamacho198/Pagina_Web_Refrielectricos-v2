@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, LogOut, Settings, MapPin, Package, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Settings, MapPin, Package, LayoutDashboard, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -138,6 +138,14 @@ export default function Navbar() {
                       >
                         <Package className="h-4 w-4" />
                         Mis Pedidos
+                      </Link>
+                      <Link
+                        href="/profile/wishlists"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        <Heart className="h-4 w-4" />
+                        Mis Favoritos
                       </Link>
                     </div>
                   )}

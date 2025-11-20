@@ -147,6 +147,7 @@ Copilot debe ayudar a:
 
 ## Reglas y convenciones
 - **Usar pnpm** como gestor de paquetes.
+- **cumplir con ESLint y Prettier** en cada archivo generado.
 - **Gestor de Paquetes:** Usar estrictamente **pnpm** para instalar dependencias y ejecutar scripts.
 - Usar **TypeScript** en todo el proyecto.  
 - Actualizar el `copilot-instructions.md` con cada cambio 

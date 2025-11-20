@@ -35,20 +35,22 @@ model User {
   password  String
   role      Role     @default(USER)
   orders    Order[]
+  wishlists Wishlist[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  price       Float
-  stock       Int      @default(0)
-  image_url   String?
-  orderItems  OrderItem[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  stock         Int            @default(0)
+  image_url     String?
+  orderItems    OrderItem[]
+  wishlistItems WishlistItem[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Order {
@@ -70,5 +72,28 @@ model OrderItem {
   productId String
   quantity  Int     @default(1)
   price     Float
+}
+
+model Wishlist {
+  id        String         @id @default(cuid())
+  name      String
+  user      User           @relation(fields: [userId], references: [id])
+  userId    String
+  items     WishlistItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([userId, name])
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  wishlistId String
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  addedAt    DateTime @default(now())
+
+  @@unique([wishlistId, productId])
 }
 
