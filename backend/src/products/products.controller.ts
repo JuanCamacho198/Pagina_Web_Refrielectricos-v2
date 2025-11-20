@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -14,8 +14,16 @@ export class ProductsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  async create(@Body() createProductDto: CreateProductDto) {
+    console.log('ProductsController: Creating product with data:', createProductDto);
+    try {
+      return await this.productsService.create(createProductDto);
+    } catch (error) {
+      console.error('Error creating product:', error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const message = (error as any)?.message || (typeof error === 'string' ? error : 'Internal Server Error');
+      throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get()
@@ -31,8 +39,13 @@ export class ProductsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+  async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    try {
+      return await this.productsService.update(id, updateProductDto);
+    } catch (error) {
+      console.error(`Error updating product ${id}:`, error);
+      throw error;
+    }
   }
 
   @Delete(':id')

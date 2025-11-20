@@ -78,6 +78,11 @@ El objetivo es construir una tienda online moderna, escalable y mantenible, desa
      - Gestión de Productos (CRUD completo con imágenes).
      - Gestión de Pedidos (Listado y cambio de estado).
      - Protección de rutas con RolesGuard (Backend) y AdminLayout (Frontend).
+   - (Completado) **Correcciones y Estabilidad:**
+     - Solucionado error de migraciones Prisma (`PrismaClientKnownRequestError`).
+     - Implementado manejo de errores robusto en Backend (Logs, Try-Catch).
+     - Corregidos tipos en Frontend (Interfaces estrictas, eliminación de `any`).
+     - Configuración de `ValidationPipe` con conversión implícita.
 
 4. **Infraestructura:**
    - Configurar CI/CD con GitHub Actions
@@ -141,6 +146,8 @@ Copilot debe ayudar a:
 ---
 
 ## Reglas y convenciones
+- **Usar pnpm** como gestor de paquetes.
+- **Gestor de Paquetes:** Usar estrictamente **pnpm** para instalar dependencias y ejecutar scripts.
 - Usar **TypeScript** en todo el proyecto.  
 - Actualizar el `copilot-instructions.md` con cada cambio 
 relevante.

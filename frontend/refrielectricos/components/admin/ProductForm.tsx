@@ -41,11 +41,19 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     setIsLoading(true);
     setError('');
 
+    const payload = {
+      ...data,
+      price: Number(data.price),
+      stock: Number(data.stock),
+      image_url: data.image_url || undefined,
+      description: data.description || undefined,
+    };
+
     try {
       if (isEditing && initialData) {
-        await api.patch(`/products/${initialData.id}`, data);
+        await api.patch(`/products/${initialData.id}`, payload);
       } else {
-        await api.post('/products', data);
+        await api.post('/products', payload);
       }
       router.push('/admin/products');
       router.refresh();

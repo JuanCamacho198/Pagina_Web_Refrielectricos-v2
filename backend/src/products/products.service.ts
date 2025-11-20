@@ -5,12 +5,24 @@ import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {
+    if (!this.prisma) {
+      console.error('ProductsService: PrismaService is not initialized!');
+    }
+  }
 
-  create(createProductDto: CreateProductDto) {
-    return this.prisma.product.create({
-      data: createProductDto,
-    });
+  async create(createProductDto: CreateProductDto) {
+    console.log('ProductsService: Creating product in DB:', createProductDto);
+    try {
+      const product = await this.prisma.product.create({
+        data: createProductDto,
+      });
+      console.log('ProductsService: Product created successfully:', product.id);
+      return product;
+    } catch (error) {
+      console.error('ProductsService: Error creating product in Prisma:', error);
+      throw error;
+    }
   }
 
   findAll() {
