@@ -45,11 +45,16 @@ export default function LoginForm() {
       }).join(''));
       const payload = JSON.parse(jsonPayload);
 
+      // Fetch full user profile to ensure we have the latest role and name
+      const userResponse = await api.get(`/users/${payload.sub}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
       const user = {
-        id: payload.sub,
-        email: payload.email,
-        name: payload.email.split('@')[0], // Fallback name until we fetch profile
-        role: payload.role
+        id: userResponse.data.id,
+        email: userResponse.data.email,
+        name: userResponse.data.name || payload.email.split('@')[0],
+        role: userResponse.data.role
       };
 
       login(token, user);

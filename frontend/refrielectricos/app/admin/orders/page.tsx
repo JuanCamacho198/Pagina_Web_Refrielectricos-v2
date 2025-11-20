@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { Eye, Search } from 'lucide-react';
 import api from '@/lib/api';
 import Link from 'next/link';
+import { Order } from '@/types/order';
 
 export default function AdminOrdersPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 

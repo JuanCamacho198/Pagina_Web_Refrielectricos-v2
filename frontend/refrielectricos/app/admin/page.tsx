@@ -16,22 +16,14 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // In a real app, you'd have a specific /stats endpoint.
-        // Here we fetch all data and calculate locally (not efficient for large data, but fine for MVP)
-        const [productsRes, ordersRes, usersRes] = await Promise.all([
-          api.get('/products'),
-          api.get('/orders'),
-          api.get('/users'),
-        ]);
-
-        const orders = ordersRes.data;
-        const revenue = orders.reduce((acc: number, order: { status: string; total: number }) => acc + (order.status === 'PAID' || order.status === 'SHIPPED' || order.status === 'DELIVERED' ? order.total : 0), 0);
+        const response = await api.get('/dashboard/stats');
+        const data = response.data;
 
         setStats({
-          products: productsRes.data.length,
-          orders: orders.length,
-          users: usersRes.data.length,
-          revenue,
+          products: data.totalProducts,
+          orders: data.totalOrders,
+          users: data.totalUsers,
+          revenue: data.totalRevenue,
         });
       } catch (error) {
         console.error('Error fetching stats:', error);

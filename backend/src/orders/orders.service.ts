@@ -45,6 +45,10 @@ export class OrdersService {
         );
       }
 
+      if (product.stock < item.quantity) {
+        throw new Error(`Insufficient stock for product ${product.name}`);
+      }
+
       // Aquí podríamos verificar stock y lanzar error si no hay suficiente
       const itemTotal = product.price * item.quantity;
       total += itemTotal;
@@ -70,10 +74,13 @@ export class OrdersService {
         include: { items: true },
       });
 
-      // Opcional: decrementar stock de los productos (comentado por ahora)
-      // for (const it of orderItemsData) {
-      //   await prisma.product.update({ where: { id: it.productId }, data: { stock: { decrement: it.quantity } } });
-      // }
+      // Decrementar stock de los productos
+      for (const it of orderItemsData) {
+        await prisma.product.update({
+          where: { id: it.productId },
+          data: { stock: { decrement: it.quantity } },
+        });
+      }
 
       return order;
     });

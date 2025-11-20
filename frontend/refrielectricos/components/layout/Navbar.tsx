@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, LogOut, Settings, MapPin, Package } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Settings, MapPin, Package, LayoutDashboard } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -81,9 +81,15 @@ export default function Navbar() {
             </Link>
             
             {user ? (
+              
               <div className="flex items-center gap-3 pl-2 border-l border-gray-200/50 dark:border-gray-700/50">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
                   {user.name}
+                  {user.role === 'ADMIN' && (
+                    <span className="ml-2 text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full border border-blue-200">
+                      ADMIN
+                    </span>
+                  )}
                 </span>
                 
                 <div className="relative" ref={profileRef}>
@@ -97,8 +103,18 @@ export default function Navbar() {
                     </span>
                   </button>
 
-                  {isProfileOpen && (
+                  {(isProfileOpen) && (
                     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 ring-1 ring-black ring-opacity-5 border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+                      {user.role === 'ADMIN' && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 dark:text-blue-400 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-b border-gray-100 dark:border-gray-700 mb-1"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <LayoutDashboard className="h-4 w-4" />
+                          Panel Admin
+                        </Link>
+                      )}
                       <Link
                         href="/profile/edit"
                         className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
