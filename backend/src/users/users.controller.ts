@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Body, 
+  Patch, 
+  Param, 
+  Delete, 
+  UseGuards, 
+  Request, 
+  ForbiddenException 
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -31,7 +42,23 @@ export class UsersController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Request() req, 
+    @Param('id') id: string, 
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+    const user = req.user;
+
+    // Solo ADMIN puede cambiar roles
+    if (updateUserDto.role && user.role !== Role.ADMIN) {
+      throw new ForbiddenException('No tienes permisos para cambiar roles');
+    }
+
+    // Solo ADMIN o el propio usuario pueden editar
+    if (user.userId !== id && user.role !== Role.ADMIN) {
+      throw new ForbiddenException('No puedes editar este usuario');
+    }
+
     return this.usersService.update(id, updateUserDto);
   }
 
