@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { User, Shield, Trash2, Search, Mail, Calendar } from 'lucide-react';
 import api from '@/lib/api';
 // import Button from '@/components/ui/Button';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useToast } from '@/context/ToastContext';
 
 interface UserData {
   id: string;
@@ -19,21 +20,23 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const { addToast } = useToast();
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await api.get('/users');
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
+      addToast('Error al cargar usuarios', 'error');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [addToast]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleRoleChange = async (userId: string, newRole: 'USER' | 'ADMIN') => {
     if (!confirm(`¿Cambiar rol de usuario a ${newRole}?`)) return;
@@ -41,9 +44,10 @@ export default function AdminUsersPage() {
     try {
       await api.patch(`/users/${userId}`, { role: newRole });
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      addToast(`Rol actualizado a ${newRole}`, 'success');
     } catch (error) {
       console.error('Error updating role:', error);
-      alert('Error al actualizar el rol');
+      addToast('Error al actualizar el rol', 'error');
     }
   };
 
@@ -53,9 +57,10 @@ export default function AdminUsersPage() {
     try {
       await api.delete(`/users/${userId}`);
       setUsers(users.filter(u => u.id !== userId));
+      addToast('Usuario eliminado correctamente', 'success');
     } catch (error) {
       console.error('Error deleting user:', error);
-      alert('Error al eliminar el usuario');
+      addToast('Error al eliminar el usuario', 'error');
     }
   };
 

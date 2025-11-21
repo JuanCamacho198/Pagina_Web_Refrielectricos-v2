@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useToast } from './ToastContext';
 
 export interface CartItem {
   id: string;
@@ -25,6 +26,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { addToast } = useToast();
 
   // Cargar carrito desde localStorage al iniciar
   useEffect(() => {
@@ -59,9 +61,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prevItems, { ...newItem, quantity: 1 }];
     });
+    addToast(`${newItem.name} agregado al carrito`, 'success');
   };
 
   const removeItem = (id: string) => {
+    const itemToRemove = items.find((item) => item.id === id);
+    if (itemToRemove) {
+      addToast(`${itemToRemove.name} eliminado del carrito`, 'info');
+    }
     setItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
 
@@ -76,6 +83,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const clearCart = () => {
     setItems([]);
+    addToast('Carrito vaciado', 'info');
   };
 
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);

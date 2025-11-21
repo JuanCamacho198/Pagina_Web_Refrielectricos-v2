@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import Navbar from '@/components/layout/Navbar';
 import AddressesList from '@/components/features/profile/addresses/AddressesList';
 import { Loader2 } from 'lucide-react';
 
@@ -26,11 +25,8 @@ export default function AddressesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <Navbar />
-      <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <AddressesList />
-      </main>
+    <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <AddressesList />
     </div>
   );
 }

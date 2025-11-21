@@ -5,11 +5,13 @@ import { Eye, Search } from 'lucide-react';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { Order } from '@/types/order';
+import { useToast } from '@/context/ToastContext';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const { addToast } = useToast();
 
   useEffect(() => {
     fetchOrders();
@@ -21,6 +23,7 @@ export default function AdminOrdersPage() {
       setOrders(response.data);
     } catch (error) {
       console.error('Error fetching orders:', error);
+      addToast('Error al cargar pedidos', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -30,11 +33,12 @@ export default function AdminOrdersPage() {
     try {
       await api.patch(`/orders/${orderId}`, { status: newStatus });
       setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
+        order.id === orderId ? { ...order, status: newStatus as Order['status'] } : order
       ));
+      addToast('Estado del pedido actualizado', 'success');
     } catch (error) {
       console.error('Error updating order status:', error);
-      alert('Error al actualizar el estado');
+      addToast('Error al actualizar el estado', 'error');
     }
   };
 

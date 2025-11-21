@@ -3,6 +3,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { WishlistProvider } from "@/context/WishlistContext";
+import { ToastProvider } from "@/context/ToastContext";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
@@ -25,11 +26,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <WishlistProvider>
-              <CartProvider>
-                {children}
-              </CartProvider>
-            </WishlistProvider>
+            <ToastProvider>
+              <WishlistProvider>
+                <CartProvider>
+                  {children}
+                </CartProvider>
+              </WishlistProvider>
+            </ToastProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

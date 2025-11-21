@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import api from '@/lib/api';
 import { useAuth } from './AuthContext';
 import { Wishlist } from '@/types/wishlist';
+import { useToast } from './ToastContext';
 
 interface WishlistContextType {
   wishlists: Wishlist[];
@@ -21,6 +22,7 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [wishlists, setWishlists] = useState<Wishlist[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -47,6 +49,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       await api.post('/wishlists', { name });
       await refreshWishlists();
+      addToast(`Lista "${name}" creada`, 'success');
+    } catch (error) {
+      console.error('Error creating wishlist:', error);
+      addToast('Error al crear la lista', 'error');
     } finally {
       setLoading(false);
     }
@@ -57,23 +63,36 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       await api.delete(`/wishlists/${id}`);
       await refreshWishlists();
+      addToast('Lista eliminada', 'info');
+    } catch (error) {
+      console.error('Error deleting wishlist:', error);
+      addToast('Error al eliminar la lista', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const addToWishlist = async (productId: string, wishlistId?: string) => {
-    if (!user) return; // TODO: Redirigir a login o mostrar toast
+    if (!user) {
+      addToast('Debes iniciar sesión para agregar a favoritos', 'warning');
+      return; 
+    }
     
     let targetListId = wishlistId;
 
     // Si no se especifica lista, usar la primera o crear una "Favoritos"
     if (!targetListId) {
       if (wishlists.length === 0) {
-        const res = await api.post('/wishlists', { name: 'Favoritos' });
-        targetListId = res.data.id;
-        // Actualizamos estado local optimista o esperamos refresh
-        setWishlists([res.data]); 
+        try {
+          const res = await api.post('/wishlists', { name: 'Favoritos' });
+          targetListId = res.data.id;
+          // Actualizamos estado local optimista o esperamos refresh
+          setWishlists([res.data]); 
+        } catch (error) {
+          console.error('Error creating default wishlist:', error);
+          addToast('Error al crear lista de favoritos', 'error');
+          return;
+        }
       } else {
         targetListId = wishlists[0].id;
       }
@@ -82,14 +101,15 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     try {
       await api.post(`/wishlists/${targetListId}/items`, { productId });
       await refreshWishlists();
+      addToast('Producto agregado a favoritos', 'success');
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((error as any).response?.status === 409) {
-        // Ya existe, no hacemos nada o mostramos toast
-        console.log('El producto ya está en la lista');
+        addToast('El producto ya está en esta lista', 'info');
         return;
       }
       console.error('Error adding to wishlist:', error);
+      addToast('Error al agregar a favoritos', 'error');
       throw error;
     }
   };
@@ -98,8 +118,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     try {
       await api.delete(`/wishlists/${wishlistId}/items/${productId}`);
       await refreshWishlists();
+      addToast('Producto eliminado de favoritos', 'info');
     } catch (error) {
       console.error('Error removing from wishlist:', error);
+      addToast('Error al eliminar de favoritos', 'error');
     }
   };
 
@@ -109,7 +131,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   const toggleWishlist = async (productId: string) => {
     if (!user) {
-        alert('Debes iniciar sesión para guardar favoritos');
+        addToast('Debes iniciar sesión para guardar favoritos', 'warning');
         return;
     }
 

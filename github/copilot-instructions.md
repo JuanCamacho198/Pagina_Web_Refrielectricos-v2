@@ -47,7 +47,7 @@ El objetivo es construir una tienda online moderna, escalable y mantenible, desa
   - `clsx` + `tailwind-merge` (Manejo dinámico de clases).
   - `lucide-react` (Iconografía).
 - **Estado:**
-  - **Contextos:** `AuthContext` (Login/Register/Logout) y `CartContext` (Carrito persistente) implementados.
+  - **Contextos:** `AuthContext` (Login/Register/Logout), `CartContext` (Carrito persistente), `WishlistContext` (Favoritos) y `ToastContext` (Notificaciones) implementados.
   - **Componentes UI:** `Button`, `Input`, `Card`, `Navbar` (con estado de usuario y carrito).
   - **Páginas Implementadas:**
     - `page.tsx`: Home con listado de productos.
@@ -57,6 +57,9 @@ El objetivo es construir una tienda online moderna, escalable y mantenible, desa
     - `(shop)/cart`: Vista de carrito con gestión de cantidades.
     - `(shop)/checkout`: Formulario de envío y creación de orden.
     - `(shop)/checkout/success`: Confirmación de compra.
+    - `(shop)/profile/wishlists`: Gestión de listas de deseos.
+    - `admin/users`: Gestión de usuarios y roles.
+    - `admin/settings`: Configuración de la tienda (UI).
 
 ### Próximos pasos sugeridos
 2. **Backend:**
@@ -64,6 +67,7 @@ El objetivo es construir una tienda online moderna, escalable y mantenible, desa
    - (Completado) Implementar autenticación JWT con guards y bcrypt
    - (Completado) Añadir DTOs y validación con `class-validator`
    - (Completado) Crear endpoints CRUD completos para productos y órdenes
+   - (Completado) Implementar módulo de `Wishlists` (Favoritos).
    - Notas recientes: se implementó autenticación completa (JWT, bcrypt, Guards) y se protegieron las rutas sensibles. Se corrigieron problemas de tipos en `tsconfig.json`.
 
 3. **Frontend:**
@@ -72,17 +76,19 @@ El objetivo es construir una tienda online moderna, escalable y mantenible, desa
    - (Completado) **Fase 2 (Estado):** Implementar `CartContext` para manejo global del carrito y persistencia.
    - (Completado) **Fase 3 (Páginas):** Detalle de producto (`/products/[id]`), Login/Register (`/auth/*`).
    - (Completado) **Fase 4 (Checkout):** Página de resumen de carrito y envío de orden a la API protegida.
-   - (Completado al 90%)**Fase 5 (Usuario):** Perfil de usuario e historial de órdenes.
+   - (Completado) **Fase 5 (Usuario):** Perfil de usuario, historial de órdenes y Wishlist (Favoritos).
    - (Completado) **Fase 6 (Admin):** Panel de administración para productos y órdenes.
      - Dashboard con estadísticas.
      - Gestión de Productos (CRUD completo con imágenes).
      - Gestión de Pedidos (Listado y cambio de estado).
+     - Gestión de Usuarios (Roles y eliminación).
      - Protección de rutas con RolesGuard (Backend) y AdminLayout (Frontend).
    - (Completado) **Correcciones y Estabilidad:**
      - Solucionado error de migraciones Prisma (`PrismaClientKnownRequestError`).
      - Implementado manejo de errores robusto en Backend (Logs, Try-Catch).
      - Corregidos tipos en Frontend (Interfaces estrictas, eliminación de `any`).
      - Configuración de `ValidationPipe` con conversión implícita.
+     - Implementado sistema de notificaciones (`ToastContext`).
 
 4. **Infraestructura:**
    - Configurar CI/CD con GitHub Actions
@@ -330,7 +336,9 @@ frontend/refrielectricos/
 │   └── useToast.ts          # Notificaciones emergentes
 ├── context/                 # React Contexts
 │   ├── AuthContext.tsx      # Estado global de autenticación
-│   └── CartContext.tsx      # Estado global del carrito
+│   ├── CartContext.tsx      # Estado global del carrito
+│   ├── WishlistContext.tsx  # Estado global de favoritos
+│   └── ToastContext.tsx     # Sistema de notificaciones
 └── types/                   # Definiciones de TypeScript compartidas
     ├── product.ts
     ├── user.ts
@@ -378,6 +386,18 @@ Maneja el estado del carrito de compras.
 - `removeItem(productId)`: Elimina item.
 - `clearCart()`: Vacía el carrito.
 - `total`: Precio total calculado.
+
+### `useWishlist`
+Maneja el estado de la lista de deseos.
+- `wishlists`: Listas del usuario.
+- `addToWishlist(productId)`: Agrega a favoritos.
+- `removeFromWishlist(productId)`: Elimina de favoritos.
+- `isInWishlist(productId)`: Verifica si está en favoritos.
+
+### `useToast`
+Maneja las notificaciones emergentes.
+- `addToast(message, type)`: Muestra un mensaje (success, error, info, warning).
+- `removeToast(id)`: Elimina un mensaje manualmente.
 
 ### `useFetch` (Opcional o usar SWR/TanStack Query)
 Para peticiones de datos.
