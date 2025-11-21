@@ -10,6 +10,11 @@ export const productSchema = z.object({
     .startsWith('https://', 'La URL debe ser segura (https://)')
     .optional()
     .or(z.literal('')),
+  category: z.string().optional(),
+  brand: z.string().optional(),
+  sku: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  isActive: z.boolean().optional(),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;

@@ -16,6 +16,7 @@ interface Product {
   price: number;
   image_url?: string;
   category?: string;
+  brand?: string;
 }
 
 interface ProductCardProps {
@@ -84,8 +85,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
           
-          {product.category && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{product.category}</p>
+          {(product.category || product.brand) && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              {product.brand && <span className="font-medium text-gray-700 dark:text-gray-300">{product.brand}</span>}
+              {product.brand && product.category && <span className="mx-1">•</span>}
+              {product.category}
+            </p>
           )}
           
           <div className="mt-auto">

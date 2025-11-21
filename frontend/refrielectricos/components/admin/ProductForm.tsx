@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Save, ArrowLeft } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Modal from '@/components/ui/Modal';
 import { productSchema, ProductFormData } from '@/schemas/product';
+import { useToast } from '@/context/ToastContext';
 
 interface ProductFormProps {
   initialData?: ProductFormData & { id: string };
@@ -18,8 +20,11 @@ interface ProductFormProps {
 
 export default function ProductForm({ initialData, isEditing = false }: ProductFormProps) {
   const router = useRouter();
+  const { addToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [pendingData, setPendingData] = useState<ProductFormData | null>(null);
 
   const {
     register,
@@ -37,23 +42,33 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     },
   });
 
-  const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
+  const onSubmit: SubmitHandler<ProductFormData> = (data) => {
+    setPendingData(data);
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmSave = async () => {
+    if (!pendingData) return;
+    
+    setIsConfirmModalOpen(false);
     setIsLoading(true);
     setError('');
 
     const payload = {
-      ...data,
-      price: Number(data.price),
-      stock: Number(data.stock),
-      image_url: data.image_url || undefined,
-      description: data.description || undefined,
+      ...pendingData,
+      price: Number(pendingData.price),
+      stock: Number(pendingData.stock),
+      image_url: pendingData.image_url || undefined,
+      description: pendingData.description || undefined,
     };
 
     try {
       if (isEditing && initialData) {
         await api.patch(`/products/${initialData.id}`, payload);
+        addToast('Producto actualizado correctamente', 'success');
       } else {
         await api.post('/products', payload);
+        addToast('Producto creado correctamente', 'success');
       }
       router.push('/admin/products');
       router.refresh();
@@ -61,9 +76,12 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
       console.error('Error saving product:', err);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const error = err as any;
-      setError(error.response?.data?.message || 'Error al guardar el producto');
+      const errorMessage = error.response?.data?.message || 'Error al guardar el producto';
+      setError(errorMessage);
+      addToast(errorMessage, 'error');
     } finally {
       setIsLoading(false);
+      setPendingData(null);
     }
   };
 
@@ -125,12 +143,62 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
           />
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Categoría"
+            {...register('category')}
+            error={errors.category?.message}
+            placeholder="Ej: Refrigeración"
+          />
+          <Input
+            label="Marca"
+            {...register('brand')}
+            error={errors.brand?.message}
+            placeholder="Ej: Samsung"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="SKU"
+            {...register('sku')}
+            error={errors.sku?.message}
+            placeholder="Ej: REF-123"
+          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+              Etiquetas (separadas por coma)
+            </label>
+            <input
+              type="text"
+              className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 bg-white dark:bg-gray-800 sm:text-sm sm:leading-6 px-3 transition-all"
+              placeholder="Ej: inverter, original, nuevo"
+              {...register('tags', {
+                setValueAs: (v) => typeof v === 'string' ? v.split(',').map(t => t.trim()).filter(Boolean) : v
+              })}
+            />
+            {errors.tags && <p className="mt-1 text-sm text-red-600">{errors.tags.message}</p>}
+          </div>
+        </div>
+
         <Input
           label="URL de Imagen"
           {...register('image_url')}
           error={errors.image_url?.message}
           placeholder="https://ejemplo.com/imagen.jpg"
         />
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="isActive"
+            {...register('isActive')}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700"
+          />
+          <label htmlFor="isActive" className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            Producto Activo (Visible en la tienda)
+          </label>
+        </div>
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
@@ -148,6 +216,48 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
           </Button>
         </div>
       </form>
+
+      <Modal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        title="Confirmar cambios"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
+            <AlertTriangle className="h-6 w-6 shrink-0" />
+            <p className="text-sm font-medium">
+              ¿Estás seguro de que deseas {isEditing ? 'actualizar' : 'crear'} este producto?
+            </p>
+          </div>
+          
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Esta acción guardará los cambios en la base de datos y será visible para los usuarios inmediatamente.
+          </p>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsConfirmModalOpen(false)}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmSave}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Confirmando...
+                </>
+              ) : (
+                'Confirmar'
+              )}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

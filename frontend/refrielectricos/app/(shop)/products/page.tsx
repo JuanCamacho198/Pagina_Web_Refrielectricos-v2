@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import ProductCard from '@/components/features/products/ProductCard';
+import ProductFilters from '@/components/features/products/ProductFilters';
 import Button from '@/components/ui/Button';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -13,9 +15,12 @@ interface Product {
   price: number;
   image_url?: string;
   category?: string;
+  brand?: string;
+  tags?: string[];
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +28,17 @@ export default function ProductsPage() {
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({ min: '', max: '' });
   const [showFilters, setShowFilters] = useState(false);
+
+  // Inicializar búsqueda desde URL
+  useEffect(() => {
+    const search = searchParams.get('search');
+    if (search) {
+      setSearchTerm(search);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -45,26 +60,51 @@ export default function ProductsPage() {
   useEffect(() => {
     let result = products;
 
+    // Filtro por búsqueda
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       result = result.filter(p => 
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        p.name.toLowerCase().includes(term) ||
+        p.description?.toLowerCase().includes(term) ||
+        p.brand?.toLowerCase().includes(term) ||
+        p.tags?.some(tag => tag.toLowerCase().includes(term))
       );
     }
 
+    // Filtro por categoría
     if (selectedCategory) {
       result = result.filter(p => p.category === selectedCategory);
     }
 
-    setFilteredProducts(result);
-  }, [searchTerm, selectedCategory, products]);
+    // Filtro por marca
+    if (selectedBrand) {
+      result = result.filter(p => p.brand === selectedBrand);
+    }
 
-  // Obtener categorías únicas
+    // Filtro por precio
+    if (priceRange.min) {
+      result = result.filter(p => p.price >= Number(priceRange.min));
+    }
+    if (priceRange.max) {
+      result = result.filter(p => p.price <= Number(priceRange.max));
+    }
+
+    setFilteredProducts(result);
+  }, [searchTerm, selectedCategory, selectedBrand, priceRange, products]);
+
+  // Obtener categorías y marcas únicas
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean))) as string[];
+  const brands = Array.from(new Set(products.map(p => p.brand).filter(Boolean))) as string[];
 
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedCategory(null);
+    setSelectedBrand(null);
+    setPriceRange({ min: '', max: '' });
+  };
+
+  const handlePriceRangeChange = (type: 'min' | 'max', value: string) => {
+    setPriceRange(prev => ({ ...prev, [type]: value }));
   };
 
   return (
@@ -99,51 +139,19 @@ export default function ProductsPage() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar de Filtros (Desktop) */}
+        {/* Sidebar de Filtros */}
         <aside className={`lg:w-64 shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 sticky top-24 transition-colors">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Filtros</h3>
-              {(searchTerm || selectedCategory) && (
-                <button 
-                  onClick={clearFilters}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1"
-                >
-                  <X size={14} /> Limpiar
-                </button>
-              )}
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Categorías</h4>
-                <div className="space-y-2">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="category"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                      checked={selectedCategory === null}
-                      onChange={() => setSelectedCategory(null)}
-                    />
-                    <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Todas</span>
-                  </label>
-                  {categories.map(category => (
-                    <label key={category} className="flex items-center cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                        checked={selectedCategory === category}
-                        onChange={() => setSelectedCategory(category)}
-                      />
-                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">{category}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ProductFilters
+            categories={categories}
+            brands={brands}
+            selectedCategory={selectedCategory}
+            selectedBrand={selectedBrand}
+            priceRange={priceRange}
+            onCategoryChange={setSelectedCategory}
+            onBrandChange={setSelectedBrand}
+            onPriceRangeChange={handlePriceRangeChange}
+            onClearFilters={clearFilters}
+          />
         </aside>
 
         {/* Grid de Productos */}
@@ -175,5 +183,13 @@ export default function ProductsPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Cargando catálogo...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }
