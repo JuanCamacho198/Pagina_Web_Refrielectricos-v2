@@ -20,6 +20,13 @@ export class CreateOrderDto {
   @Type(() => CreateOrderItemDto)
   items: CreateOrderItemDto[];
 
+  @IsString()
+  addressId: string;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
   @IsEnum(OrderStatus)
   @IsOptional()
   status?: OrderStatus;

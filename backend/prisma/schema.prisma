@@ -36,6 +36,7 @@ model User {
   role      Role     @default(USER)
   orders    Order[]
   wishlists Wishlist[]
+  addresses Address[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -63,9 +64,20 @@ model Order {
   user       User        @relation(fields: [userId], references: [id])
   userId     String
   items      OrderItem[]
-  total      Float       @default(0)
-  status     OrderStatus @default(PENDING)
-  createdAt  DateTime    @default(now())
+  total           Float       @default(0)
+  status          OrderStatus @default(PENDING)
+  
+  // Snapshot de dirección de envío
+  shippingName    String?
+  shippingPhone   String?
+  shippingAddress String?
+  shippingCity    String?
+  shippingState   String?
+  shippingZip     String?
+  shippingCountry String?
+  shippingNotes   String?
+
+  createdAt       DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 }
 
@@ -100,5 +112,22 @@ model WishlistItem {
   addedAt    DateTime @default(now())
 
   @@unique([wishlistId, productId])
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String?
+  zipCode      String?
+  country      String   @default("Colombia")
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 

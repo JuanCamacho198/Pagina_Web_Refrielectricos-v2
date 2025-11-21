@@ -20,4 +20,12 @@ export interface Order {
     name: string | null;
     email: string;
   };
+  shippingName?: string;
+  shippingPhone?: string;
+  shippingAddress?: string;
+  shippingCity?: string;
+  shippingState?: string;
+  shippingZip?: string;
+  shippingCountry?: string;
+  shippingNotes?: string;
 }

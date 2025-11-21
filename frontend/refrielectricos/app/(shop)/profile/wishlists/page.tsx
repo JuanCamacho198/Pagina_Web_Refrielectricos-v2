@@ -201,3 +201,5 @@ export default function WishlistsPage() {
         </div>
     );
 }
+
+// Re-saving file to fix potential syntax glitches

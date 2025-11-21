@@ -10,12 +10,23 @@ export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<any> {
-    const { userId, items, status } = createOrderDto;
+    const { userId, items, status, addressId, notes } = createOrderDto;
 
     // Verificar que el usuario existe
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Verificar dirección
+    const address = await this.prisma.address.findUnique({
+      where: { id: addressId },
+    });
+
+    if (!address || address.userId !== userId) {
+      throw new NotFoundException(
+        `Address with ID ${addressId} not found or does not belong to user`,
+      );
     }
 
     if (!items || items.length === 0) {
@@ -67,6 +78,14 @@ export class OrdersService {
           userId,
           status,
           total,
+          shippingName: address.fullName,
+          shippingPhone: address.phone,
+          shippingAddress: `${address.addressLine1} ${address.addressLine2 || ''}`.trim(),
+          shippingCity: address.city,
+          shippingState: address.state,
+          shippingZip: address.zipCode,
+          shippingCountry: address.country,
+          shippingNotes: notes,
           items: {
             create: orderItemsData,
           },

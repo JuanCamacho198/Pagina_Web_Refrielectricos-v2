@@ -1,48 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, MapPin, Trash2 } from 'lucide-react';
+import { Plus, MapPin, Trash2, CheckCircle } from 'lucide-react';
 import AddressForm from '@/components/features/profile/addresses/AddressForm';
-
-import { AddressFormData } from '@/types/address';
-
-// Mock data temporal hasta que tengamos el backend listo
-const MOCK_ADDRESSES = [
-  {
-    id: '1',
-    street: 'Calle 123 # 45-67',
-    neighborhood: 'El Poblado',
-    department: 'Antioquia',
-    city: 'Medellín',
-    type: 'Apartamento',
-    floor: '',
-    reference: ''
-  }
-];
+import { useAddresses } from '@/hooks/useAddresses';
+import { CreateAddressDto } from '@/types/address';
 
 export default function AddressesPage() {
   const [isAdding, setIsAdding] = useState(false);
-  const [addresses, setAddresses] = useState(MOCK_ADDRESSES);
-  const [isLoading, setIsLoading] = useState(false);
+  const { addresses, loading, createAddress, deleteAddress } = useAddresses();
 
-  const handleAddAddress = async (data: AddressFormData) => {
-    setIsLoading(true);
-    // Simular petición API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const newAddress = {
-      id: Date.now().toString(),
-      ...data
-    };
-    
-    setAddresses([...addresses, newAddress]);
-    setIsLoading(false);
-    setIsAdding(false);
+  const handleAddAddress = async (data: CreateAddressDto) => {
+    const success = await createAddress(data);
+    if (success) {
+      setIsAdding(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('¿Estás seguro de eliminar esta dirección?')) {
-      setAddresses(addresses.filter(addr => addr.id !== id));
+      await deleteAddress(id);
     }
   };
 
@@ -67,11 +44,15 @@ export default function AddressesPage() {
         <AddressForm 
           onSubmit={handleAddAddress}
           onCancel={() => setIsAdding(false)}
-          isLoading={isLoading}
+          isLoading={loading}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {addresses.length === 0 ? (
+          {loading && addresses.length === 0 ? (
+             <div className="col-span-full text-center py-12">
+               <p className="text-gray-500">Cargando direcciones...</p>
+             </div>
+          ) : addresses.length === 0 ? (
             <div className="col-span-full text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
               <MapPin className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No tienes direcciones</h3>
@@ -81,13 +62,20 @@ export default function AddressesPage() {
             addresses.map((address) => (
               <div 
                 key={address.id} 
-                className="relative p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
+                className={`relative p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border transition-colors group ${
+                  address.isDefault 
+                    ? 'border-blue-500 ring-1 ring-blue-500' 
+                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500'
+                }`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 rounded-full">
-                      {address.type}
-                    </span>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {address.isDefault && (
+                      <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 rounded-full">
+                        <CheckCircle size={12} />
+                        Predeterminada
+                      </span>
+                    )}
                   </div>
                   <button
                     onClick={() => handleDelete(address.id)}
@@ -99,14 +87,24 @@ export default function AddressesPage() {
                 </div>
                 
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                  {address.street}
+                  {address.addressLine1}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {address.neighborhood}
-                </p>
+                {address.addressLine2 && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    {address.addressLine2}
+                  </p>
+                )}
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {address.city}, {address.department}
+                  {address.city}, {address.state}
                 </p>
+                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    <span className="font-medium">Recibe:</span> {address.fullName}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    <span className="font-medium">Tel:</span> {address.phone}
+                  </p>
+                </div>
               </div>
             ))
           )}

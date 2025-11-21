@@ -4,27 +4,25 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useAddresses } from '@/hooks/useAddresses';
 import api from '@/lib/api';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { MapPin, CreditCard, Loader2 } from 'lucide-react';
+import AddressForm from '@/components/features/profile/addresses/AddressForm';
+import { MapPin, CreditCard, Loader2, Plus, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { addresses, loading: addressesLoading, createAddress } = useAddresses();
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // Formulario de envío (Simulado por ahora, ya que el backend no guarda dirección en Order aún)
-  const [shippingData, setShippingData] = useState({
-    address: '',
-    city: '',
-    phone: '',
-    notes: ''
-  });
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -38,16 +36,24 @@ export default function CheckoutPage() {
     }
   }, [items, router]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setShippingData({
-      ...shippingData,
-      [e.target.name]: e.target.value
-    });
-  };
+  // Seleccionar dirección por defecto
+  useEffect(() => {
+    if (addresses.length > 0 && !selectedAddressId) {
+      const defaultAddr = addresses.find(a => a.isDefault);
+      if (defaultAddr) setSelectedAddressId(defaultAddr.id);
+      else setSelectedAddressId(addresses[0].id);
+    }
+  }, [addresses, selectedAddressId]);
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    
+    if (!selectedAddressId) {
+      setError('Por favor selecciona una dirección de envío');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     
     console.log('Iniciando proceso de orden...');
     setLoading(true);
@@ -56,6 +62,8 @@ export default function CheckoutPage() {
     try {
       const orderData = {
         userId: user.id,
+        addressId: selectedAddressId,
+        notes: notes,
         items: items.map(item => ({
           productId: item.id,
           quantity: item.quantity
@@ -99,51 +107,88 @@ export default function CheckoutPage() {
           
           {/* Sección Dirección */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="text-blue-600 dark:text-blue-400" />
-              <h2 className="text-lg font-medium text-gray-900 dark:text-white">Información de Envío</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <MapPin className="text-blue-600 dark:text-blue-400" />
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Dirección de Envío</h2>
+              </div>
+              {!isAddingAddress && (
+                <button 
+                  onClick={() => setIsAddingAddress(true)}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                >
+                  <Plus size={16} /> Nueva
+                </button>
+              )}
             </div>
             
-            <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Ciudad"
-                  name="city"
-                  required
-                  value={shippingData.city}
-                  onChange={handleInputChange}
-                  placeholder="Bogotá, Medellín..."
-                />
-                <Input
-                  label="Teléfono"
-                  name="phone"
-                  required
-                  value={shippingData.phone}
-                  onChange={handleInputChange}
-                  placeholder="300 123 4567"
-                />
-              </div>
-              <Input
-                label="Dirección de entrega"
-                name="address"
-                required
-                value={shippingData.address}
-                onChange={handleInputChange}
-                placeholder="Calle 123 # 45 - 67"
+            {isAddingAddress ? (
+              <AddressForm 
+                onSubmit={async (data) => {
+                  const success = await createAddress(data);
+                  if (success) setIsAddingAddress(false);
+                }}
+                onCancel={() => setIsAddingAddress(false)}
+                isLoading={addressesLoading}
               />
-              <div>
+            ) : (
+              <div className="space-y-4">
+                {addressesLoading && addresses.length === 0 ? (
+                   <div className="text-center py-4 text-gray-500">Cargando direcciones...</div>
+                ) : addresses.length === 0 ? (
+                  <div className="text-center py-8 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+                    <p className="text-gray-500 mb-4">No tienes direcciones guardadas</p>
+                    <Button onClick={() => setIsAddingAddress(true)}>Agregar Dirección</Button>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {addresses.map(addr => (
+                      <div 
+                        key={addr.id}
+                        onClick={() => setSelectedAddressId(addr.id)}
+                        className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                          selectedAddressId === addr.id 
+                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' 
+                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`mt-1 h-5 w-5 shrink-0 rounded-full border flex items-center justify-center ${
+                            selectedAddressId === addr.id 
+                              ? 'border-blue-600 bg-blue-600 text-white' 
+                              : 'border-gray-400'
+                          }`}>
+                            {selectedAddressId === addr.id && <CheckCircle size={12} />}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{addr.addressLine1}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {addr.addressLine2 && `${addr.addressLine2}, `}{addr.city}, {addr.state}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{addr.fullName} - {addr.phone}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isAddingAddress && (
+              <div className="mt-6">
                 <label className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200 mb-2">
                   Notas adicionales (Opcional)
                 </label>
                 <textarea
-                  name="notes"
                   rows={3}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 bg-white dark:bg-gray-800 sm:text-sm sm:leading-6 px-3"
-                  value={shippingData.notes}
-                  onChange={handleInputChange}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Instrucciones especiales para la entrega..."
                 />
               </div>
-            </form>
+            )}
           </div>
 
           {/* Sección Pago (Simulada) */}
@@ -237,7 +282,7 @@ export default function CheckoutPage() {
 
             <Button
               type="submit"
-              form="checkout-form"
+              onClick={handlePlaceOrder}
               className="w-full mt-6"
               size="lg"
               disabled={loading}

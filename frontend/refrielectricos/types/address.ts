@@ -1,9 +1,29 @@
-export interface AddressFormData {
-  street: string;
-  department: string;
+export interface Address {
+  id: string;
+  userId: string;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
   city: string;
-  neighborhood: string;
-  floor: string;
-  type: string;
-  reference: string;
+  state?: string;
+  zipCode?: string;
+  country: string;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export interface CreateAddressDto {
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  isDefault?: boolean;
+}
+
+export interface UpdateAddressDto extends Partial<CreateAddressDto> {}

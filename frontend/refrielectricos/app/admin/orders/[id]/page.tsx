@@ -106,16 +106,39 @@ export default function AdminOrderDetailPage() {
             </div>
           </div>
 
-          {/* Shipping Info (Placeholder as we don't save address in Order model yet) */}
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 opacity-50">
+          {/* Shipping Info */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
               <MapPin className="text-blue-600" />
               Envío
             </h2>
-            <p className="text-sm text-gray-500 italic">
-              La dirección de envío no se está guardando en la base de datos todavía. 
-              (Se implementará en la siguiente fase de backend).
-            </p>
+            {order.shippingAddress ? (
+              <div className="space-y-3 text-sm">
+                <div>
+                  <p className="text-gray-500">Destinatario</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{order.shippingName}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Teléfono</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{order.shippingPhone}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Dirección</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{order.shippingAddress}</p>
+                  <p className="text-gray-600 dark:text-gray-400">{order.shippingCity}, {order.shippingState}</p>
+                </div>
+                {order.shippingNotes && (
+                  <div className="pt-2 border-t border-gray-100 dark:border-gray-700 mt-2">
+                    <p className="text-gray-500">Notas</p>
+                    <p className="italic text-gray-700 dark:text-gray-300">{order.shippingNotes}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">
+                Sin información de envío (Orden antigua o incompleta).
+              </p>
+            )}
           </div>
         </div>
       </div>

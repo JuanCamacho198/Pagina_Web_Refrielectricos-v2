@@ -3,23 +3,26 @@
 import { useState, useMemo } from 'react';
 import { departamentos } from '@/data/colombiaData';
 import { ChevronDown, ChevronUp, Search } from 'lucide-react';
-import { AddressFormData } from '@/types/address';
+import { CreateAddressDto } from '@/types/address';
 
 interface AddressFormProps {
-  onSubmit: (data: AddressFormData) => Promise<void>;
+  onSubmit: (data: CreateAddressDto) => Promise<void>;
   onCancel: () => void;
   isLoading: boolean;
 }
 
 export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFormProps) {
-  const [formData, setFormData] = useState<AddressFormData>({
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
     street: '',
     department: '',
     city: '',
     neighborhood: '',
     floor: '',
     type: '',
-    reference: ''
+    reference: '',
+    isDefault: false
   });
 
   const [showDeptModal, setShowDeptModal] = useState(false);
@@ -46,11 +49,59 @@ export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    const addressLine2 = [
+      formData.type,
+      formData.neighborhood ? `Barrio: ${formData.neighborhood}` : '',
+      formData.floor ? `Int/Apto: ${formData.floor}` : '',
+      formData.reference
+    ].filter(Boolean).join(', ');
+
+    const submitData: CreateAddressDto = {
+      fullName: formData.fullName,
+      phone: formData.phone,
+      addressLine1: formData.street,
+      addressLine2,
+      city: formData.city,
+      state: formData.department,
+      country: 'Colombia',
+      isDefault: formData.isDefault
+    };
+
+    onSubmit(submitData);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      
+      {/* Datos Personales */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+            Nombre Completo <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            required
+            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={formData.fullName}
+            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+            Teléfono <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            required
+            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          />
+        </div>
+      </div>
+
       {/* Dirección */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
@@ -233,6 +284,20 @@ export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFo
           value={formData.reference}
           onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
         />
+      </div>
+
+      {/* Default Checkbox */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="isDefault"
+          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          checked={formData.isDefault}
+          onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
+        />
+        <label htmlFor="isDefault" className="text-sm text-gray-700 dark:text-gray-300">
+          Establecer como dirección predeterminada
+        </label>
       </div>
 
       {/* Botones */}
