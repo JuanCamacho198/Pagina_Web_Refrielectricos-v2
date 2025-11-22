@@ -55,4 +55,4 @@ uploads/
 *.bak
 
 # Custom ignores
-github\copilot-instructions.md
+github/copilot-instructions.md
