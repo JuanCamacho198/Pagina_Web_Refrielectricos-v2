@@ -25,7 +25,7 @@ export default function RegisterForm() {
     e.preventDefault();
     try {
       await register(formData);
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -41,6 +41,7 @@ export default function RegisterForm() {
           value={formData.name}
           onChange={handleChange}
           placeholder="Juan Pérez"
+          autoComplete="name"
         />
       </div>
 
@@ -53,6 +54,7 @@ export default function RegisterForm() {
           value={formData.email}
           onChange={handleChange}
           placeholder="juan@ejemplo.com"
+          autoComplete="email"
         />
       </div>
 
@@ -66,6 +68,7 @@ export default function RegisterForm() {
           onChange={handleChange}
           placeholder="••••••••"
           minLength={6}
+          autoComplete="new-password"
         />
       </div>
 

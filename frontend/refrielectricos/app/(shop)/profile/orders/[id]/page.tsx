@@ -95,7 +95,13 @@ export default function OrderDetailPage() {
                 <div key={item.id} className="p-6 flex gap-4">
                   <div className="h-20 w-20 relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shrink-0 bg-gray-50 dark:bg-gray-900">
                      {item.product.image_url ? (
-                        <Image src={item.product.image_url} alt={item.product.name} fill className="object-contain p-2" />
+                        <Image 
+                          src={item.product.image_url} 
+                          alt={item.product.name} 
+                          fill 
+                          className="object-contain p-2" 
+                          sizes="80px"
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">Sin img</div>
                       )}

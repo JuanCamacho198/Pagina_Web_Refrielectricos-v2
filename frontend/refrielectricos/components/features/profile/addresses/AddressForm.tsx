@@ -86,6 +86,7 @@ export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFo
             className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            autoComplete="name"
           />
         </div>
         <div>
@@ -98,6 +99,7 @@ export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFo
             className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            autoComplete="tel"
           />
         </div>
       </div>
@@ -114,6 +116,7 @@ export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFo
           className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={formData.street}
           onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+          autoComplete="street-address"
         />
       </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,7 +14,7 @@ import Image from 'next/image';
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { addresses, loading: addressesLoading, createAddress, isCreating: isCreatingAddress } = useAddresses();
   const { mutateAsync: createOrder, isPending: isCreatingOrder } = useCreateOrder();
   
@@ -24,12 +24,7 @@ export default function CheckoutPage() {
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'CARD' | 'NEQUI'>('COD');
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login?redirect=/checkout');
-    }
-  }, [isAuthenticated, router]);
+  const hasInitializedAddress = useRef(false);
 
   useEffect(() => {
     if (items.length === 0) {
@@ -39,12 +34,14 @@ export default function CheckoutPage() {
 
   // Seleccionar dirección por defecto
   useEffect(() => {
-    if (addresses.length > 0 && !selectedAddressId) {
-      const defaultAddr = addresses.find(a => a.isDefault);
-      if (defaultAddr) setSelectedAddressId(defaultAddr.id);
-      else setSelectedAddressId(addresses[0].id);
+    if (!hasInitializedAddress.current && addresses.length > 0) {
+      const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
+      setTimeout(() => {
+        setSelectedAddressId(defaultAddr.id);
+        hasInitializedAddress.current = true;
+      }, 0);
     }
-  }, [addresses, selectedAddressId]);
+  }, [addresses]);
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,14 +88,6 @@ export default function CheckoutPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -294,6 +283,7 @@ export default function CheckoutPage() {
                         alt={item.product.name}
                         fill
                         className="object-contain object-center bg-white dark:bg-gray-700"
+                        sizes="64px"
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs text-gray-400">Sin img</div>

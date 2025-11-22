@@ -72,7 +72,13 @@ export default function AdminProductsPage() {
                   <div className="flex items-center">
                     <div className="h-10 w-10 shrink-0 relative rounded-md overflow-hidden border border-gray-200 dark:border-gray-700">
                       {product.image_url ? (
-                        <Image src={product.image_url} alt={product.name} fill className="object-cover" />
+                        <Image 
+                          src={product.image_url} 
+                          alt={product.name} 
+                          fill 
+                          className="object-cover" 
+                          sizes="40px"
+                        />
                       ) : (
                         <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs">Sin img</div>
                       )}

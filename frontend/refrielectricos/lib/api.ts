@@ -25,8 +25,15 @@ api.interceptors.response.use(
       // Si el error es 401 (Unauthorized), probablemente el token expiró
       useAuthStore.getState().logout();
       if (typeof window !== 'undefined') {
-        // Redirigir al login para forzar re-autenticación
-        window.location.href = '/login?redirect=/checkout';
+        const path = window.location.pathname;
+        // Lista de rutas que requieren autenticación
+        const protectedRoutes = ['/checkout', '/profile', '/admin', '/orders'];
+        const isProtected = protectedRoutes.some(route => path.startsWith(route));
+
+        if (isProtected) {
+          window.location.href = `/login?redirect=${encodeURIComponent(path)}`;
+        }
+        // Si es una ruta pública, solo cerramos sesión y no redirigimos forzosamente
       }
     }
     return Promise.reject(error);

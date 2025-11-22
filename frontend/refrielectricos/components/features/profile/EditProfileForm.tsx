@@ -74,6 +74,7 @@ export default function EditProfileForm() {
           {...register('name')}
           error={errors.name?.message}
           placeholder="Tu nombre"
+          autoComplete="name"
         />
 
         <Input
@@ -81,6 +82,7 @@ export default function EditProfileForm() {
           {...register('email')}
           error={errors.email?.message}
           placeholder="tu@email.com"
+          autoComplete="email"
         />
       </div>
 

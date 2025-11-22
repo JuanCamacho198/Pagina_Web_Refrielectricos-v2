@@ -46,7 +46,7 @@ export default function LoginForm() {
       }
 
       router.push('/');
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };
@@ -68,6 +68,7 @@ export default function LoginForm() {
           value={formData.email}
           onChange={handleChange}
           placeholder="juan@ejemplo.com"
+          autoComplete="email"
         />
       </div>
 
@@ -80,6 +81,7 @@ export default function LoginForm() {
           value={formData.password}
           onChange={handleChange}
           placeholder="••••••••"
+          autoComplete="current-password"
         />
       </div>
 

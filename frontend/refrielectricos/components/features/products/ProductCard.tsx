@@ -47,7 +47,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 src={product.image_url}
                 alt={product.name}
                 fill
-                className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             ) : (
               <span>Sin imagen</span>

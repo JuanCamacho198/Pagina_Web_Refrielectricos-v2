@@ -95,7 +95,13 @@ export default function AdminOrderDetailPage() {
                 <div key={item.id} className="flex items-center gap-4 border-b border-gray-100 dark:border-gray-700 pb-4 last:border-0 last:pb-0">
                   <div className="h-16 w-16 relative rounded-md overflow-hidden border border-gray-200 dark:border-gray-700 shrink-0">
                      {item.product.image_url ? (
-                        <Image src={item.product.image_url} alt={item.product.name} fill className="object-cover" />
+                        <Image 
+                          src={item.product.image_url} 
+                          alt={item.product.name} 
+                          fill 
+                          className="object-cover" 
+                          sizes="64px"
+                        />
                       ) : (
                         <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs">Sin img</div>
                       )}
