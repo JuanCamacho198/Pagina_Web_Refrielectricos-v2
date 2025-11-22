@@ -41,13 +41,14 @@ export default function ProductDetailPage() {
   const [isAdded, setIsAdded] = useState(false);
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
 
-  const id = params?.id as string;
+  // Nota: Aunque la carpeta se llama [id], ahora puede recibir un slug
+  const term = params?.id as string;
 
   useEffect(() => {
     const fetchProduct = async () => {
-      if (!id) return;
+      if (!term) return;
       try {
-        const response = await api.get(`/products/${id}`);
+        const response = await api.get(`/products/${term}`);
         const data = response.data;
         setProduct(data);
         // Establecer imagen principal (prioridad: array[0] -> string -> placeholder)
@@ -62,7 +63,7 @@ export default function ProductDetailPage() {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [term]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!zoomRef.current || !containerRef.current) return;

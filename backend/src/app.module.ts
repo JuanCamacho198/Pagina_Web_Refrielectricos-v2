@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { WishlistsModule } from './wishlists/wishlists.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AddressesModule } from './addresses/addresses.module';
     DashboardModule,
     WishlistsModule,
     AddressesModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

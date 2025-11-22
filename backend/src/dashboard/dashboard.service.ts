@@ -62,11 +62,11 @@ export class DashboardService {
       topSellingItems.map(async (item) => {
         const product = await this.prisma.product.findUnique({
           where: { id: item.productId },
-          select: { name: true, price: true, image_url: true, category: true },
+          select: { id: true, name: true, price: true, image_url: true, category: true },
         });
         return {
           ...product,
-          sold: item._sum.quantity,
+          sold: item._sum.quantity || 0,
         };
       }),
     );

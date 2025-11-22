@@ -12,6 +12,7 @@ import { useWishlist } from '@/context/WishlistContext';
 interface Product {
   id: string;
   name: string;
+  slug?: string;
   description: string;
   price: number;
   image_url?: string;
@@ -29,6 +30,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { isInWishlist, toggleWishlist } = useWishlist();
   
   const isFavorite = isInWishlist(product.id);
+  const productLink = `/products/${product.slug || product.id}`;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,7 +52,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Link href={`/products/${product.id}`} className="group block h-full">
+    <Link href={productLink} className="group block h-full">
       <Card className="h-full flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md relative">
         {/* Imagen */}
         <div className="relative w-full pt-[70%] bg-gray-100 dark:bg-gray-700 overflow-hidden">

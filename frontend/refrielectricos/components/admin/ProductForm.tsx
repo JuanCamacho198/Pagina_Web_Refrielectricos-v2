@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -10,6 +10,7 @@ import api from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import ImageUpload from '@/components/ui/ImageUpload';
 import { productSchema, ProductFormData } from '@/schemas/product';
 import { useToast } from '@/context/ToastContext';
 
@@ -29,6 +30,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<ProductFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,11 +183,24 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
           </div>
         </div>
 
-        <Input
-          label="URL de Imagen"
-          {...register('image_url')}
-          error={errors.image_url?.message}
-          placeholder="https://ejemplo.com/imagen.jpg"
+        <Controller
+          name="image_url"
+          control={control}
+          render={({ field }) => (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Imagen del Producto
+              </label>
+              <ImageUpload
+                value={field.value || ''}
+                onChange={field.onChange}
+                disabled={isLoading}
+              />
+              {errors.image_url && (
+                <p className="text-sm text-red-500">{errors.image_url.message}</p>
+              )}
+            </div>
+          )}
         />
 
         <div className="flex items-center gap-2">

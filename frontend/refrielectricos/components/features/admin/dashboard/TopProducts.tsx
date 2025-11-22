@@ -6,9 +6,7 @@ interface TopProductsProps {
   products: {
     id: string;
     name: string;
-    _count: {
-      orderItems: number;
-    };
+    sold: number;
   }[];
 }
 
@@ -35,7 +33,7 @@ export default function TopProducts({ products }: TopProductsProps) {
             </div>
             <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
               <TrendingUp size={14} />
-              <span>{product._count.orderItems} ventas</span>
+              <span>{product.sold} ventas</span>
             </div>
           </div>
         ))}

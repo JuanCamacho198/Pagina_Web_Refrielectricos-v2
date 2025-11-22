@@ -15,7 +15,7 @@ interface DashboardStats {
   revenue: number;
   revenueByMonth: { name: string; total: number }[];
   orderStatusDistribution: { name: string; value: number }[];
-  topProducts: { id: string; name: string; _count: { orderItems: number } }[];
+  topProducts: { id: string; name: string; sold: number }[];
   recentOrders: {
     id: string;
     total: number;
