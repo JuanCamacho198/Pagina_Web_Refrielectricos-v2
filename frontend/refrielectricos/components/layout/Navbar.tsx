@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, User, LogOut, Settings, MapPin, Package, LayoutDashboard, Heart, Search } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Settings, MapPin, Package, LayoutDashboard, Heart, Search, Menu, X } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -13,6 +13,7 @@ export default function Navbar() {
   const { totalItems } = useCart();
   const { user, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function Navbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
+      setIsMobileMenuOpen(false);
     }
   };
 
@@ -40,6 +42,16 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 w-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-gray-200/30 dark:border-gray-700/30 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 gap-4">
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+
           {/* Logo & Navigation */}
           <div className="flex items-center gap-8 shrink-0">
             <Link 
@@ -53,7 +65,7 @@ export default function Navbar() {
                 height={32} 
                 className="w-8 h-8"
               />
-              <span className="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent hidden md:block">
+              <span className="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent hidden sm:block">
                 Refrielectricos
               </span>
             </Link>
@@ -80,8 +92,8 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md hidden sm:block">
+          {/* Search Bar (Desktop) */}
+          <div className="flex-1 max-w-md hidden md:block">
             <form onSubmit={handleSearch} className="relative group">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
@@ -211,6 +223,47 @@ export default function Navbar() {
             )}
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4 space-y-4 animate-in slide-in-from-top-5">
+            <form onSubmit={handleSearch} className="relative group px-2">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar productos..."
+                className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </form>
+            <div className="flex flex-col space-y-2 px-2">
+              <Link 
+                href="/" 
+                className="px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Inicio
+              </Link>
+              <Link 
+                href="/products" 
+                className="px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Productos
+              </Link>
+              <Link 
+                href="/contact" 
+                className="px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Contacto
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
