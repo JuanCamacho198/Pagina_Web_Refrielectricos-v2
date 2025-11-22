@@ -1,42 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
-import api from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Image from 'next/image';
-import { Product } from '@/types/product';
+import { useProducts, useDeleteProduct } from '@/hooks/useProducts';
+import { useToast } from '@/context/ToastContext';
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: products = [], isLoading } = useProducts();
+  const deleteProductMutation = useDeleteProduct();
+  const { addToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const response = await api.get('/products');
-      setProducts(response.data);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
 
     try {
-      await api.delete(`/products/${id}`);
-      setProducts(products.filter(p => p.id !== id));
+      await deleteProductMutation.mutateAsync(id);
+      addToast('Producto eliminado correctamente', 'success');
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Error al eliminar el producto');
+      addToast('Error al eliminar el producto', 'error');
     }
   };
 

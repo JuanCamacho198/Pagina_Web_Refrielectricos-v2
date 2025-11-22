@@ -1,21 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import api from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Link from 'next/link';
 
 export default function RegisterForm() {
-  const router = useRouter();
+  const { register, isRegistering } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -26,31 +23,15 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
     try {
-      await api.post('/auth/register', formData);
-      // Redirect to login on success
-      router.push('/login?registered=true');
-    } catch (err: unknown) {
-      console.error(err);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const error = err as any;
-      setError(error.response?.data?.message || 'Error al registrarse');
-    } finally {
-      setLoading(false);
+      await register(formData);
+    } catch (error) {
+      // Error handled in hook
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">
-          {error}
-        </div>
-      )}
-      
       <div>
         <Input
           label="Nombre completo"
@@ -91,9 +72,9 @@ export default function RegisterForm() {
       <Button
         type="submit"
         className="w-full"
-        disabled={loading}
+        disabled={isRegistering}
       >
-        {loading ? 'Registrando...' : 'Crear cuenta'}
+        {isRegistering ? 'Registrando...' : 'Crear cuenta'}
       </Button>
 
       <div className="text-center text-sm text-gray-600 dark:text-gray-400">

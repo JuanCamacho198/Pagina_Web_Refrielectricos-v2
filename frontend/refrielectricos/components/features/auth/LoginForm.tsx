@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import api from '@/lib/api';
-import { useAuth } from '@/context/AuthContext';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
+import { useCartStore } from '@/store/cartStore';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Link from 'next/link';
@@ -11,13 +12,15 @@ import Link from 'next/link';
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, isLoggingIn } = useAuth();
+  const { mergeCart } = useCart();
+  const localItems = useCartStore(state => state.items);
+  const clearLocalCart = useCartStore(state => state.clearCart);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   
   const registered = searchParams.get('registered');
 
@@ -30,42 +33,21 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
     try {
-      const response = await api.post('/auth/login', formData);
-      const token = response.data.access_token;
+      await login(formData);
       
-      // Decode token manually to get user info (since we don't have a /me endpoint yet)
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      const payload = JSON.parse(jsonPayload);
+      if (localItems.length > 0) {
+        const itemsToMerge = localItems.map(item => ({
+          productId: item.id,
+          quantity: item.quantity
+        }));
+        await mergeCart(itemsToMerge);
+        clearLocalCart();
+      }
 
-      // Fetch full user profile to ensure we have the latest role and name
-      const userResponse = await api.get(`/users/${payload.sub}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      const user = {
-        id: userResponse.data.id,
-        email: userResponse.data.email,
-        name: userResponse.data.name || payload.email.split('@')[0],
-        role: userResponse.data.role
-      };
-
-      login(token, user);
       router.push('/');
-    } catch (err: unknown) {
-      console.error(err);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const error = err as any;
-      setError(error.response?.data?.message || 'Credenciales inválidas');
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      // Error handled in hook
     }
   };
 
@@ -74,12 +56,6 @@ export default function LoginForm() {
       {registered && (
         <div className="bg-green-50 text-green-600 p-3 rounded-md text-sm">
           Cuenta creada exitosamente. Por favor inicia sesión.
-        </div>
-      )}
-      
-      {error && (
-        <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">
-          {error}
         </div>
       )}
       
@@ -110,9 +86,9 @@ export default function LoginForm() {
       <Button
         type="submit"
         className="w-full"
-        disabled={loading}
+        disabled={isLoggingIn}
       >
-        {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+        {isLoggingIn ? 'Iniciando sesión...' : 'Iniciar sesión'}
       </Button>
 
       <div className="text-center text-sm text-gray-600 dark:text-gray-400">

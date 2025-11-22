@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Package, Calendar, AlertCircle } from 'lucide-react';
 import api from '@/lib/api';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Order } from '@/types/order';
 import Button from '@/components/ui/Button';
 

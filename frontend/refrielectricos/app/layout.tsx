@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { CartProvider } from "@/context/CartContext";
-import { AuthProvider } from "@/context/AuthContext";
-import { WishlistProvider } from "@/context/WishlistContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { ThemeProvider } from "@/components/theme-provider";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 export const metadata: Metadata = {
   title: "Refrielectricos",
@@ -25,15 +23,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
+          <QueryProvider>
             <ToastProvider>
-              <WishlistProvider>
-                <CartProvider>
-                  {children}
-                </CartProvider>
-              </WishlistProvider>
+              {children}
             </ToastProvider>
-          </AuthProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

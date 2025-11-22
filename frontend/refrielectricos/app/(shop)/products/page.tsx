@@ -7,17 +7,7 @@ import ProductCard from '@/components/features/products/ProductCard';
 import ProductFilters from '@/components/features/products/ProductFilters';
 import Button from '@/components/ui/Button';
 import { Search, Filter } from 'lucide-react';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image_url?: string;
-  category?: string;
-  brand?: string;
-  tags?: string[];
-}
+import { Product } from '@/types/product';
 
 function ProductsContent() {
   const searchParams = useSearchParams();

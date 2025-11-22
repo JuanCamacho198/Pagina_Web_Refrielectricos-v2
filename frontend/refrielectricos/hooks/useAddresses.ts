@@ -1,84 +1,73 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Address, CreateAddressDto, UpdateAddressDto } from '@/types/address';
 import { useToast } from '@/context/ToastContext';
 
 export function useAddresses() {
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const { addToast } = useToast();
 
-  const fetchAddresses = useCallback(async () => {
-    setLoading(true);
-    try {
+  const { data: addresses = [], isLoading: loading, isError } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: async () => {
       const { data } = await api.get<Address[]>('/addresses');
-      setAddresses(data);
-    } catch (error) {
-      console.error('Error fetching addresses:', error);
-      // No mostrar toast si es 401 (manejado por interceptor) o si es un error silencioso
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      return data;
+    },
+  });
 
-  const createAddress = async (data: CreateAddressDto) => {
-    setLoading(true);
-    try {
-      await api.post('/addresses', data);
-      await fetchAddresses();
+  const createAddressMutation = useMutation({
+    mutationFn: async (data: CreateAddressDto) => {
+      const { data: newAddress } = await api.post<Address>('/addresses', data);
+      return newAddress;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
       addToast('Dirección agregada', 'success');
-      return true;
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error creating address:', error);
       addToast('Error al crear dirección', 'error');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
-  const updateAddress = async (id: string, data: UpdateAddressDto) => {
-    setLoading(true);
-    try {
-      await api.patch(`/addresses/${id}`, data);
-      await fetchAddresses();
+  const updateAddressMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateAddressDto }) => {
+      const { data: updatedAddress } = await api.patch<Address>(`/addresses/${id}`, data);
+      return updatedAddress;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
       addToast('Dirección actualizada', 'success');
-      return true;
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error updating address:', error);
       addToast('Error al actualizar dirección', 'error');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
-  const deleteAddress = async (id: string) => {
-    setLoading(true);
-    try {
+  const deleteAddressMutation = useMutation({
+    mutationFn: async (id: string) => {
       await api.delete(`/addresses/${id}`);
-      await fetchAddresses();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
       addToast('Dirección eliminada', 'info');
-      return true;
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error deleting address:', error);
       addToast('Error al eliminar dirección', 'error');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAddresses();
-  }, [fetchAddresses]);
+    },
+  });
 
   return {
     addresses,
     loading,
-    fetchAddresses,
-    createAddress,
-    updateAddress,
-    deleteAddress,
+    isError,
+    createAddress: createAddressMutation.mutateAsync,
+    updateAddress: (id: string, data: UpdateAddressDto) => updateAddressMutation.mutateAsync({ id, data }),
+    deleteAddress: deleteAddressMutation.mutateAsync,
+    isCreating: createAddressMutation.isPending,
+    isUpdating: updateAddressMutation.isPending,
+    isDeleting: deleteAddressMutation.isPending,
   };
 }

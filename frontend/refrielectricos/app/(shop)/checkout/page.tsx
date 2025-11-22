@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/hooks/useAuth';
 import { useAddresses } from '@/hooks/useAddresses';
-import api from '@/lib/api';
+import { useCreateOrder } from '@/hooks/useOrders';
 import Button from '@/components/ui/Button';
 import AddressForm from '@/components/features/profile/addresses/AddressForm';
 import { MapPin, CreditCard, Loader2, Plus, CheckCircle } from 'lucide-react';
@@ -14,10 +14,10 @@ import Image from 'next/image';
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { addresses, loading: addressesLoading, createAddress } = useAddresses();
+  const { user, isAuthenticated } = useAuth();
+  const { addresses, loading: addressesLoading, createAddress, isCreating: isCreatingAddress } = useAddresses();
+  const { mutateAsync: createOrder, isPending: isCreatingOrder } = useCreateOrder();
   
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
@@ -26,10 +26,10 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'CARD' | 'NEQUI'>('COD');
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!isAuthenticated) {
       router.push('/login?redirect=/checkout');
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     if (items.length === 0) {
@@ -57,7 +57,6 @@ export default function CheckoutPage() {
     }
     
     console.log('Iniciando proceso de orden...');
-    setLoading(true);
     setError('');
 
     try {
@@ -70,7 +69,7 @@ export default function CheckoutPage() {
         userId: user.id,
         addressId: selectedAddressId,
         notes: notes,
-        status: paymentMethod === 'COD' ? 'PENDING' : 'PAID', // Simulación: Pagado si es electrónico
+        status: (paymentMethod === 'COD' ? 'PENDING' : 'PAID') as 'PENDING' | 'PAID', // Simulación: Pagado si es electrónico
         items: items.map(item => ({
           productId: item.id,
           quantity: item.quantity
@@ -78,8 +77,7 @@ export default function CheckoutPage() {
       };
 
       console.log('Enviando datos de orden:', orderData);
-      const response = await api.post('/orders', orderData);
-      console.log('Respuesta del servidor:', response);
+      await createOrder(orderData);
       
       clearCart();
       router.push('/checkout/success');
@@ -91,12 +89,10 @@ export default function CheckoutPage() {
       setError(errorMessage);
       // Scroll al error para que el usuario lo vea
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } finally {
-      setLoading(false);
     }
   };
 
-  if (authLoading || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -132,11 +128,15 @@ export default function CheckoutPage() {
             {isAddingAddress ? (
               <AddressForm 
                 onSubmit={async (data) => {
-                  const success = await createAddress(data);
-                  if (success) setIsAddingAddress(false);
+                  try {
+                    await createAddress(data);
+                    setIsAddingAddress(false);
+                  } catch (error) {
+                    console.error("Error creating address", error);
+                  }
                 }}
                 onCancel={() => setIsAddingAddress(false)}
-                isLoading={addressesLoading}
+                isLoading={isCreatingAddress}
               />
             ) : (
               <div className="space-y-4">
@@ -288,10 +288,10 @@ export default function CheckoutPage() {
               {items.map((item) => (
                 <li key={item.id} className="py-4 flex gap-4">
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 relative">
-                    {item.image_url ? (
+                    {item.product.image_url ? (
                       <Image
-                        src={item.image_url}
-                        alt={item.name}
+                        src={item.product.image_url}
+                        alt={item.product.name}
                         fill
                         className="object-contain object-center bg-white dark:bg-gray-700"
                       />
@@ -300,11 +300,11 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{item.name}</h3>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{item.product.name}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Cant: {item.quantity}</p>
                   </div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    ${(item.price * item.quantity).toLocaleString()}
+                    ${(item.product.price * item.quantity).toLocaleString()}
                   </p>
                 </li>
               ))}
@@ -336,9 +336,9 @@ export default function CheckoutPage() {
               onClick={handlePlaceOrder}
               className="w-full mt-6"
               size="lg"
-              disabled={loading}
+              disabled={isCreatingOrder}
             >
-              {loading ? (
+              {isCreatingOrder ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Procesando...

@@ -2,21 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/hooks/useCart';
 import Button from '@/components/ui/Button';
 import { ShoppingCart, CreditCard, Check, ListPlus } from 'lucide-react';
 import AddToWishlistModal from '@/components/features/wishlist/AddToWishlistModal';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  image_url?: string;
-  category?: string;
-  brand?: string;
-  sku?: string;
-}
+import { Product } from '@/types/product';
 
 interface ProductInfoProps {
   product: Product;
@@ -29,12 +19,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
 
   const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price),
-      image_url: product.image_url,
-    });
+    addItem(product);
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);

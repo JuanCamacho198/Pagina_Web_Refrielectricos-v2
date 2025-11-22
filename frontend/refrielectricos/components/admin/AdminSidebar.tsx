@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 const menuItems = [

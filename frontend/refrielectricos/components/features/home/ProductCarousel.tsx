@@ -3,16 +3,7 @@
 import { useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '@/components/features/products/ProductCard';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image_url?: string;
-  category?: string;
-  brand?: string;
-}
+import { Product } from '@/types/product';
 
 interface ProductCarouselProps {
   title: string;

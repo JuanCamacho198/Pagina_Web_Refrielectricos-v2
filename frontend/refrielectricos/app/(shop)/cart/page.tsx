@@ -1,6 +1,6 @@
 'use client';
 
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/hooks/useCart';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -32,10 +32,10 @@ export default function CartPage() {
               {items.map((item) => (
                 <li key={item.id} className="p-6 flex items-center">
                   <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
-                    {item.image_url ? (
+                    {item.product.image_url ? (
                       <Image
-                        src={item.image_url}
-                        alt={item.name}
+                        src={item.product.image_url}
+                        alt={item.product.name}
                         fill
                         className="object-contain object-center bg-white dark:bg-gray-700"
                       />
@@ -49,8 +49,8 @@ export default function CartPage() {
                   <div className="ml-4 flex-1 flex flex-col">
                     <div>
                       <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white">
-                        <h3>{item.name}</h3>
-                        <p className="ml-4">${(item.price * item.quantity).toLocaleString()}</p>
+                        <h3>{item.product.name}</h3>
+                        <p className="ml-4">${(item.product.price * item.quantity).toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="flex-1 flex items-end justify-between text-sm">

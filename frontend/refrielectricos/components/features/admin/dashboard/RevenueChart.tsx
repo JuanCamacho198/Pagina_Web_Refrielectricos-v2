@@ -3,7 +3,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface RevenueChartProps {
-  data: { name: string; revenue: number }[];
+  data: { name: string; total: number }[];
 }
 
 export default function RevenueChart({ data }: RevenueChartProps) {
@@ -38,7 +38,7 @@ export default function RevenueChart({ data }: RevenueChartProps) {
               formatter={(value: number) => [`$${value.toLocaleString()}`, 'Ingresos']}
             />
             <Bar 
-              dataKey="revenue" 
+              dataKey="total" 
               fill="#3B82F6" 
               radius={[4, 4, 0, 0]} 
               barSize={40}

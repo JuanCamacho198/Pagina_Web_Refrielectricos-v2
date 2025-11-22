@@ -3,7 +3,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 interface OrderStatusChartProps {
-  data: { status: string; _count: { status: number } }[];
+  data: { name: string; value: number }[];
 }
 
 const COLORS = {
@@ -24,9 +24,9 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function OrderStatusChart({ data }: OrderStatusChartProps) {
   const chartData = data.map(item => ({
-    name: STATUS_LABELS[item.status] || item.status,
-    value: item._count.status,
-    color: COLORS[item.status as keyof typeof COLORS] || '#9CA3AF'
+    name: STATUS_LABELS[item.name] || item.name,
+    value: item.value,
+    color: COLORS[item.name as keyof typeof COLORS] || '#9CA3AF'
   }));
 
   return (

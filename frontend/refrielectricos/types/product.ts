@@ -6,6 +6,7 @@ export interface Product {
   price: number;
   stock: number;
   image_url: string | null;
+  images_url: string[];
   category: string;
   brand: string | null;
   sku: string | null;

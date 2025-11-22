@@ -5,7 +5,7 @@ import { Plus, Heart, Check } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { useWishlist } from '@/context/WishlistContext';
+import { useWishlist } from '@/hooks/useWishlist';
 import { useToast } from '@/context/ToastContext';
 
 interface AddToWishlistModalProps {

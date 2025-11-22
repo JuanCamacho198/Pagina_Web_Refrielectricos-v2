@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '@/store/authStore';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
@@ -9,11 +10,9 @@ const api = axios.create({
 
 // Interceptor para añadir el token a las peticiones
 api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -24,9 +23,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Si el error es 401 (Unauthorized), probablemente el token expiró
+      useAuthStore.getState().logout();
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
         // Redirigir al login para forzar re-autenticación
         window.location.href = '/login?redirect=/checkout';
       }

@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Save, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import api from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
@@ -14,6 +13,7 @@ import ImageUpload from '@/components/ui/ImageUpload';
 import MultiImageUpload from '@/components/ui/MultiImageUpload';
 import { productSchema, ProductFormData } from '@/schemas/product';
 import { useToast } from '@/context/ToastContext';
+import { useCreateProduct, useUpdateProduct } from '@/hooks/useProducts';
 
 interface ProductFormProps {
   initialData?: ProductFormData & { id: string };
@@ -23,10 +23,14 @@ interface ProductFormProps {
 export default function ProductForm({ initialData, isEditing = false }: ProductFormProps) {
   const router = useRouter();
   const { addToast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [pendingData, setPendingData] = useState<ProductFormData | null>(null);
+
+  const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
+
+  const isSaving = createProduct.isPending || updateProduct.isPending;
 
   const {
     register,
@@ -55,7 +59,6 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     if (!pendingData) return;
     
     setIsConfirmModalOpen(false);
-    setIsLoading(true);
     setError('');
 
     const payload = {
@@ -69,10 +72,10 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
 
     try {
       if (isEditing && initialData) {
-        await api.patch(`/products/${initialData.id}`, payload);
+        await updateProduct.mutateAsync({ id: initialData.id, ...payload });
         addToast('Producto actualizado correctamente', 'success');
       } else {
-        await api.post('/products', payload);
+        await createProduct.mutateAsync(payload);
         addToast('Producto creado correctamente', 'success');
       }
       router.push('/admin/products');
@@ -85,7 +88,6 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
       setError(errorMessage);
       addToast(errorMessage, 'error');
     } finally {
-      setIsLoading(false);
       setPendingData(null);
     }
   };
@@ -197,7 +199,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
               <ImageUpload
                 value={field.value || ''}
                 onChange={field.onChange}
-                disabled={isLoading}
+                disabled={isSaving}
               />
               {errors.image_url && (
                 <p className="text-sm text-red-500">{errors.image_url.message}</p>
@@ -217,7 +219,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
               <MultiImageUpload
                 value={field.value || []}
                 onChange={field.onChange}
-                disabled={isLoading}
+                disabled={isSaving}
               />
               {errors.images_url && (
                 <p className="text-sm text-red-500">{errors.images_url.message}</p>
@@ -239,8 +241,8 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
         </div>
 
         <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-            {isLoading ? (
+          <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
+            {isSaving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Guardando...
@@ -276,15 +278,15 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
             <Button
               variant="outline"
               onClick={() => setIsConfirmModalOpen(false)}
-              disabled={isLoading}
+              disabled={isSaving}
             >
               Cancelar
             </Button>
             <Button
               onClick={handleConfirmSave}
-              disabled={isLoading}
+              disabled={isSaving}
             >
-              {isLoading ? (
+              {isSaving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Confirmando...

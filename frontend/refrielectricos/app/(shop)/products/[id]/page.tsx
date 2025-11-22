@@ -1,57 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import api from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import ProductGallery from '@/components/features/products/ProductGallery';
 import ProductInfo from '@/components/features/products/ProductInfo';
 import ProductDescription from '@/components/features/products/ProductDescription';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  image_url?: string;
-  images_url?: string[]; // Soporte para múltiples imágenes si el backend lo envía
-  category?: string;
-  brand?: string;
-  sku?: string;
-  tags?: string[];
-  main_category?: string;
-  sub_category?: string;
-}
+import { useProduct } from '@/hooks/useProducts';
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
+  
   // Nota: Aunque la carpeta se llama [id], ahora puede recibir un slug
   const term = params?.id as string;
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      if (!term) return;
-      try {
-        const response = await api.get(`/products/${term}`);
-        const data = response.data;
-        setProduct(data);
-      } catch (err) {
-        console.error(err);
-        setError('Error al cargar el producto');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [term]);
+  const { data: product, isLoading: loading, isError } = useProduct(term);
 
   if (loading) {
     return (
@@ -61,7 +25,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  if (error || !product) {
+  if (isError || !product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Producto no encontrado</h1>
@@ -97,7 +61,7 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Descripción y Detalles */}
-      <ProductDescription description={product.description} tags={product.tags} />
+      <ProductDescription description={product.description || ''} tags={product.tags} />
     </>
   );
 }

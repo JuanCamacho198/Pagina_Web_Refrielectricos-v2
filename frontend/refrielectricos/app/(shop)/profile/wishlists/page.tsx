@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useWishlist } from '@/context/WishlistContext';
+import { useWishlist } from '@/hooks/useWishlist';
 import { Trash2, Plus, ShoppingCart, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/hooks/useCart';
 
 export default function WishlistsPage() {
     const { wishlists, createWishlist, deleteWishlist, removeFromWishlist } = useWishlist();
@@ -34,12 +34,7 @@ export default function WishlistsPage() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleAddToCart = (product: any) => {
-        addItem({
-            id: product.id,
-            name: product.name,
-            price: Number(product.price),
-            image_url: product.image_url,
-        });
+        addItem(product);
         // Consider replacing this alert with a toast in the future
         // alert('Agregado al carrito'); 
     };

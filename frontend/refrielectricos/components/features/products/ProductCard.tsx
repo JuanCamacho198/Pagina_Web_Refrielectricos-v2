@@ -6,19 +6,9 @@ import Image from 'next/image';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import { useCart } from '@/context/CartContext';
-import { useWishlist } from '@/context/WishlistContext';
-
-interface Product {
-  id: string;
-  name: string;
-  slug?: string;
-  description: string;
-  price: number;
-  image_url?: string;
-  category?: string;
-  brand?: string;
-}
+import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/hooks/useWishlist';
+import { Product } from '@/types/product';
 
 interface ProductCardProps {
   product: Product;
@@ -35,12 +25,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price),
-      image_url: product.image_url,
-    });
+    addItem(product);
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);

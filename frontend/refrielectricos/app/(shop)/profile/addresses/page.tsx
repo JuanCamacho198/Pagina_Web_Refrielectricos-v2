@@ -2,21 +2,21 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import AddressesList from '@/components/features/profile/addresses/AddressesList';
 import { Loader2 } from 'lucide-react';
 
 export default function AddressesPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isAuthenticated) {
       router.push('/login');
     }
-  }, [user, isLoading, router]);
+  }, [isAuthenticated, router]);
 
-  if (isLoading || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
