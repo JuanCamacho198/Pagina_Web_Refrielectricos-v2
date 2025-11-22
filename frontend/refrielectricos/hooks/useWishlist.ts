@@ -86,16 +86,20 @@ export function useWishlist() {
     let targetListId = wishlistId;
 
     if (!targetListId) {
-      if (wishlists.length === 0) {
+      // Buscar la lista por defecto "Favoritos"
+      const defaultList = wishlists.find(list => list.name === 'Favoritos');
+      
+      if (defaultList) {
+        targetListId = defaultList.id;
+      } else {
+        // Si no existe, crearla
         try {
           const newList = await createWishlistMutation.mutateAsync('Favoritos');
           targetListId = newList.id;
         } catch (error) {
-            console.error(error);
+          console.error(error);
           return; // Error handled in mutation
         }
-      } else {
-        targetListId = wishlists[0].id;
       }
     }
 

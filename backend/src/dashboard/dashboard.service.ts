@@ -12,7 +12,9 @@ export class DashboardService {
         this.prisma.product.count(),
         this.prisma.order.count(),
         this.prisma.order.findMany({
-          where: { status: 'PAID' },
+          where: { 
+            status: { in: ['PAID', 'PENDING'] } // Include PENDING for demo purposes
+          },
           select: { total: true, createdAt: true },
         }),
         this.prisma.product.count({
@@ -26,12 +28,17 @@ export class DashboardService {
     const revenueByMonth = this.getRevenueByMonth(paidOrders);
 
     // 2. Order Status Distribution
-    const orderStatusDistribution = await this.prisma.order.groupBy({
+    const orderStatusRaw = await this.prisma.order.groupBy({
       by: ['status'],
       _count: {
         status: true,
       },
     });
+
+    const orderStatusDistribution = orderStatusRaw.map((item) => ({
+      name: item.status,
+      value: item._count.status,
+    }));
 
     // 3. Recent Orders
     const recentOrders = await this.prisma.order.findMany({
@@ -124,6 +131,6 @@ export class DashboardService {
       }
     });
 
-    return last6Months.map(({ month, revenue }) => ({ name: month, revenue }));
+    return last6Months.map(({ month, revenue }) => ({ name: month, total: revenue }));
   }
 }

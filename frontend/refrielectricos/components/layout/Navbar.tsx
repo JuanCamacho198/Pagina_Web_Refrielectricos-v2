@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, User, LogOut, Settings, MapPin, Package, LayoutDashboard, Heart, Search, Menu, X, ChevronDown } from 'lucide-react';
+import { ShoppingCart, LogOut, Settings, MapPin, Package, LayoutDashboard, Heart, Search, Menu, X, ChevronDown } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { useAddresses } from '@/hooks/useAddresses';
@@ -169,8 +169,8 @@ export default function Navbar() {
 
             {/* Nav Links */}
             <div className="flex items-center gap-4">
-              <Link href="/products" className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Ofertas</Link>
-              <Link href="/contact" className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Ayuda / PQR</Link>
+              <Link href="/products" className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Productos</Link>
+          
             </div>
           </div>
 
@@ -181,13 +181,15 @@ export default function Navbar() {
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none"
+                  className="flex items-center gap-2 focus:outline-none group"
                 >
-                  <span className="flex items-center gap-2">
-                    <User size={18} />
+                  <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 font-semibold border border-blue-200 dark:border-blue-800 group-hover:border-blue-300 transition-colors">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {user.name.split(' ')[0]}
                   </span>
-                  <ChevronDown size={14} />
+                  <ChevronDown size={14} className="text-gray-500 group-hover:text-blue-600 transition-colors" />
                 </button>
 
                 {(isProfileOpen) && (
@@ -249,8 +251,18 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-3 text-sm">
-                <Link href="/register" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Crea tu cuenta</Link>
-                <Link href="/login" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Ingresa</Link>
+                <Link 
+                  href="/register" 
+                  className="px-3 py-1.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors font-medium"
+                >
+                  Crea tu cuenta
+                </Link>
+                <Link 
+                  href="/login" 
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium shadow-sm"
+                >
+                  Ingresa
+                </Link>
               </div>
             )}
 

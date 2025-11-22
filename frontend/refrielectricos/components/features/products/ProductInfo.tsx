@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import { ShoppingCart, CreditCard, Check, ListPlus } from 'lucide-react';
 import AddToWishlistModal from '@/components/features/wishlist/AddToWishlistModal';
 import { Product } from '@/types/product';
+import { formatCurrency } from '@/lib/utils';
 
 interface ProductInfoProps {
   product: Product;
@@ -36,7 +37,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       
       <div className="flex items-center gap-4 mb-6">
         <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-          ${Number(product.price).toLocaleString()}
+          {formatCurrency(Number(product.price))}
         </span>
         {product.stock > 0 ? (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400">

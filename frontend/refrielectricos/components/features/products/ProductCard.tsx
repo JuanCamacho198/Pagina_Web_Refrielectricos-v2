@@ -9,6 +9,7 @@ import Card from '@/components/ui/Card';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { Product } from '@/types/product';
+import { formatCurrency } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -83,7 +84,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           
           <div className="mt-auto">
             <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-3">
-              ${Number(product.price).toLocaleString()}
+              {formatCurrency(Number(product.price))}
             </p>
             
             <Button 

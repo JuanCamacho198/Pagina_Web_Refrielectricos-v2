@@ -36,9 +36,11 @@ export default function ProductDetailPage() {
     );
   }
 
-  const images = product.images_url && product.images_url.length > 0 
-    ? product.images_url 
-    : (product.image_url ? [product.image_url] : []);
+  const additionalImages = product.images_url?.filter(url => url && url.trim() !== '') || [];
+  // Combinamos la imagen principal con las adicionales, asegurando que la principal vaya primero
+  const images = product.image_url 
+    ? [product.image_url, ...additionalImages.filter(url => url !== product.image_url)]
+    : (additionalImages.length > 0 ? additionalImages : []);
 
   return (
     <>

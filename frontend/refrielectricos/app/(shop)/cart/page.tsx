@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Trash2, Plus, Minus } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
@@ -50,7 +51,7 @@ export default function CartPage() {
                     <div>
                       <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white">
                         <h3>{item.product.name}</h3>
-                        <p className="ml-4">${(item.product.price * item.quantity).toLocaleString()}</p>
+                        <p className="ml-4">{formatCurrency(item.product.price * item.quantity)}</p>
                       </div>
                     </div>
                     <div className="flex-1 flex items-end justify-between text-sm">
@@ -94,7 +95,7 @@ export default function CartPage() {
               <dl className="-my-4 divide-y divide-gray-200 dark:divide-gray-700">
                 <div className="py-4 flex items-center justify-between">
                   <dt className="text-gray-600 dark:text-gray-400">Subtotal</dt>
-                  <dd className="font-medium text-gray-900 dark:text-white">${totalPrice.toLocaleString()}</dd>
+                  <dd className="font-medium text-gray-900 dark:text-white">{formatCurrency(totalPrice)}</dd>
                 </div>
                 <div className="py-4 flex items-center justify-between">
                   <dt className="text-gray-600 dark:text-gray-400">Envío</dt>
@@ -102,7 +103,7 @@ export default function CartPage() {
                 </div>
                 <div className="py-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
                   <dt className="text-base font-bold text-gray-900 dark:text-white">Total</dt>
-                  <dd className="text-base font-bold text-blue-600 dark:text-blue-400">${totalPrice.toLocaleString()}</dd>
+                  <dd className="text-base font-bold text-blue-600 dark:text-blue-400">{formatCurrency(totalPrice)}</dd>
                 </div>
               </dl>
             </div>

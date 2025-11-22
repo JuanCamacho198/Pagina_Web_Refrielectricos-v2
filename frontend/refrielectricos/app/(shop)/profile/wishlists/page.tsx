@@ -124,13 +124,15 @@ export default function WishlistsPage() {
                                         </Link>
                                     )}
                                 </div>
-                                <button
-                                    onClick={() => setDeleteListId(list.id)}
-                                    className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                                    title="Eliminar lista"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
+                                {list.name !== 'Favoritos' && (
+                                    <button
+                                        onClick={() => setDeleteListId(list.id)}
+                                        className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                                        title="Eliminar lista"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                )}
                             </div>
 
                             <div className="p-4">

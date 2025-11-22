@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button';
 import AddressForm from '@/components/features/profile/addresses/AddressForm';
 import { MapPin, CreditCard, Loader2, Plus, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
+import { formatCurrency } from '@/lib/utils';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function CheckoutPage() {
   const { mutateAsync: createOrder, isPending: isCreatingOrder } = useCreateOrder();
   
   const [error, setError] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
   
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
@@ -27,10 +29,10 @@ export default function CheckoutPage() {
   const hasInitializedAddress = useRef(false);
 
   useEffect(() => {
-    if (items.length === 0) {
+    if (items.length === 0 && !isSuccess) {
       router.push('/cart');
     }
-  }, [items, router]);
+  }, [items, router, isSuccess]);
 
   // Seleccionar dirección por defecto
   useEffect(() => {
@@ -76,6 +78,7 @@ export default function CheckoutPage() {
       console.log('Enviando datos de orden:', orderData);
       await createOrder(orderData);
       
+      setIsSuccess(true);
       clearCart();
       router.push('/checkout/success');
     } catch (err: unknown) {
@@ -294,7 +297,7 @@ export default function CheckoutPage() {
                     <p className="text-sm text-gray-500 dark:text-gray-400">Cant: {item.quantity}</p>
                   </div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    ${(item.product.price * item.quantity).toLocaleString()}
+                    {formatCurrency(item.product.price * item.quantity)}
                   </p>
                 </li>
               ))}
@@ -303,15 +306,15 @@ export default function CheckoutPage() {
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                 <span>Subtotal</span>
-                <span>${totalPrice.toLocaleString()}</span>
+                <span>{formatCurrency(totalPrice)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                 <span>Envío</span>
-                <span>$0 (Gratis)</span>
+                <span>{formatCurrency(0)} (Gratis)</span>
               </div>
               <div className="flex justify-between text-base font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
                 <span>Total a pagar</span>
-                <span className="text-blue-600 dark:text-blue-400">${totalPrice.toLocaleString()}</span>
+                <span className="text-blue-600 dark:text-blue-400">{formatCurrency(totalPrice)}</span>
               </div>
             </div>
 

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
@@ -123,7 +124,12 @@ export class WishlistsService {
   }
 
   async remove(userId: string, id: string) {
-    await this.findOne(userId, id);
+    const wishlist = await this.findOne(userId, id);
+    
+    if (wishlist.name === 'Favoritos') {
+      throw new BadRequestException('No se puede eliminar la lista de favoritos por defecto');
+    }
+
     return this.prisma.wishlist.delete({ where: { id } });
   }
 }
