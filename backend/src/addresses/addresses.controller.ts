@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AddressesService } from './addresses.service';
 import { CreateAddressDto } from './dto/create-address.dto';
@@ -23,6 +24,8 @@ interface RequestWithUser extends Request {
   };
 }
 
+@ApiTags('Addresses')
+@ApiBearerAuth()
 @Controller('addresses')
 @UseGuards(JwtAuthGuard)
 export class AddressesController {

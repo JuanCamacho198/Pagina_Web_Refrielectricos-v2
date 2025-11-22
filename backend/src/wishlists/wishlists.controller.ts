@@ -8,6 +8,7 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { WishlistsService } from './wishlists.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { AddWishlistItemDto } from './dto/add-item.dto';
@@ -19,6 +20,8 @@ interface RequestWithUser {
   };
 }
 
+@ApiTags('Wishlists')
+@ApiBearerAuth()
 @Controller('wishlists')
 @UseGuards(JwtAuthGuard)
 export class WishlistsController {
