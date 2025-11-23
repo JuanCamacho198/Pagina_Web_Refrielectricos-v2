@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Refrielectricos Frontend 🛍️
 
-## Getting Started
+Este es el frontend de la tienda **Refrielectricos**, una aplicación moderna de comercio electrónico construida con **Next.js 16 (App Router)**, diseñada para ser rápida, accesible y fácil de mantener.
 
-First, run the development server:
+## 🛠️ Stack Tecnológico
+
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router, Server Components).
+- **Lenguaje:** TypeScript.
+- **Estilos:** [Tailwind CSS 4](https://tailwindcss.com/) (Utility-first CSS).
+- **Estado Global:**
+    - [Zustand](https://github.com/pmndrs/zustand): Para estado cliente ligero (Carrito, Auth).
+    - [TanStack Query (React Query)](https://tanstack.com/query/latest): Para estado asíncrono y caché de servidor.
+- **Cliente HTTP:** Axios (con interceptores para manejo de tokens).
+- **Iconos:** Lucide React.
+- **Formularios:** React Hook Form (en desarrollo).
+
+## 📂 Estructura del Proyecto
+
+La estructura sigue las convenciones del **App Router** de Next.js, separando la lógica de negocio de la interfaz de usuario.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+frontend/refrielectricos/
+├── app/                 # Rutas y Páginas (File-system routing)
+│   ├── (auth)/          # Grupo de rutas de autenticación (Login, Register)
+│   ├── (shop)/          # Rutas públicas de la tienda (Home, Products, Cart, Checkout)
+│   ├── admin/           # Panel de Administración (Protegido)
+│   ├── layout.tsx       # Layout raíz (Providers, Fuentes)
+│   └── page.tsx         # Página de inicio
+├── components/
+│   ├── ui/              # Componentes base reutilizables (Button, Input, Modal, Card)
+│   ├── layout/          # Componentes estructurales (Navbar, Footer)
+│   └── features/        # Componentes específicos de negocio (ProductCard, CartItem)
+├── hooks/               # Custom Hooks (Lógica encapsulada)
+│   ├── useAuth.ts       # Manejo de sesión
+│   ├── useCart.ts       # Lógica del carrito
+│   └── useWishlist.ts   # Lógica de favoritos
+├── lib/                 # Utilidades y configuración
+│   ├── api.ts           # Instancia de Axios configurada
+│   └── utils.ts         # Helpers (formato de moneda, cn para clases)
+├── store/               # Estado global con Zustand
+│   ├── authStore.ts     # Persistencia de sesión
+│   └── cartStore.ts     # Estado local del carrito
+└── types/               # Definiciones de TypeScript (Interfaces compartidas)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🧠 Decisiones de Arquitectura
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. App Router & Server Components
+Utilizamos el App Router para aprovechar las últimas características de Next.js.
+*   **Server Components:** Por defecto, los componentes son del servidor (mejor SEO, menor JS al cliente).
+*   **Client Components:** Usamos `'use client'` solo cuando necesitamos interactividad (hooks, eventos de click, estado).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Separación de UI y Features
+*   `components/ui`: Contiene "átomos" de diseño que no saben nada del negocio (ej. un Botón azul). Son puramente visuales.
+*   `components/features`: Contiene componentes que conectan la UI con la lógica (ej. `ProductCard` usa `useCart` para añadir productos).
 
-## Learn More
+### 3. Gestión de Estado Híbrida
+*   **Zustand:** Lo usamos para el estado global que debe persistir o compartirse en toda la app (ej. si el usuario está logueado, qué items tiene en el carrito localmente).
+*   **React Query:** Lo usamos para todo lo que viene del servidor (productos, listas de deseos). Maneja el caché, la carga (loading) y los errores automáticamente, evitando `useEffect` innecesarios.
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Interceptores de Axios (`lib/api.ts`)
+Centralizamos las peticiones HTTP. El interceptor:
+1.  Inyecta automáticamente el Token JWT en cada petición.
+2.  Detecta errores 401 (Token expirado) y maneja el cierre de sesión o redirección de forma inteligente, sin que cada componente tenga que preocuparse por ello.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 5. Rutas Agrupadas
+Usamos grupos de rutas como `(shop)` y `(auth)` para organizar los archivos sin afectar la URL final. Esto nos permite tener layouts específicos (ej. el Login no tiene el mismo Navbar que la Tienda).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Instalación y Ejecución
 
-## Deploy on Vercel
+1.  **Instalar dependencias:**
+    ```bash
+    pnpm install
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2.  **Configurar variables de entorno:**
+    Crea un archivo `.env.local` con:
+    ```env
+    NEXT_PUBLIC_API_URL=http://localhost:4000
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3.  **Ejecutar en desarrollo:**
+    ```bash
+    pnpm dev
+    ```
+
+4.  **Abrir en el navegador:**
+    Visita `http://localhost:3000`.
