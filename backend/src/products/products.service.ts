@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -15,15 +19,20 @@ export class ProductsService {
   async create(createProductDto: CreateProductDto) {
     console.log('ProductsService: Creating product in DB:', createProductDto);
     try {
-      const slug = slugify(createProductDto.name, { lower: true, strict: true });
-      
+      const slug = slugify(createProductDto.name, {
+        lower: true,
+        strict: true,
+      });
+
       // Verificar si el slug ya existe
       const existingProduct = await this.prisma.product.findUnique({
         where: { slug },
       });
 
       if (existingProduct) {
-        throw new BadRequestException(`Product with name "${createProductDto.name}" already exists (slug conflict)`);
+        throw new BadRequestException(
+          `Product with name "${createProductDto.name}" already exists (slug conflict)`,
+        );
       }
 
       const product = await this.prisma.product.create({
@@ -35,7 +44,10 @@ export class ProductsService {
       console.log('ProductsService: Product created successfully:', product.id);
       return product;
     } catch (error) {
-      console.error('ProductsService: Error creating product in Prisma:', error);
+      console.error(
+        'ProductsService: Error creating product in Prisma:',
+        error,
+      );
       throw error;
     }
   }
@@ -47,10 +59,7 @@ export class ProductsService {
   async findOne(term: string) {
     const product = await this.prisma.product.findFirst({
       where: {
-        OR: [
-          { id: term },
-          { slug: term },
-        ],
+        OR: [{ id: term }, { slug: term }],
       },
     });
 
@@ -63,8 +72,7 @@ export class ProductsService {
 
   async update(id: string, updateProductDto: UpdateProductDto) {
     const { name } = updateProductDto;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = { ...updateProductDto };
+    const data = { ...updateProductDto, slug: undefined };
 
     if (name) {
       data.slug = slugify(name, { lower: true, strict: true });

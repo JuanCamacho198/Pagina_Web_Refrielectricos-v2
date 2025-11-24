@@ -33,7 +33,7 @@ export const useCart = () => {
   // Sync DB cart to local store
   useEffect(() => {
     if (isAuthenticated && dbCart) {
-      const mappedItems = dbCart.items.map((item: any) => ({
+      const mappedItems = dbCart.items.map((item: { productId: string; quantity: number; product: Product }) => ({
         id: item.productId,
         quantity: item.quantity,
         product: item.product,
@@ -134,16 +134,16 @@ export const useCart = () => {
   );
 
   return {
-    items,
-    isOpen,
     toggleCart,
     addItem,
     removeItem,
     updateQuantity,
     clearCart,
+    mergeCart: mergeCartMutation.mutateAsync,
+    items,
+    isOpen,
     totalPrice,
     totalItems,
     isLoading: isAuthenticated && !dbCart,
-    mergeCart: mergeCartMutation.mutateAsync,
   };
 };

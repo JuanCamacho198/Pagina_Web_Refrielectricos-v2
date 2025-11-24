@@ -132,13 +132,13 @@ export function useWishlist() {
   };
 
   return {
-    wishlists,
-    loading: isLoading,
     createWishlist: createWishlistMutation.mutateAsync,
     deleteWishlist: deleteWishlistMutation.mutateAsync,
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
     toggleWishlist,
+    wishlists,
+    loading: isLoading,
   };
 }

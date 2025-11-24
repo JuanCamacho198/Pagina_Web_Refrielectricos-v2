@@ -84,16 +84,16 @@ export const useAuth = () => {
   };
 
   return {
-    user,
-    token,
-    isAuthenticated: !!token,
     logout,
     login: loginMutation.mutateAsync,
     register: registerMutation.mutateAsync,
+    updateUser,
+    user,
+    token,
+    isAuthenticated: !!token,
     isLoggingIn: loginMutation.isPending,
     isRegistering: registerMutation.isPending,
     loginError: loginMutation.error,
     registerError: registerMutation.error,
-    updateUser,
   };
 };

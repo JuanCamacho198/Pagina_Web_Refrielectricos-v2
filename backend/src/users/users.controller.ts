@@ -1,14 +1,14 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Patch, 
-  Param, 
-  Delete, 
-  UseGuards, 
-  Request, 
-  ForbiddenException 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -18,6 +18,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
+
+interface RequestWithUser {
+  user: {
+    userId: string;
+    email: string;
+    role: string;
+  };
+}
 
 @ApiTags('Users')
 @Controller('users')
@@ -48,9 +56,9 @@ export class UsersController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   update(
-    @Request() req, 
-    @Param('id') id: string, 
-    @Body() updateUserDto: UpdateUserDto
+    @Request() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     const user = req.user;
 

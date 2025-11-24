@@ -60,12 +60,12 @@ export function useAddresses() {
   });
 
   return {
+    createAddress: createAddressMutation.mutateAsync,
+    deleteAddress: deleteAddressMutation.mutateAsync,
+    updateAddress: (id: string, data: UpdateAddressDto) => updateAddressMutation.mutateAsync({ id, data }),
     addresses,
     loading,
     isError,
-    createAddress: createAddressMutation.mutateAsync,
-    updateAddress: (id: string, data: UpdateAddressDto) => updateAddressMutation.mutateAsync({ id, data }),
-    deleteAddress: deleteAddressMutation.mutateAsync,
     isCreating: createAddressMutation.isPending,
     isUpdating: updateAddressMutation.isPending,
     isDeleting: deleteAddressMutation.isPending,

@@ -53,7 +53,11 @@ export class CartService {
     }
   }
 
-  async updateCartItem(userId: string, productId: string, dto: UpdateCartItemDto) {
+  async updateCartItem(
+    userId: string,
+    productId: string,
+    dto: UpdateCartItemDto,
+  ) {
     const cart = await this.getCart(userId);
     
     const item = await this.prisma.cartItem.findUnique({

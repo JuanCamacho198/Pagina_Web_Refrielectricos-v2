@@ -24,7 +24,10 @@ export class FilesController {
       throw new BadRequestException('Only image files are allowed!');
     }
 
-    const result = await this.filesService.uploadImage(file);
+    const result = (await this.filesService.uploadImage(file)) as {
+      secure_url: string;
+      public_id: string;
+    };
     return {
       url: result.secure_url,
       public_id: result.public_id,
