@@ -5,8 +5,18 @@ import { ThemeProvider } from "@/components/theme-provider";
 import QueryProvider from "@/components/providers/QueryProvider";
 
 export const metadata: Metadata = {
-  title: "Refrielectricos",
-  description: "Tienda de repuestos de refrigeración y electricidad",
+  title: {
+    template: '%s | Refrielectricos',
+    default: 'Refrielectricos | Repuestos de Refrigeración y Electricidad',
+  },
+  description: "Tienda especializada en repuestos de refrigeración, aire acondicionado y electricidad. Envíos a todo el país.",
+  keywords: ['refrigeración', 'electricidad', 'repuestos', 'aire acondicionado', 'herramientas'],
+  openGraph: {
+    type: 'website',
+    locale: 'es_CO',
+    url: 'https://refrielectricos.com',
+    siteName: 'Refrielectricos',
+  },
 };
 
 export default function RootLayout({
