@@ -125,11 +125,20 @@ export class WishlistsService {
 
   async remove(userId: string, id: string) {
     const wishlist = await this.findOne(userId, id);
-    
+
     if (wishlist.name === 'Favoritos') {
-      throw new BadRequestException('No se puede eliminar la lista de favoritos por defecto');
+      throw new BadRequestException(
+        'No se puede eliminar la lista de favoritos por defecto',
+      );
     }
 
-    return this.prisma.wishlist.delete({ where: { id } });
+    try {
+      return await this.prisma.wishlist.delete({ where: { id } });
+    } catch (error) {
+      if ((error as { code: string }).code === 'P2025') {
+        throw new NotFoundException('Lista no encontrada');
+      }
+      throw error;
+    }
   }
 }

@@ -7,6 +7,7 @@ import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import ProductGallery from '@/components/features/products/ProductGallery';
 import ProductInfo from '@/components/features/products/ProductInfo';
 import ProductDescription from '@/components/features/products/ProductDescription';
+import { ProductReviews } from '@/components/features/reviews/ProductReviews';
 import { useProduct } from '@/hooks/useProducts';
 
 export default function ProductDetailPage() {
@@ -64,6 +65,11 @@ export default function ProductDetailPage() {
 
       {/* Descripción y Detalles */}
       <ProductDescription description={product.description || ''} tags={product.tags} />
+
+      {/* Reseñas */}
+      <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 transition-colors">
+        <ProductReviews productId={product.id} />
+      </div>
     </>
   );
 }

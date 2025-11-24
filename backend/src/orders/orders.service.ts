@@ -1,13 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import type { Product, Order } from '../../generated/prisma/client';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<any> {
     const { userId, items, status, addressId, notes } = createOrderDto;
@@ -186,7 +190,7 @@ export class OrdersService {
       });
     }
 
-    return await this.prisma.$transaction(async (prisma) => {
+    const updatedOrder = await this.prisma.$transaction(async (prisma) => {
       // Caso 1: Cancelar orden (Restaurar stock)
       if (status === 'CANCELLED' && currentOrder.status !== 'CANCELLED') {
         for (const item of currentOrder.items) {
@@ -224,6 +228,19 @@ export class OrdersService {
         data: { ...data, status },
       });
     });
+
+    // Enviar notificación si el estado cambia a DELIVERED
+    if (status === 'DELIVERED' && currentOrder.status !== 'DELIVERED') {
+      await this.notificationsService.create(
+        currentOrder.userId,
+        '¡Tu pedido ha llegado!',
+        `El pedido #${currentOrder.id.slice(-6)} ha sido entregado. Por favor, califica tus productos.`,
+        'ORDER_DELIVERED',
+        `/orders/${currentOrder.id}`,
+      );
+    }
+
+    return updatedOrder;
   }
 
   remove(id: string): Promise<Order> {

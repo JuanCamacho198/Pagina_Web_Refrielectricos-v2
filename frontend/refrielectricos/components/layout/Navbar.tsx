@@ -9,6 +9,7 @@ import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { useAddresses } from '@/hooks/useAddresses';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import NotificationsDropdown from '@/components/layout/NotificationsDropdown';
 
 export default function Navbar() {
   const { totalItems } = useCart();
@@ -176,6 +177,7 @@ export default function Navbar() {
 
           {/* Right: User & Cart */}
           <div className="flex items-center gap-6">
+            {user && <NotificationsDropdown />}
             {/* User Menu */}
             {user ? (
               <div className="relative" ref={profileRef}>
