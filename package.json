@@ -8,13 +8,5 @@
   "devDependencies": {
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0"
-  },
-  "lint-staged": {
-    "backend/**/*.{ts,tsx}": [
-      "cd backend && pnpm lint"
-    ],
-    "frontend/refrielectricos/**/*.{ts,tsx}": [
-      "cd frontend/refrielectricos && pnpm lint"
-    ]
   }
 }

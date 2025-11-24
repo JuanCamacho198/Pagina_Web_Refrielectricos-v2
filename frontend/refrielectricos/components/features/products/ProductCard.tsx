@@ -59,7 +59,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* Botón Favorito */}
           <button
             onClick={handleToggleFavorite}
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 dark:bg-gray-900/90 shadow-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors z-10"
+            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 dark:bg-gray-900/90 shadow-sm hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors z-10 cursor-pointer"
           >
             <Heart
               size={20}
