@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: refri_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: refrielectricos_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: refri_backend
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgres://admin:password123@postgres:5432/refrielectricos_db
+      PORT: 4000
+      JWT_SECRET: supersecretkey123
+      # Agrega aquí otras variables de entorno necesarias (Cloudinary, etc.)
+    depends_on:
+      - postgres
+    restart: always
+
+  frontend:
+    build: ./frontend/refrielectricos
+    container_name: refri_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:

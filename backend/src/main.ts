@@ -2,10 +2,40 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Configuración de Winston
+  const logger = WinstonModule.createLogger({
+    transports: [
+      new winston.transports.Console({
+        format: winston.format.combine(
+          winston.format.timestamp(),
+          winston.format.ms(),
+          // En producción usamos JSON, en desarrollo usamos formato legible con colores
+          process.env.NODE_ENV === 'production'
+            ? winston.format.json()
+            : winston.format.combine(
+                winston.format.colorize({ all: true }),
+                winston.format.printf(({ timestamp, level, message, context, ms }) => {
+                  return `${timestamp} [${context || 'Application'}] ${level}: ${message} ${ms}`;
+                }),
+              ),
+        ),
+      }),
+    ],
+  });
+
+  const app = await NestFactory.create(AppModule, {
+    logger: logger,
+  });
+  
+  // Security Headers
+  app.use(helmet());
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

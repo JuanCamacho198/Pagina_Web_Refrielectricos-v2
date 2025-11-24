@@ -28,6 +28,7 @@
     "@nestjs/passport": "11.0.5",
     "@nestjs/platform-express": "11.0.1",
     "@nestjs/swagger": "11.2.3",
+    "@nestjs/throttler": "^6.4.0",
     "@prisma/client": "6.19.0",
     "@types/multer": "2.0.0",
     "axios": "1.13.2",
@@ -36,15 +37,18 @@
     "class-validator": "0.14.2",
     "cloudinary": "2.8.0",
     "clsx": "2.1.1",
+    "helmet": "^8.1.0",
     "lucide-react": "0.554.0",
     "multer": "2.0.2",
+    "nest-winston": "^1.10.2",
     "passport": "0.7.0",
     "passport-jwt": "4.0.1",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.1",
     "slugify": "1.6.6",
     "swagger-ui-express": "5.0.1",
-    "tailwind-merge": "3.4.0"
+    "tailwind-merge": "3.4.0",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.2.0",
