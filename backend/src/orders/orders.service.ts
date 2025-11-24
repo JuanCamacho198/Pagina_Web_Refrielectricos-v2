@@ -236,7 +236,7 @@ export class OrdersService {
         '¡Tu pedido ha llegado!',
         `El pedido #${currentOrder.id.slice(-6)} ha sido entregado. Por favor, califica tus productos.`,
         'ORDER_DELIVERED',
-        `/orders/${currentOrder.id}`,
+        `/profile/orders/${currentOrder.id}`,
       );
     }
 

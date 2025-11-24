@@ -79,7 +79,7 @@ export const useAuth = () => {
 
   const logout = () => {
     storeLogout();
-    router.push('/login');
+    router.push('/');
     addToast('Sesión cerrada', 'info');
   };
 

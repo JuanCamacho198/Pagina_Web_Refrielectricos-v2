@@ -8,11 +8,15 @@ import api from '@/lib/api';
 import Image from 'next/image';
 import { Order } from '@/types/order';
 import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
+import { ReviewForm } from '@/components/features/reviews/ReviewForm';
 
 export default function OrderDetailPage() {
   const params = useParams();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedProductToReview, setSelectedProductToReview] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -113,6 +117,19 @@ export default function OrderDetailPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-gray-900 dark:text-white">${(item.price * item.quantity).toLocaleString()}</p>
+                    {order.status === 'DELIVERED' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 text-xs"
+                        onClick={() => {
+                          setSelectedProductToReview({ id: item.product.id, name: item.product.name });
+                          setIsReviewModalOpen(true);
+                        }}
+                      >
+                        Calificar
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -184,6 +201,20 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Review Modal */}
+      <Modal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        title={`Calificar ${selectedProductToReview?.name}`}
+      >
+        {selectedProductToReview && (
+          <ReviewForm
+            productId={selectedProductToReview.id}
+            onSuccess={() => setIsReviewModalOpen(false)}
+          />
+        )}
+      </Modal>
     </div>
   );
 }

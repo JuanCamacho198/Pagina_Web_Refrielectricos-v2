@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { useCart } from '@/hooks/useCart';
 import Button from '@/components/ui/Button';
 import { ShoppingCart, CreditCard, Check, ListPlus } from 'lucide-react';
 import AddToWishlistModal from '@/components/features/wishlist/AddToWishlistModal';
+import { StarRating } from '@/components/features/reviews/StarRating';
 import { Product } from '@/types/product';
 import { formatCurrency } from '@/lib/utils';
+import api from '@/lib/api';
 
 interface ProductInfoProps {
   product: Product;
@@ -18,6 +21,18 @@ export default function ProductInfo({ product }: ProductInfoProps) {
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
+
+  const { data: reviews = [] } = useQuery({
+    queryKey: ['reviews', product.id],
+    queryFn: async () => {
+      const response = await api.get(`/reviews/product/${product.id}`);
+      return response.data;
+    },
+  });
+
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((acc: number, review: { rating: number }) => acc + review.rating, 0) / reviews.length
+    : 0;
 
   const handleAddToCart = () => {
     addItem(product);
@@ -35,6 +50,13 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     <div className="flex flex-col h-full">
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{product.name}</h1>
       
+      <div className="flex items-center gap-2 mb-4">
+        <StarRating value={averageRating} readOnly size={20} />
+        <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+          {averageRating.toFixed(1)} ({reviews.length} {reviews.length === 1 ? 'opinión' : 'opiniones'})
+        </span>
+      </div>
+
       <div className="flex items-center gap-4 mb-6">
         <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">
           {formatCurrency(Number(product.price))}
