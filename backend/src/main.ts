@@ -20,9 +20,13 @@ async function bootstrap() {
             ? winston.format.json()
             : winston.format.combine(
                 winston.format.colorize({ all: true }),
-                winston.format.printf(({ timestamp, level, message, context, ms }) => {
-                  return `${timestamp} [${context || 'Application'}] ${level}: ${message} ${ms}`;
-                }),
+                winston.format.printf(
+                  ({ timestamp, level, message, context, ms }) => {
+                    return `${timestamp as string} [${
+                      (context as string) || 'Application'
+                    }] ${level}: ${message as string} ${ms as string}`;
+                  },
+                ),
               ),
         ),
       }),
@@ -32,13 +36,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: logger,
   });
-  
   // Security Headers
   app.use(helmet());
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
