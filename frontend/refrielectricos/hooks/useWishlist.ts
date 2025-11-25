@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Wishlist } from '@/types/wishlist';
+import { Product } from '@/types/product';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -83,33 +84,85 @@ export function useWishlist() {
       return;
     }
 
+    // Optimistic update
+    const previousWishlists = queryClient.getQueryData<Wishlist[]>(['wishlists']);
+    
+    // Find target list ID (optimistic guess)
     let targetListId = wishlistId;
-
     if (!targetListId) {
+      const defaultList = previousWishlists?.find(list => list.name === 'Favoritos');
+      targetListId = defaultList?.id;
+    }
+
+    if (targetListId) {
+      queryClient.setQueryData<Wishlist[]>(['wishlists'], (old) => {
+        if (!old) return [];
+        return old.map(list => {
+          if (list.id === targetListId) {
+            return {
+              ...list,
+              items: [...list.items, { id: 'temp-id', wishlistId: list.id, productId, addedAt: new Date().toISOString(), product: { id: productId } as Product }]
+            };
+          }
+          return list;
+        });
+      });
+    }
+
+    let finalTargetListId = wishlistId;
+
+    if (!finalTargetListId) {
       // Buscar la lista por defecto "Favoritos"
       const defaultList = wishlists.find(list => list.name === 'Favoritos');
       
       if (defaultList) {
-        targetListId = defaultList.id;
+        finalTargetListId = defaultList.id;
       } else {
         // Si no existe, crearla
         try {
           const newList = await createWishlistMutation.mutateAsync('Favoritos');
-          targetListId = newList.id;
-        } catch (error) {
-          console.error(error);
-          return; // Error handled in mutation
+          finalTargetListId = newList.id;
+        } catch {
+          // Revert optimistic update if creation fails
+          queryClient.setQueryData(['wishlists'], previousWishlists);
+          return; 
         }
       }
     }
 
-    if (targetListId) {
-        await addItemMutation.mutateAsync({ productId, wishlistId: targetListId });
+    if (finalTargetListId) {
+        try {
+          await addItemMutation.mutateAsync({ productId, wishlistId: finalTargetListId });
+        } catch {
+           // Revert on error
+           queryClient.setQueryData(['wishlists'], previousWishlists);
+        }
     }
   };
 
   const removeFromWishlist = async (productId: string, wishlistId: string) => {
-      await removeItemMutation.mutateAsync({ productId, wishlistId });
+      // Optimistic update
+      const previousWishlists = queryClient.getQueryData<Wishlist[]>(['wishlists']);
+      
+      queryClient.setQueryData<Wishlist[]>(['wishlists'], (old) => {
+        if (!old) return [];
+        return old.map(list => {
+          if (list.id === wishlistId) {
+            return {
+              ...list,
+              items: list.items.filter(item => item.productId !== productId)
+            };
+          }
+          return list;
+        });
+      });
+
+      try {
+        await removeItemMutation.mutateAsync({ productId, wishlistId });
+      } catch {
+        // Revert on error
+        queryClient.setQueryData(['wishlists'], previousWishlists);
+      }
   };
 
   const isInWishlist = (productId: string) => {

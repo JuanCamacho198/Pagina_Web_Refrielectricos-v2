@@ -26,4 +26,6 @@ export interface CreateAddressDto {
   isDefault?: boolean;
 }
 
-export interface UpdateAddressDto extends Partial<CreateAddressDto> {}
+export interface UpdateAddressDto extends Partial<CreateAddressDto> {
+  id?: string;
+}
