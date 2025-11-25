@@ -268,19 +268,23 @@ export default function Navbar() {
               </div>
             )}
 
-            <Link 
-              href="/profile/orders" 
-              className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              Mis compras
-            </Link>
+            {user && (
+              <>
+                <Link 
+                  href="/profile/orders" 
+                  className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Mis compras
+                </Link>
 
-            <Link 
-              href="/profile/wishlists" 
-              className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              Favoritos
-            </Link>
+                <Link 
+                  href="/profile/wishlists" 
+                  className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Favoritos
+                </Link>
+              </>
+            )}
 
             <Link 
               href="/cart" 

@@ -7,6 +7,7 @@ import RevenueChart from '@/components/features/admin/dashboard/RevenueChart';
 import OrderStatusChart from '@/components/features/admin/dashboard/OrderStatusChart';
 import RecentOrders from '@/components/features/admin/dashboard/RecentOrders';
 import TopProducts from '@/components/features/admin/dashboard/TopProducts';
+import DashboardSkeleton from '@/components/features/admin/dashboard/DashboardSkeleton';
 
 interface DashboardStats {
   products: number;
@@ -65,11 +66,7 @@ export default function AdminDashboard() {
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (
