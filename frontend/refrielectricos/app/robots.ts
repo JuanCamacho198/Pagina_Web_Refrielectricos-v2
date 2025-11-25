@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://refrielectricos.com'; // TODO: Configurar dominio real
+  const baseUrl = 'https://pagina-web-refrielectricos-v2.vercel.app'; // TODO: Configurar dominio real
 
   return {
     rules: {
