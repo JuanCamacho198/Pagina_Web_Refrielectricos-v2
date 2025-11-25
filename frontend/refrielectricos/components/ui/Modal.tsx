@@ -42,10 +42,10 @@ export default function Modal({ isOpen, onClose, title, children, className }: M
         onClick={onClose}
       />
       <div className={cn(
-        "relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200",
+        "relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200",
         className
       )}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700 shrink-0">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             {title}
           </h3>
@@ -56,7 +56,7 @@ export default function Modal({ isOpen, onClose, title, children, className }: M
             <X size={20} />
           </button>
         </div>
-        <div className="p-4">
+        <div className="p-4 overflow-y-auto">
           {children}
         </div>
       </div>
