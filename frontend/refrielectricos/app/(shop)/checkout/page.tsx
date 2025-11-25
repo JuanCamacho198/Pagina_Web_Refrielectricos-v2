@@ -16,7 +16,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
-  const { addresses, loading: addressesLoading, createAddress, isCreating: isCreatingAddress } = useAddresses();
+  const { addresses, loading: addressesLoading, createAddress, isCreating: isCreatingAddress } = useAddresses({ enabled: !!user });
   const { mutateAsync: createOrder, isPending: isCreatingOrder } = useCreateOrder();
   
   const [error, setError] = useState('');

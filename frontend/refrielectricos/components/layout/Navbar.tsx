@@ -14,7 +14,7 @@ import NotificationsDropdown from '@/components/layout/NotificationsDropdown';
 export default function Navbar() {
   const { totalItems } = useCart();
   const { user, logout } = useAuth();
-  const { addresses } = useAddresses();
+  const { addresses } = useAddresses({ enabled: !!user });
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
