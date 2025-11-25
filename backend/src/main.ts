@@ -51,8 +51,29 @@ async function bootstrap() {
   );
   // Habilitar CORS para permitir peticiones desde el Frontend
   app.enableCors({
-    origin: process.env.FRONTEND_URL || '*', // Asegúrate de tener FRONTEND_URL en Render o usa '*' temporalmente
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:4000',
+      ].filter((url): url is string => !!url);
+
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        /\.vercel\.app$/.test(origin)
+      ) {
+        callback(null, true);
+      } else {
+        console.warn(`Blocked by CORS: ${origin}`);
+        callback(null, false);
+      }
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
