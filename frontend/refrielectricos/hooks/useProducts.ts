@@ -6,8 +6,20 @@ export const useProducts = () => {
   return useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data } = await api.get<Product[]>('/products');
-      return data;
+      // Solicitamos un límite alto para obtener "todos" los productos en contextos donde no hay paginación explícita (Home, Admin)
+      const { data } = await api.get('/products?limit=50');
+      
+      // Manejar respuesta paginada { data: [], meta: ... }
+      if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
+        return data.data as Product[];
+      }
+      
+      // Manejar respuesta array simple (legacy o si cambia el backend)
+      if (Array.isArray(data)) {
+        return data as Product[];
+      }
+
+      return [] as Product[];
     },
   });
 };
