@@ -8,6 +8,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { Loader2, MapPin, CreditCard, LogOut, Edit2, CheckCircle, Clock, RefreshCw, Plus, Lock } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import Modal from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 import AddressesList from '@/components/features/profile/addresses/AddressesList';
 import { api } from '@/lib/api';
 
@@ -104,13 +105,14 @@ export default function ProfilePage() {
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-blue-900 dark:text-blue-400">Mi Información</h2>
-                <button 
+                <Button 
                   onClick={() => setIsEditProfileOpen(true)}
-                  className="bg-[#0f458b] text-white hover:bg-blue-800 font-bold py-2 px-4 rounded-lg flex items-center transition-colors text-sm"
+                  variant="secondary"
+                  size="sm"
                 >
                   <Edit2 className="mr-2 h-4 w-4" />
                   Editar Perfil
-                </button>
+                </Button>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
@@ -196,28 +198,29 @@ export default function ProfilePage() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">Expira 12/2026</p>
                 </div>
               </div>
-              <button className="mt-4 w-full bg-[#f5de0e] text-blue-900 hover:bg-yellow-500 font-bold py-2 px-4 rounded-lg flex items-center justify-center transition-colors">
+              <Button className="mt-4 w-full bg-[#f5de0e] text-blue-900 hover:bg-yellow-500">
                 <Plus className="mr-2 h-5 w-5" />
                 Añadir método
-              </button>
+              </Button>
             </div>
 
             {/* Seguridad */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-bold text-blue-900 dark:text-blue-400 mb-4">Seguridad</h2>
-              <button className="flex items-center text-blue-900 dark:text-blue-400 hover:underline font-medium w-full text-left">
+              <Button variant="ghost" className="w-full justify-start text-blue-900 dark:text-blue-400">
                 <Lock className="mr-2 h-5 w-5" />
                 Cambiar Contraseña
-              </button>
+              </Button>
               
               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
-                <button 
+                <Button 
                   onClick={logout}
-                  className="flex items-center text-red-600 hover:text-red-700 font-medium w-full text-left"
+                  variant="ghost"
+                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <LogOut className="mr-2 h-5 w-5" />
                   Cerrar Sesión
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -259,21 +262,20 @@ export default function ProfilePage() {
             />
           </div>
           <div className="flex justify-end gap-2 mt-4">
-            <button 
+            <Button 
               onClick={() => setIsEditProfileOpen(false)}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg"
+              variant="ghost"
               disabled={saving}
             >
               Cancelar
-            </button>
-            <button 
+            </Button>
+            <Button 
               onClick={handleSaveProfile}
-              className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 flex items-center gap-2"
-              disabled={saving}
+              variant="secondary"
+              isLoading={saving}
             >
-              {saving && <Loader2 size={16} className="animate-spin" />}
               Guardar Cambios
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>
