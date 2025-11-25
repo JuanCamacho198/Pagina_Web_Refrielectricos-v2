@@ -3,11 +3,25 @@ import { Product } from '@/types/product';
 
 async function getProducts(): Promise<Product[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products`, {
+    // Solicitamos un límite alto para el sitemap
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products?limit=1000`, {
       next: { revalidate: 3600 } // Revalidate every hour
     });
     if (!res.ok) return [];
-    return res.json();
+    
+    const data = await res.json();
+    
+    // Manejar respuesta paginada { data: [], meta: ... }
+    if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
+      return data.data;
+    }
+    
+    // Manejar respuesta array simple (legacy)
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    return [];
   } catch {
     return [];
   }
