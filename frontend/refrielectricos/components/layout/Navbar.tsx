@@ -303,18 +303,6 @@ export default function Navbar() {
         {/* Mobile Menu (Simplified for now, keeping existing logic but updated styles) */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4 space-y-4 animate-in slide-in-from-top-5 mt-2">
-            <form onSubmit={handleSearch} className="relative group px-2">
-              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </form>
             <div className="flex flex-col space-y-2 px-2">
               {user && (
                 <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg mb-2">
@@ -325,25 +313,25 @@ export default function Navbar() {
                 </div>
               )}
               <Link 
-                href="/" 
-                className="px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Inicio
-              </Link>
-              <Link 
-                href="/products" 
-                className="px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Productos
-              </Link>
-              <Link 
                 href="/contact" 
                 className="px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Contacto
+              </Link>
+              <Link 
+                href="/about" 
+                className="px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Sobre Nosotros
+              </Link>
+              <Link 
+                href="/faq" 
+                className="px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Preguntas Frecuentes
               </Link>
             </div>
           </div>

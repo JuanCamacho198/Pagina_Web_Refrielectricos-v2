@@ -8,6 +8,7 @@ import ProductCard from '@/components/features/products/ProductCard';
 import ProductCardSkeleton from '@/components/features/products/ProductCardSkeleton';
 import ProductFilters from '@/components/features/products/ProductFilters';
 import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
 import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '@/types/product';
 
@@ -156,8 +157,8 @@ function ProductsContent() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar de Filtros */}
-        <aside className={`lg:w-64 shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+        {/* Sidebar de Filtros (Desktop) */}
+        <aside className="hidden lg:block lg:w-64 shrink-0">
           <ProductFilters
             categories={categories}
             brands={brands}
@@ -170,6 +171,31 @@ function ProductsContent() {
             onClearFilters={clearFilters}
           />
         </aside>
+
+        {/* Modal de Filtros (Mobile) */}
+        <Modal 
+          isOpen={showFilters} 
+          onClose={() => setShowFilters(false)} 
+          title="Filtrar Productos"
+        >
+          <ProductFilters
+            categories={categories}
+            brands={brands}
+            selectedCategory={selectedCategory}
+            selectedBrand={selectedBrand}
+            priceRange={{ min: minPrice || '', max: maxPrice || '' }}
+            onCategoryChange={handleCategoryChange}
+            onBrandChange={handleBrandChange}
+            onPriceRangeChange={handlePriceRangeChange}
+            onClearFilters={clearFilters}
+            className="shadow-none border-none p-0 static"
+          />
+          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <Button onClick={() => setShowFilters(false)} className="w-full">
+              Ver Resultados
+            </Button>
+          </div>
+        </Modal>
 
         {/* Grid de Productos */}
         <div className="flex-1">
