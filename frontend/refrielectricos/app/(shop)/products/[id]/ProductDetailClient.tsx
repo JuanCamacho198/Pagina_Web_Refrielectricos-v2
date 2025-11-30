@@ -9,6 +9,7 @@ import ProductInfo from '@/components/features/products/ProductInfo';
 import ProductDescription from '@/components/features/products/ProductDescription';
 import { ProductReviews } from '@/components/features/reviews/ProductReviews';
 import RelatedProducts from '@/components/features/products/RelatedProducts';
+import ProductDetailSkeleton from '@/components/features/products/ProductDetailSkeleton';
 import { useProduct } from '@/hooks/useProducts';
 
 export default function ProductDetailClient() {
@@ -20,11 +21,7 @@ export default function ProductDetailClient() {
   const { data: product, isLoading: loading, isError } = useProduct(term);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (isError || !product) {
