@@ -84,7 +84,7 @@ export default function Navbar() {
               height={32} 
               className="w-8 h-8 md:w-10 md:h-10"
             />
-            <span className="text-xl md:text-2xl font-bold bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent hidden sm:block">
+            <span className="text-xl md:text-2xl font-bold bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent block">
               Refrielectricos
             </span>
           </Link>

@@ -26,12 +26,6 @@ export default function BottomNav() {
       active: pathname.startsWith('/products')
     },
     {
-      label: 'Buscar',
-      href: '/products?search=', // Simple way to trigger search focus or go to search page
-      icon: Search,
-      active: false // Search is an action, not really a page usually, but here we link to products
-    },
-    {
       label: 'Carrito',
       href: '/cart',
       icon: ShoppingCart,
