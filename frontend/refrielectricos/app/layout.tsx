@@ -4,6 +4,7 @@ import "./globals.css";
 import { ToastProvider } from "@/context/ToastContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import QueryProvider from "@/components/providers/QueryProvider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -44,6 +45,7 @@ export default function RootLayout({
           <QueryProvider>
             <ToastProvider>
               {children}
+              <SpeedInsights />
             </ToastProvider>
           </QueryProvider>
         </ThemeProvider>
