@@ -85,7 +85,7 @@ export default function Combobox({
               <input
                 type="text"
                 placeholder={searchPlaceholder}
-                className="w-full bg-transparent border-none p-2 text-sm focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-400"
+                className="w-full bg-transparent border-none p-2 text-sm focus:ring-0 outline-none text-gray-900 dark:text-white placeholder:text-gray-400"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 autoFocus

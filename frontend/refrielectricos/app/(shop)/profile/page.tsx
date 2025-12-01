@@ -130,13 +130,14 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Direcciones</label>
-                  <button 
+                  <Button 
                     onClick={() => setIsAddressesOpen(true)}
-                    className="mt-1 text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-1"
+                    variant="ghost"
+                    className="mt-1 text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-1 p-0 h-auto hover:bg-transparent hover:text-blue-700 dark:hover:text-blue-300"
                   >
                     <MapPin size={16} />
                     Gestionar Direcciones
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
