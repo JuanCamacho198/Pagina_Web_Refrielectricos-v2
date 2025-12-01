@@ -9,11 +9,12 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import Combobox from '@/components/ui/Combobox';
 import ImageUpload from '@/components/ui/ImageUpload';
 import MultiImageUpload from '@/components/ui/MultiImageUpload';
 import { productSchema, ProductFormData } from '@/schemas/product';
 import { useToast } from '@/context/ToastContext';
-import { useCreateProduct, useUpdateProduct } from '@/hooks/useProducts';
+import { useCreateProduct, useUpdateProduct, useProductMetadata } from '@/hooks/useProducts';
 
 interface ProductFormProps {
   initialData?: ProductFormData & { id: string };
@@ -29,6 +30,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
 
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
+  const { data: metadata } = useProductMetadata();
 
   const isSaving = createProduct.isPending || updateProduct.isPending;
 
@@ -36,6 +38,8 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     register,
     handleSubmit,
     control,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<ProductFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,6 +53,9 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
       images_url: [],
     },
   });
+
+  const selectedCategory = watch('category');
+  const subcategories = metadata?.structure.find(s => s.name === selectedCategory)?.subcategories || [];
 
   const onSubmit: SubmitHandler<ProductFormData> = (data) => {
     setPendingData(data);
@@ -151,23 +158,77 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Input
-            label="Categoría"
-            {...register('category')}
-            error={errors.category?.message}
-            placeholder="Ej: Refrigeración"
+          <Controller
+            name="category"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  Categoría
+                </label>
+                <Combobox
+                  options={metadata?.categories || []}
+                  value={field.value || ''}
+                  onChange={(val) => {
+                    field.onChange(val);
+                    setValue('subcategory', '');
+                  }}
+                  creatable
+                  placeholder="Seleccionar categoría"
+                  searchPlaceholder="Buscar categoría..."
+                />
+                {errors.category && (
+                  <p className="mt-1 text-sm text-red-500">{errors.category.message}</p>
+                )}
+              </div>
+            )}
           />
-          <Input
-            label="Subcategoría"
-            {...register('subcategory')}
-            error={errors.subcategory?.message}
-            placeholder="Ej: Neveras"
+
+          <Controller
+            name="subcategory"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  Subcategoría
+                </label>
+                <Combobox
+                  options={subcategories}
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  creatable
+                  placeholder="Seleccionar subcategoría"
+                  searchPlaceholder="Buscar subcategoría..."
+                  disabled={!selectedCategory}
+                />
+                {errors.subcategory && (
+                  <p className="mt-1 text-sm text-red-500">{errors.subcategory.message}</p>
+                )}
+              </div>
+            )}
           />
-          <Input
-            label="Marca"
-            {...register('brand')}
-            error={errors.brand?.message}
-            placeholder="Ej: Samsung"
+
+          <Controller
+            name="brand"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  Marca
+                </label>
+                <Combobox
+                  options={metadata?.brands || []}
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  creatable
+                  placeholder="Seleccionar marca"
+                  searchPlaceholder="Buscar marca..."
+                />
+                {errors.brand && (
+                  <p className="mt-1 text-sm text-red-500">{errors.brand.message}</p>
+                )}
+              </div>
+            )}
           />
         </div>
 

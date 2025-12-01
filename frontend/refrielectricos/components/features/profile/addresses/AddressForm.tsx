@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import { departamentos } from '@/data/colombiaData';
-import { ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { CreateAddressDto } from '@/types/address';
+import Combobox from '@/components/ui/Combobox';
 
 interface AddressFormProps {
   onSubmit: (data: CreateAddressDto) => Promise<void>;
@@ -25,27 +25,9 @@ export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFo
     isDefault: false
   });
 
-  const [showDeptModal, setShowDeptModal] = useState(false);
-  const [showCityModal, setShowCityModal] = useState(false);
-  const [searchDept, setSearchDept] = useState('');
-  const [searchCity, setSearchCity] = useState('');
-
-  const filteredDepts = useMemo(() => {
-    return departamentos.filter(dept => 
-      dept.nombre.toLowerCase().includes(searchDept.toLowerCase())
-    );
-  }, [searchDept]);
-
   const selectedDeptData = useMemo(() => {
     return departamentos.find(d => d.nombre === formData.department);
   }, [formData.department]);
-
-  const filteredCities = useMemo(() => {
-    if (!selectedDeptData) return [];
-    return selectedDeptData.ciudades.filter(city => 
-      city.toLowerCase().includes(searchCity.toLowerCase())
-    );
-  }, [selectedDeptData, searchCity]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,104 +104,32 @@ export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFo
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Departamento */}
-        <div className="relative">
+        <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
             Departamento <span className="text-red-500">*</span>
           </label>
-          <button
-            type="button"
-            onClick={() => setShowDeptModal(!showDeptModal)}
-            className="w-full flex items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <span className={!formData.department ? 'text-gray-400' : ''}>
-              {formData.department || 'Seleccionar'}
-            </span>
-            {showDeptModal ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
-
-          {showDeptModal && (
-            <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-lg">
-              <div className="p-2 border-b border-gray-200 dark:border-gray-600">
-                <div className="flex items-center px-2 bg-gray-50 dark:bg-gray-800 rounded">
-                  <Search size={14} className="text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Buscar..."
-                    className="w-full bg-transparent border-none p-2 text-sm focus:ring-0 text-gray-900 dark:text-white"
-                    value={searchDept}
-                    onChange={(e) => setSearchDept(e.target.value)}
-                    autoFocus
-                  />
-                </div>
-              </div>
-              <ul className="max-h-60 overflow-auto py-1">
-                {filteredDepts.map((dept) => (
-                  <li
-                    key={dept.id}
-                    className="px-4 py-2 text-sm hover:bg-blue-50 dark:hover:bg-gray-600 cursor-pointer text-gray-900 dark:text-white"
-                    onClick={() => {
-                      setFormData({ ...formData, department: dept.nombre, city: '' });
-                      setShowDeptModal(false);
-                      setSearchDept('');
-                    }}
-                  >
-                    {dept.nombre}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <Combobox
+            options={departamentos.map(d => d.nombre)}
+            value={formData.department}
+            onChange={(val) => setFormData({ ...formData, department: val, city: '' })}
+            placeholder="Seleccionar departamento"
+            searchPlaceholder="Buscar departamento..."
+          />
         </div>
 
         {/* Ciudad */}
-        <div className="relative">
+        <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
             Ciudad / Municipio <span className="text-red-500">*</span>
           </label>
-          <button
-            type="button"
+          <Combobox
+            options={selectedDeptData ? selectedDeptData.ciudades : []}
+            value={formData.city}
+            onChange={(val) => setFormData({ ...formData, city: val })}
+            placeholder="Seleccionar ciudad"
+            searchPlaceholder="Buscar ciudad..."
             disabled={!formData.department}
-            onClick={() => setShowCityModal(!showCityModal)}
-            className="w-full flex items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span className={!formData.city ? 'text-gray-400' : ''}>
-              {formData.city || 'Seleccionar'}
-            </span>
-            {showCityModal ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
-
-          {showCityModal && (
-            <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-lg">
-              <div className="p-2 border-b border-gray-200 dark:border-gray-600">
-                <div className="flex items-center px-2 bg-gray-50 dark:bg-gray-800 rounded">
-                  <Search size={14} className="text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Buscar..."
-                    className="w-full bg-transparent border-none p-2 text-sm focus:ring-0 text-gray-900 dark:text-white"
-                    value={searchCity}
-                    onChange={(e) => setSearchCity(e.target.value)}
-                    autoFocus
-                  />
-                </div>
-              </div>
-              <ul className="max-h-60 overflow-auto py-1">
-                {filteredCities.map((city) => (
-                  <li
-                    key={city}
-                    className="px-4 py-2 text-sm hover:bg-blue-50 dark:hover:bg-gray-600 cursor-pointer text-gray-900 dark:text-white"
-                    onClick={() => {
-                      setFormData({ ...formData, city });
-                      setShowCityModal(false);
-                      setSearchCity('');
-                    }}
-                  >
-                    {city}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          />
         </div>
       </div>
 

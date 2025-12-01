@@ -79,3 +79,17 @@ export const useUpdateProduct = () => {
     },
   });
 };
+
+export const useProductMetadata = () => {
+  return useQuery({
+    queryKey: ['productMetadata'],
+    queryFn: async () => {
+      const { data } = await api.get<{
+        categories: string[];
+        brands: string[];
+        structure: { name: string; subcategories: string[] }[];
+      }>('/products/metadata');
+      return data;
+    },
+  });
+};
