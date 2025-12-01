@@ -72,6 +72,11 @@ export default function HeroCarousel() {
     })
   };
 
+  const swipeConfidenceThreshold = 10000;
+  const swipePower = (offset: number, velocity: number) => {
+    return Math.abs(offset) * velocity;
+  };
+
   return (
     <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-2xl shadow-lg group bg-gray-900">
       <AnimatePresence initial={false} custom={direction}>
@@ -85,6 +90,18 @@ export default function HeroCarousel() {
           transition={{
             x: { type: "spring", stiffness: 300, damping: 30 },
             opacity: { duration: 0.2 }
+          }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={1}
+          onDragEnd={(e, { offset, velocity }) => {
+            const swipe = swipePower(offset.x, velocity.x);
+
+            if (swipe < -swipeConfidenceThreshold) {
+              paginate(1);
+            } else if (swipe > swipeConfidenceThreshold) {
+              paginate(-1);
+            }
           }}
           className={`absolute inset-0 w-full h-full ${slides[current].color} flex items-center`}
         >
@@ -115,7 +132,7 @@ export default function HeroCarousel() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-4xl md:text-6xl font-bold leading-tight"
+                className="text-3xl md:text-6xl font-bold leading-tight"
               >
                 {slides[current].title}
               </motion.h2>
