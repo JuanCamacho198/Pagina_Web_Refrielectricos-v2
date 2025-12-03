@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getCloudinaryUrl } from '@/lib/cloudinary';
 
 interface ProductGalleryProps {
   images: string[];
@@ -15,6 +16,13 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
   const containerRef = useRef<HTMLDivElement>(null);
 
   const mainImage = images[mainImageIndex];
+  const optimizedMainImage = getCloudinaryUrl(mainImage, {
+    width: 800,
+    height: 800,
+    crop: 'fill',
+    quality: 'auto',
+    format: 'auto'
+  });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!zoomRef.current || !containerRef.current) return;
@@ -59,7 +67,7 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
       >
         <Image
           ref={zoomRef}
-          src={mainImage}
+          src={optimizedMainImage}
           alt={productName}
           fill
           priority
@@ -98,7 +106,7 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
               }`}
             >
               <Image
-                src={img}
+                src={getCloudinaryUrl(img, { width: 150, height: 150, crop: 'fill', quality: 'auto', format: 'auto' })}
                 alt={`Vista ${index + 1}`}
                 fill
                 sizes="80px"

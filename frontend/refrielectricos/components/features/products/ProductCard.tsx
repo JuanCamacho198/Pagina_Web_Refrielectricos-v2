@@ -11,6 +11,7 @@ import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 import { Product } from '@/types/product';
 import { formatCurrency } from '@/lib/utils';
+import { getCloudinaryUrl } from '@/lib/cloudinary';
 import ProductQuickView from './ProductQuickView';
 
 interface ProductCardProps {
@@ -28,6 +29,15 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const productLink = `/products/${product.slug || product.id}`;
   const isLowStock = product.stock > 0 && product.stock < 5;
   const isOutOfStock = product.stock === 0;
+
+  // Generate optimized URL for the card (thumbnail)
+  const imageUrl = getCloudinaryUrl(product.image_url, {
+    width: 400, // Slightly larger than 300 to look good on high DPI mobile
+    height: 400,
+    crop: 'fill',
+    quality: 'auto',
+    format: 'auto'
+  });
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -68,7 +78,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             <Link href={productLink} className="absolute inset-0">
               {product.image_url ? (
                 <Image
-                  src={product.image_url}
+                  src={imageUrl}
                   alt={product.name}
                   fill
                   priority={priority}
