@@ -15,7 +15,6 @@ async function bootstrap() {
         format: winston.format.combine(
           winston.format.timestamp(),
           winston.format.ms(),
-          // En producción usamos JSON, en desarrollo usamos formato legible con colores
           process.env.NODE_ENV === 'production'
             ? winston.format.json()
             : winston.format.combine(
@@ -36,6 +35,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: logger,
   });
+
   // Security Headers
   app.use(helmet());
   app.setGlobalPrefix('api');
@@ -49,33 +49,20 @@ async function bootstrap() {
       },
     }),
   );
-  // Habilitar CORS para permitir peticiones desde el Frontend
-  app.enableCors({
-    origin: (
-      origin: string | undefined,
-      callback: (err: Error | null, allow?: boolean) => void,
-    ) => {
-      const allowedOrigins = [
-        process.env.FRONTEND_URL,
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:4000',
-      ].filter((url): url is string => !!url);
 
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        /\.vercel\.app$/.test(origin) ||
-        /\.railway\.app$/.test(origin)
-      ) {
-        callback(null, true);
-      } else {
-        console.warn(`Blocked by CORS: ${origin}`);
-        callback(null, false);
-      }
-    },
+  // Configuración simplificada y robusta de CORS
+  app.enableCors({
+    origin: [
+      process.env.FRONTEND_URL,
+      'https://frontend-production-4178.up.railway.app',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:4000',
+      'http://localhost:8080',
+    ].filter((url): url is string => !!url),
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type,Authorization',
   });
 
   const config = new DocumentBuilder()
@@ -87,6 +74,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(process.env.PORT ?? 4000);
+  // IMPORTANTE: Escuchar en 0.0.0.0 para contenedores Docker/Railway
+  const port = process.env.PORT ?? 4000;
+  await app.listen(port, '0.0.0.0');
+  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`Listening on port: ${port}`);
 }
 void bootstrap();
