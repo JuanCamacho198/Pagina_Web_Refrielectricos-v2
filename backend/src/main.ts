@@ -8,7 +8,6 @@ import * as winston from 'winston';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  // Configuración de Winston
   const logger = WinstonModule.createLogger({
     transports: [
       new winston.transports.Console({
@@ -36,8 +35,14 @@ async function bootstrap() {
     logger: logger,
   });
 
-  // Security Headers
-  app.use(helmet());
+  // 1. CONFIGURACIÓN CRÍTICA DE HELMET
+  // Por defecto helmet bloquea recursos cross-origin. Hay que permitirlo.
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
+
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({
@@ -50,19 +55,18 @@ async function bootstrap() {
     }),
   );
 
-  // Configuración simplificada y robusta de CORS
+  // 2. CONFIGURACIÓN DE CORS
   app.enableCors({
     origin: [
-      process.env.FRONTEND_URL,
       'https://frontend-production-4178.up.railway.app',
+      process.env.FRONTEND_URL,
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:4000',
-      'http://localhost:8080',
     ].filter((url): url is string => !!url),
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: 'Content-Type,Authorization',
+    allowedHeaders: 'Content-Type,Authorization,Accept',
   });
 
   const config = new DocumentBuilder()
@@ -74,10 +78,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // IMPORTANTE: Escuchar en 0.0.0.0 para contenedores Docker/Railway
   const port = process.env.PORT ?? 4000;
+  // 3. ESCUCHAR EN 0.0.0.0 (Obligatorio para Railway)
   await app.listen(port, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
-  console.log(`Listening on port: ${port}`);
 }
 void bootstrap();
