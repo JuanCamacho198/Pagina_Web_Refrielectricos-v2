@@ -103,19 +103,21 @@ export default function AdminProductsPage() {
                     {product.stock}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                  <div className="flex justify-center gap-2">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center justify-center gap-2">
                     <Link href={`/admin/products/${product.id}`}>
-                      <button className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                        <Edit size={18} />
-                      </button>
+                      <Button variant="ghost" size="sm" className="p-2">
+                        <Edit size={16} />
+                      </Button>
                     </Link>
-                    <button 
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
                       onClick={() => handleDelete(product.id)}
-                      className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                     >
-                      <Trash2 size={18} />
-                    </button>
+                      <Trash2 size={16} />
+                    </Button>
                   </div>
                 </td>
               </tr>
