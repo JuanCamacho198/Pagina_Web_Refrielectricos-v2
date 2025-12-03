@@ -12,6 +12,7 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
@@ -22,10 +23,23 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
 
+interface RequestWithUser {
+  user: {
+    userId: string;
+  };
+}
+
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
+
+  @Post(':id/view')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  recordView(@Param('id') id: string, @Request() req: RequestWithUser) {
+    return this.productsService.recordView(id, req.user.userId);
+  }
 
   @Post()
   @ApiBearerAuth()

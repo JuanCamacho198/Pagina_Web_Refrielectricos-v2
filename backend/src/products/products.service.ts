@@ -256,4 +256,22 @@ export class ProductsService {
       take: 4,
     });
   }
+
+  async recordView(productId: string, userId: string) {
+    return this.prisma.productView.upsert({
+      where: {
+        userId_productId: {
+          userId,
+          productId,
+        },
+      },
+      update: {
+        viewedAt: new Date(),
+      },
+      create: {
+        userId,
+        productId,
+      },
+    });
+  }
 }

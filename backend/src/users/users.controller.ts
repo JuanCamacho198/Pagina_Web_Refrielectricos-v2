@@ -45,6 +45,13 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('history')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  getHistory(@Request() req: RequestWithUser) {
+    return this.usersService.getHistory(req.user.userId);
+  }
+
   @Get(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

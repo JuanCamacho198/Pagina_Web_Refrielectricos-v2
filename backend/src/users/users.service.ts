@@ -60,4 +60,23 @@ export class UsersService {
       where: { id },
     });
   }
+
+  async getHistory(userId: string) {
+    return this.prisma.productView.findMany({
+      where: { userId },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            image_url: true,
+            slug: true,
+            category: true,
+          },
+        },
+      },
+      orderBy: { viewedAt: 'desc' },
+    });
+  }
 }

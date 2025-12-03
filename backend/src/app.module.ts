@@ -15,13 +15,16 @@ import { FilesModule } from './files/files.module';
 import { CartModule } from './cart/cart.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { QuestionsModule } from './questions/questions.module';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     PrismaModule,
     ProductsModule,
     UsersModule,
@@ -34,6 +37,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     CartModule,
     ReviewsModule,
     NotificationsModule,
+    QuestionsModule,
   ],
   controllers: [AppController],
   providers: [

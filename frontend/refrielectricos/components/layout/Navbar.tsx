@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { ShoppingCart, LogOut, Settings, MapPin, Package, LayoutDashboard, Heart, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { ShoppingCart, LogOut, Settings, MapPin, Package, LayoutDashboard, Heart, Menu, X, ChevronDown, ChevronRight, Clock } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { useAddresses } from '@/hooks/useAddresses';
@@ -245,6 +245,14 @@ export default function Navbar() {
                     >
                       <Heart className="h-4 w-4" />
                       Favoritos
+                    </Link>
+                    <Link
+                      href="/profile/history"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <Clock className="h-4 w-4" />
+                      Historial
                     </Link>
                     <Link
                       href="/profile"
