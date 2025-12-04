@@ -68,11 +68,6 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Announcement Bar */}
-      <div className="bg-blue-600 text-white text-[10px] sm:text-xs text-center py-1.5 font-medium tracking-wide">
-        Envíos gratis en Curumaní 🚚
-      </div>
-
       <nav className={`sticky top-0 z-50 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/30 dark:border-gray-700/30 transition-all duration-300 shadow-sm ${
         isScrolled ? 'py-2' : 'py-3'
       }`}>
