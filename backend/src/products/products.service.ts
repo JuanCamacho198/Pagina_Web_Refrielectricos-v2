@@ -160,8 +160,50 @@ export class ProductsService {
   }
 
   remove(id: string) {
-    return this.prisma.product.delete({
-      where: { id },
+    return this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.findUnique({
+        where: { id },
+        select: { id: true, isActive: true },
+      });
+
+      if (!product) {
+        throw new NotFoundException(`Product with id "${id}" not found`);
+      }
+
+      const orderItemsCount = await tx.orderItem.count({
+        where: { productId: id },
+      });
+
+      if (orderItemsCount > 0) {
+        if (!product.isActive) {
+          throw new BadRequestException(
+            'Product has related orders and is already inactive, so it cannot be deleted.',
+          );
+        }
+
+        await tx.product.update({
+          where: { id },
+          data: { isActive: false },
+        });
+
+        return {
+          status: 'archived',
+          message:
+            'The product has historical orders. It was deactivated instead of being permanently deleted.',
+        };
+      }
+
+      await Promise.all([
+        tx.cartItem.deleteMany({ where: { productId: id } }),
+        tx.wishlistItem.deleteMany({ where: { productId: id } }),
+        tx.review.deleteMany({ where: { productId: id } }),
+        tx.question.deleteMany({ where: { productId: id } }),
+        tx.productView.deleteMany({ where: { productId: id } }),
+      ]);
+
+      await tx.product.delete({ where: { id } });
+
+      return { status: 'deleted', message: 'Product deleted successfully.' };
     });
   }
 

@@ -18,8 +18,15 @@ export default function AdminProductsPage() {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
 
     try {
-      await deleteProductMutation.mutateAsync(id);
-      addToast('Producto eliminado correctamente', 'success');
+      const result = await deleteProductMutation.mutateAsync(id);
+      if (result?.status === 'archived') {
+        addToast(
+          'El producto tiene pedidos asociados, por lo que se desactivó en lugar de eliminarse.',
+          'info',
+        );
+      } else {
+        addToast('Producto eliminado correctamente', 'success');
+      }
     } catch (error) {
       console.error('Error deleting product:', error);
       addToast('Error al eliminar el producto', 'error');
