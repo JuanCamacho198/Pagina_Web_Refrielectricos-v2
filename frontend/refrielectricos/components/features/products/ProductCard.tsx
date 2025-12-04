@@ -145,31 +145,31 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           </div>
 
           {/* Info */}
-          <div className="p-4 flex flex-col grow">
-            <div className="mb-2 min-h-[72px]">
+          <div className="p-2 sm:p-4 flex flex-col grow">
+            <div className="mb-2 min-h-[60px] sm:min-h-[72px]">
               {/* Brand/Category - fixed height line */}
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 truncate h-4">
+              <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1 truncate h-3 sm:h-4">
                 {product.brand && <span className="font-medium text-gray-700 dark:text-gray-300">{product.brand}</span>}
                 {product.brand && (product.subcategory || product.category) && <span className="mx-1">•</span>}
                 {product.subcategory || product.category || '\u00A0'}
               </p>
               <Link href={productLink}>
-                <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 h-12 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title={product.name}>
+                <h3 className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 h-10 sm:h-12 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight" title={product.name}>
                   {product.name}
                 </h3>
               </Link>
             </div>
             
-            <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between gap-3">
+            <div className="mt-auto pt-2 sm:pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between gap-2 sm:gap-3">
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 dark:text-gray-400">Precio</span>
+                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Precio</span>
                 <div className="flex flex-col">
                   {hasDiscount && (
-                    <span className="text-xs text-gray-400 line-through decoration-red-500/50">
+                    <span className="text-[10px] sm:text-xs text-gray-400 line-through decoration-red-500/50">
                       {formatCurrency(Number(product.originalPrice))}
                     </span>
                   )}
-                  <span className={`text-lg font-bold ${hasDiscount ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                  <span className={`text-sm sm:text-lg font-bold ${hasDiscount ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
                     {formatCurrency(Number(product.price))}
                   </span>
                 </div>
@@ -177,7 +177,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
               
               <Button 
                 onClick={handleAddToCart} 
-                className={`shrink-0 w-10 h-10 p-0 rounded-full flex items-center justify-center transition-all duration-300 ${
+                className={`shrink-0 w-8 h-8 sm:w-10 sm:h-10 p-0 rounded-full flex items-center justify-center transition-all duration-300 ${
                   isAdded 
                     ? 'bg-green-600 hover:bg-green-700' 
                     : isOutOfStock
@@ -195,7 +195,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
                     >
-                      <Check size={18} />
+                      <Check size={16} className="sm:w-[18px] sm:h-[18px]" />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -204,7 +204,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
                     >
-                      <ShoppingCart size={18} />
+                      <ShoppingCart size={16} className="sm:w-[18px] sm:h-[18px]" />
                     </motion.div>
                   )}
                 </AnimatePresence>
