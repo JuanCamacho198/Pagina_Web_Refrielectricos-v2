@@ -37,7 +37,7 @@ export class ProductsService {
       }
 
       const specificationsValue = createProductDto.specifications
-        ? (createProductDto.specifications as Prisma.InputJsonValue)
+        ? (createProductDto.specifications as unknown as Prisma.InputJsonValue)
         : undefined;
 
       const product = await this.prisma.product.create({
@@ -141,16 +141,16 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-    const { name } = updateProductDto;
-    const data: Prisma.ProductUpdateInput = { ...updateProductDto };
+    const { specifications, name, ...rest } = updateProductDto;
+    const data: Prisma.ProductUpdateInput = { ...rest };
 
     if (name) {
+      data.name = name;
       data.slug = slugify(name, { lower: true, strict: true });
     }
 
-    if (updateProductDto.specifications) {
-      data.specifications =
-        updateProductDto.specifications as Prisma.InputJsonValue;
+    if (specifications) {
+      data.specifications = specifications as unknown as Prisma.InputJsonValue;
     }
 
     return this.prisma.product.update({
