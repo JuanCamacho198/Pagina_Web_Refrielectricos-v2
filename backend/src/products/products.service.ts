@@ -63,10 +63,16 @@ export class ProductsService {
       brand?: string;
       minPrice?: number;
       maxPrice?: number;
+      isAdmin?: boolean; // If true, show all products including inactive
     },
   ) {
     const skip = (page - 1) * limit;
     const where: Prisma.ProductWhereInput = {};
+
+    // Only show active products for storefront (non-admin) requests
+    if (!filters?.isAdmin) {
+      where.isActive = true;
+    }
 
     if (filters?.search) {
       where.OR = [

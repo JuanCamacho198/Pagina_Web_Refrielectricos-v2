@@ -27,8 +27,10 @@ export class AuthService {
 
   login(user: Omit<User, 'password'>) {
     const payload = { email: user.email, sub: user.id, role: user.role };
+    // Admin users get longer sessions (24 hours) vs regular users (1 hour)
+    const expiresIn = user.role === 'ADMIN' ? '24h' : '1h';
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, { expiresIn }),
     };
   }
 

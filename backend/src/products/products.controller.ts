@@ -73,6 +73,12 @@ export class ProductsController {
   @ApiQuery({ name: 'brand', required: false, type: String })
   @ApiQuery({ name: 'minPrice', required: false, type: Number })
   @ApiQuery({ name: 'maxPrice', required: false, type: Number })
+  @ApiQuery({
+    name: 'includeInactive',
+    required: false,
+    type: Boolean,
+    description: 'Include inactive products (admin only)',
+  })
   findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(12), ParseIntPipe) limit: number,
@@ -82,6 +88,7 @@ export class ProductsController {
     @Query('brand') brand?: string,
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string,
+    @Query('includeInactive') includeInactive?: string,
   ) {
     return this.productsService.findAll(page, limit, {
       search,
@@ -90,6 +97,7 @@ export class ProductsController {
       brand,
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      isAdmin: includeInactive === 'true',
     });
   }
 

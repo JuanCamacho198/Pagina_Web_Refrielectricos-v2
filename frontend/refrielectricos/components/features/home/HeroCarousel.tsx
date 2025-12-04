@@ -117,15 +117,15 @@ export default function HeroCarousel() {
           </div>
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-20 bg-[url('/patterns/circuit.svg')] bg-repeat"></div>
-          <div className="absolute inset-0 bg-linear-to-r from-black/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-linear-to-r from-black/70 to-black/20"></div>
           
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-12 w-full">
-            <div className="max-w-lg text-white space-y-6">
+            <div className="max-w-lg text-white space-y-4">
               <motion.span 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium border border-white/30"
+                className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs md:text-sm font-medium border border-white/30"
               >
                 {slides[current].subtitle}
               </motion.span>
@@ -133,7 +133,7 @@ export default function HeroCarousel() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-3xl md:text-6xl font-bold leading-tight"
+                className="text-2xl md:text-4xl font-bold leading-tight"
               >
                 {slides[current].title}
               </motion.h2>
@@ -141,7 +141,7 @@ export default function HeroCarousel() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-lg md:text-xl text-gray-100"
+                className="text-base md:text-lg text-gray-100"
               >
                 {slides[current].description}
               </motion.p>

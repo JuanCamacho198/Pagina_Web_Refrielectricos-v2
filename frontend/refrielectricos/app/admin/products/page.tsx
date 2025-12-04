@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Image from 'next/image';
-import { useProducts, useDeleteProduct } from '@/hooks/useProducts';
+import { useAdminProducts, useDeleteProduct } from '@/hooks/useProducts';
 import { useToast } from '@/context/ToastContext';
 
 export default function AdminProductsPage() {
-  const { data: products = [], isLoading } = useProducts();
+  const { data: products = [], isLoading } = useAdminProducts();
   const deleteProductMutation = useDeleteProduct();
   const { addToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,6 +62,7 @@ export default function AdminProductsPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Producto</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Precio</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stock</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
@@ -101,6 +102,15 @@ export default function AdminProductsPage() {
                       : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                   }`}>
                     {product.stock}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    product.isActive !== false
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                  }`}>
+                    {product.isActive !== false ? 'Visible' : 'Oculto'}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

@@ -130,16 +130,15 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
           {/* Info */}
           <div className="p-4 flex flex-col grow">
-            <div className="mb-2">
-              {(product.category || product.brand) && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
-                  {product.brand && <span className="font-medium text-gray-700 dark:text-gray-300">{product.brand}</span>}
-                  {product.brand && (product.subcategory || product.category) && <span className="mx-1">•</span>}
-                  {product.subcategory || product.category}
-                </p>
-              )}
+            <div className="mb-2 min-h-[72px]">
+              {/* Brand/Category - fixed height line */}
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 truncate h-4">
+                {product.brand && <span className="font-medium text-gray-700 dark:text-gray-300">{product.brand}</span>}
+                {product.brand && (product.subcategory || product.category) && <span className="mx-1">•</span>}
+                {product.subcategory || product.category || '\u00A0'}
+              </p>
               <Link href={productLink}>
-                <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title={product.name}>
+                <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 h-12 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" title={product.name}>
                   {product.name}
                 </h3>
               </Link>

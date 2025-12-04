@@ -24,6 +24,29 @@ export const useProducts = () => {
   });
 };
 
+// Hook for admin panel - includes inactive products
+export const useAdminProducts = () => {
+  return useQuery({
+    queryKey: ['adminProducts'],
+    queryFn: async () => {
+      // Include inactive products for admin panel
+      const { data } = await api.get('/products?limit=100&includeInactive=true');
+      
+      // Manejar respuesta paginada { data: [], meta: ... }
+      if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
+        return data.data as Product[];
+      }
+      
+      // Manejar respuesta array simple
+      if (Array.isArray(data)) {
+        return data as Product[];
+      }
+
+      return [] as Product[];
+    },
+  });
+};
+
 export const useProduct = (term: string) => {
   return useQuery({
     queryKey: ['product', term],
@@ -44,6 +67,7 @@ export const useDeleteProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['adminProducts'] });
     },
   });
 };
@@ -58,6 +82,7 @@ export const useCreateProduct = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['adminProducts'] });
     },
   });
 };
@@ -72,6 +97,7 @@ export const useUpdateProduct = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['adminProducts'] });
       queryClient.invalidateQueries({ queryKey: ['product', data.id] });
       if (data.slug) {
         queryClient.invalidateQueries({ queryKey: ['product', data.slug] });

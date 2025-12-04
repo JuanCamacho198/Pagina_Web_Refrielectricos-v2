@@ -9,6 +9,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import PriceInput from '@/components/ui/PriceInput';
 import Modal from '@/components/ui/Modal';
 import Combobox from '@/components/ui/Combobox';
 import ImageUpload from '@/components/ui/ImageUpload';
@@ -159,12 +160,19 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Precio"
-            type="number"
-            {...register('price')}
-            error={errors.price?.message}
-            placeholder="0"
+          <Controller
+            name="price"
+            control={control}
+            render={({ field }) => (
+              <PriceInput
+                label="Precio"
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.price?.message}
+                placeholder="0"
+                disabled={isSaving}
+              />
+            )}
           />
           <Input
             label="Stock"
