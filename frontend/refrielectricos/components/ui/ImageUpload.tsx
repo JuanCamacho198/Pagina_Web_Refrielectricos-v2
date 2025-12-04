@@ -17,10 +17,29 @@ export default function ImageUpload({ value, onChange, disabled }: ImageUploadPr
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addToast } = useToast();
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files?.[0];
     if (!file) return;
 
+    await uploadFile(file);
+  };
+
+  const uploadFile = async (file: File) => {
     setIsUploading(true);
     const formData = new FormData();
     formData.append('file', file);
@@ -39,11 +58,16 @@ export default function ImageUpload({ value, onChange, disabled }: ImageUploadPr
       addToast('Error al subir la imagen', 'error');
     } finally {
       setIsUploading(false);
-      // Reset input so same file can be selected again if needed
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadFile(file);
   };
 
   const handleRemove = () => {
@@ -75,14 +99,21 @@ export default function ImageUpload({ value, onChange, disabled }: ImageUploadPr
         ) : (
           <div 
             onClick={() => fileInputRef.current?.click()}
-            className="w-[200px] h-[200px] rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`w-[200px] h-[200px] rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
+              isDragging 
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' 
+                : 'border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+            }`}
           >
             <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-full text-blue-600 dark:text-blue-400">
               {isUploading ? <Loader2 className="animate-spin" size={24} /> : <Upload size={24} />}
             </div>
             <div className="text-center px-4">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {isUploading ? 'Subiendo...' : 'Subir imagen'}
+                {isUploading ? 'Subiendo...' : isDragging ? 'Suelta la imagen aquí' : 'Subir imagen'}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 JPG, PNG, WEBP

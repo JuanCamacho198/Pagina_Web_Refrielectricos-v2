@@ -31,6 +31,16 @@ export class CreateProductDto {
   @Type(() => Number)
   price: number;
 
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  @Type(() => Number)
+  originalPrice?: number;
+
+  @IsString()
+  @IsOptional()
+  promoLabel?: string;
+
   @IsInt()
   @Min(0)
   @IsOptional()

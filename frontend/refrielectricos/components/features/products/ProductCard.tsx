@@ -29,6 +29,12 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const productLink = `/products/${product.slug || product.id}`;
   const isLowStock = product.stock > 0 && product.stock < 5;
   const isOutOfStock = product.stock === 0;
+  
+  // Discount calculation
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercentage = hasDiscount 
+    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100) 
+    : 0;
 
   // Generate optimized URL for the card (thumbnail)
   const imageUrl = getCloudinaryUrl(product.image_url, {
@@ -99,7 +105,17 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                   Agotado
                 </span>
               )}
-              {isLowStock && (
+              {!isOutOfStock && hasDiscount && (
+                <span className="px-2 py-1 text-xs font-bold text-white bg-red-600 rounded-md shadow-sm">
+                  -{discountPercentage}%
+                </span>
+              )}
+              {!isOutOfStock && product.promoLabel && (
+                <span className="px-2 py-1 text-xs font-bold text-white bg-blue-600 rounded-md shadow-sm uppercase">
+                  {product.promoLabel}
+                </span>
+              )}
+              {!isOutOfStock && isLowStock && (
                 <span className="px-2 py-1 text-xs font-bold text-white bg-orange-500 rounded-md shadow-sm">
                   Últimas unidades
                 </span>
@@ -147,9 +163,16 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between gap-3">
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500 dark:text-gray-400">Precio</span>
-                <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {formatCurrency(Number(product.price))}
-                </span>
+                <div className="flex flex-col">
+                  {hasDiscount && (
+                    <span className="text-xs text-gray-400 line-through decoration-red-500/50">
+                      {formatCurrency(Number(product.originalPrice))}
+                    </span>
+                  )}
+                  <span className={`text-lg font-bold ${hasDiscount ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                    {formatCurrency(Number(product.price))}
+                  </span>
+                </div>
               </div>
               
               <Button 

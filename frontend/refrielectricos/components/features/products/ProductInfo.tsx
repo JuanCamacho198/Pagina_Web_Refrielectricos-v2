@@ -34,6 +34,12 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     ? reviews.reduce((acc: number, review: { rating: number }) => acc + review.rating, 0) / reviews.length
     : 0;
 
+  // Discount calculation
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercentage = hasDiscount 
+    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100) 
+    : 0;
+
   const handleAddToCart = () => {
     addItem(product);
 
@@ -57,19 +63,42 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         </span>
       </div>
 
-      <div className="flex items-center gap-4 mb-6">
-        <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-          {formatCurrency(Number(product.price))}
-        </span>
-        {product.stock > 0 ? (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400">
-            Stock disponible: {product.stock}
-          </span>
-        ) : (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400">
-            Agotado
-          </span>
-        )}
+      <div className="flex flex-col mb-6">
+        <div className="flex items-center gap-4">
+          <div className="flex items-baseline gap-3">
+            <span className={`text-3xl font-bold ${hasDiscount ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+              {formatCurrency(Number(product.price))}
+            </span>
+            {hasDiscount && (
+              <span className="text-lg text-gray-400 line-through decoration-gray-400">
+                {formatCurrency(Number(product.originalPrice))}
+              </span>
+            )}
+          </div>
+          
+          {product.stock > 0 ? (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400">
+              Stock disponible: {product.stock}
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400">
+              Agotado
+            </span>
+          )}
+        </div>
+        
+        <div className="flex gap-2 mt-2">
+          {hasDiscount && (
+            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+              Ahorras {discountPercentage}%
+            </span>
+          )}
+          {product.promoLabel && (
+            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 uppercase">
+              {product.promoLabel}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Short Details */}

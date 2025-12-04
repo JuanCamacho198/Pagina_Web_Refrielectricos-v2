@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Save, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, AlertTriangle, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -32,6 +32,8 @@ interface ProductFormProps {
   isEditing?: boolean;
 }
 
+const DRAFT_KEY = 'admin-product-draft';
+
 export default function ProductForm({ initialData, isEditing = false }: ProductFormProps) {
   const router = useRouter();
   const { addToast } = useToast();
@@ -45,26 +47,60 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
 
   const isSaving = createProduct.isPending || updateProduct.isPending;
 
+  // Load draft from localStorage if not editing
+  const getInitialValues = () => {
+    if (isEditing && initialData) return initialData;
+    
+    if (typeof window !== 'undefined') {
+      const draft = localStorage.getItem(DRAFT_KEY);
+      if (draft) {
+        try {
+          return JSON.parse(draft);
+        } catch (e) {
+          console.error('Error parsing draft:', e);
+        }
+      }
+    }
+
+    return {
+      name: '',
+      description: '',
+      price: 0,
+      originalPrice: 0,
+      promoLabel: '',
+      stock: 0,
+      image_url: '',
+      images_url: [],
+      specifications: [],
+      isActive: true,
+    };
+  };
+
   const {
     register,
     handleSubmit,
     control,
     watch,
     setValue,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<ProductFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(productSchema) as any,
-    defaultValues: initialData || {
-      name: '',
-      description: '',
-      price: 0,
-      stock: 0,
-      image_url: '',
-      images_url: [],
-      specifications: [],
-    },
+    defaultValues: getInitialValues(),
   });
+
+  // Watch all fields to save draft
+  const formValues = watch();
+
+  useEffect(() => {
+    if (!isEditing && isDirty) {
+      const timeoutId = setTimeout(() => {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(formValues));
+      }, 1000); // Debounce save
+      return () => clearTimeout(timeoutId);
+    }
+  }, [formValues, isEditing, isDirty]);
 
   const selectedCategory = watch('category');
   const subcategories = metadata?.structure.find(s => s.name === selectedCategory)?.subcategories || [];
@@ -83,6 +119,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     const payload = {
       ...pendingData,
       price: Number(pendingData.price),
+      originalPrice: pendingData.originalPrice ? Number(pendingData.originalPrice) : undefined,
       stock: Number(pendingData.stock),
       image_url: pendingData.image_url || undefined,
       images_url: pendingData.images_url || undefined,
@@ -97,6 +134,8 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
       } else {
         await createProduct.mutateAsync(payload);
         addToast('Producto creado correctamente', 'success');
+        // Clear draft on success
+        localStorage.removeItem(DRAFT_KEY);
       }
       router.push('/admin/products');
       router.refresh();
@@ -112,16 +151,43 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     }
   };
 
+  const clearDraft = () => {
+    if (confirm('¿Estás seguro de borrar el borrador?')) {
+      localStorage.removeItem(DRAFT_KEY);
+      reset({
+        name: '',
+        description: '',
+        price: 0,
+        originalPrice: 0,
+        promoLabel: '',
+        stock: 0,
+        image_url: '',
+        images_url: [],
+        specifications: [],
+        isActive: true,
+      });
+      addToast('Borrador eliminado', 'info');
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="mb-6">
-        <Link href="/admin/products" className="text-sm text-gray-500 hover:text-blue-600 flex items-center gap-1 mb-2">
-          <ArrowLeft size={16} />
-          Volver a productos
-        </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {isEditing ? 'Editar Producto' : 'Nuevo Producto'}
-        </h1>
+      <div className="mb-6 flex justify-between items-end">
+        <div>
+          <Link href="/admin/products" className="text-sm text-gray-500 hover:text-blue-600 flex items-center gap-1 mb-2">
+            <ArrowLeft size={16} />
+            Volver a productos
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {isEditing ? 'Editar Producto' : 'Nuevo Producto'}
+          </h1>
+        </div>
+        {!isEditing && (
+          <Button variant="ghost" size="sm" onClick={clearDraft} className="text-red-500 hover:text-red-600 hover:bg-red-50">
+            <Trash2 size={16} className="mr-1" />
+            Limpiar borrador
+          </Button>
+        )}
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -165,7 +231,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
             control={control}
             render={({ field }) => (
               <PriceInput
-                label="Precio"
+                label="Precio Actual"
                 value={field.value}
                 onChange={field.onChange}
                 error={errors.price?.message}
@@ -173,6 +239,29 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
                 disabled={isSaving}
               />
             )}
+          />
+          <Controller
+            name="originalPrice"
+            control={control}
+            render={({ field }) => (
+              <PriceInput
+                label="Precio Original (Antes)"
+                value={field.value || 0}
+                onChange={field.onChange}
+                error={errors.originalPrice?.message}
+                placeholder="0 (Opcional)"
+                disabled={isSaving}
+              />
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Etiqueta de Promoción"
+            {...register('promoLabel')}
+            error={errors.promoLabel?.message}
+            placeholder="Ej: Oferta, Black Friday"
           />
           <Input
             label="Stock"

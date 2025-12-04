@@ -17,15 +17,31 @@ export default function MultiImageUpload({ value = [], onChange, disabled }: Mul
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addToast } = useToast();
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
     if (!files || files.length === 0) return;
 
-    setIsUploading(true);
-    //const newUrls: string[] = [];
+    await uploadFiles(files);
+  };
 
+  const uploadFiles = async (files: FileList) => {
+    setIsUploading(true);
     try {
-      // Upload files sequentially or in parallel
       const uploadPromises = Array.from(files).map(async (file) => {
         const formData = new FormData();
         formData.append('file', file);
@@ -47,6 +63,12 @@ export default function MultiImageUpload({ value = [], onChange, disabled }: Mul
         fileInputRef.current.value = '';
       }
     }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await uploadFiles(files);
   };
 
   const handleRemove = (indexToRemove: number) => {
@@ -79,14 +101,21 @@ export default function MultiImageUpload({ value = [], onChange, disabled }: Mul
 
         <div 
           onClick={() => fileInputRef.current?.click()}
-          className="aspect-square rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`aspect-square rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
+            isDragging 
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' 
+              : 'border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+          }`}
         >
           <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full text-blue-600 dark:text-blue-400">
             {isUploading ? <Loader2 className="animate-spin" size={20} /> : <Plus size={20} />}
           </div>
           <div className="text-center px-2">
             <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
-              {isUploading ? '...' : 'Agregar'}
+              {isUploading ? '...' : isDragging ? 'Soltar' : 'Agregar'}
             </p>
           </div>
         </div>

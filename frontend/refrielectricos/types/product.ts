@@ -9,6 +9,8 @@ export interface Product {
   slug: string;
   description: string | null;
   price: number;
+  originalPrice?: number | null;
+  promoLabel?: string | null;
   stock: number;
   image_url: string | null;
   images_url: string[];

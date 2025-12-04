@@ -67,7 +67,7 @@ export default function ProductDetailClient() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-4 md:mb-8">
         <Breadcrumbs 
           items={[
             { label: 'Productos', href: '/products' },
@@ -86,7 +86,7 @@ export default function ProductDetailClient() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 p-4 md:p-8">
           {/* Galería de Imágenes */}
           <ProductGallery images={images} productName={product.name} />
 

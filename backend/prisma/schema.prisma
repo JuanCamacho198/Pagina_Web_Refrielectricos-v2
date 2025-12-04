@@ -65,6 +65,8 @@ model Product {
   slug          String         @unique // URL amigable
   description   String?
   price         Float
+  originalPrice Float?       // Nuevo: Precio original (antes del descuento)
+  promoLabel    String?      // Nuevo: Etiqueta de promoción (ej: "Oferta", "Black Friday")
   stock         Int            @default(0)
   image_url     String?
   category      String         @default("General") // Nuevo: Categoría principal

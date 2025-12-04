@@ -11,7 +11,7 @@ export function useWishlist() {
   const { user } = useAuth();
 
   const { data: wishlists = [], isLoading } = useQuery({
-    queryKey: ['wishlists'],
+    queryKey: ['wishlists', user?.id],
     queryFn: async () => {
       if (!user) return [];
       const { data } = await api.get<Wishlist[]>('/wishlists');
