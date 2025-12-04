@@ -78,119 +78,121 @@ export default function HeroCarousel() {
   };
 
   return (
-    <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-2xl shadow-lg group bg-gray-900">
-      <AnimatePresence initial={false} custom={direction}>
-        <motion.div
-          key={current}
-          custom={direction}
-          variants={slideVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{
-            x: { type: "spring", stiffness: 300, damping: 30 },
-            opacity: { duration: 0.2 }
-          }}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={1}
-          onDragEnd={(e, { offset, velocity }) => {
-            const swipe = swipePower(offset.x, velocity.x);
+    <div className="relative w-full max-w-7xl mx-auto group">
+      <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-2xl shadow-lg bg-gray-900">
+        <AnimatePresence initial={false} custom={direction}>
+          <motion.div
+            key={current}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: "spring", stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 }
+            }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={1}
+            onDragEnd={(e, { offset, velocity }) => {
+              const swipe = swipePower(offset.x, velocity.x);
 
-            if (swipe < -swipeConfidenceThreshold) {
-              paginate(1);
-            } else if (swipe > swipeConfidenceThreshold) {
-              paginate(-1);
-            }
-          }}
-          className={`absolute inset-0 w-full h-full ${slides[current].color} flex items-center`}
-        >
-          <div className="absolute inset-0 z-0">
-            <Image
-              src={slides[current].image}
-              alt={slides[current].title}
-              fill
-              sizes="100vw"
-              className="object-cover opacity-60 mix-blend-overlay"
-              priority
-            />
-          </div>
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-20 bg-[url('/patterns/circuit.svg')] bg-repeat"></div>
-          <div className="absolute inset-0 bg-linear-to-r from-black/70 to-transparent"></div>
-          
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-12 w-full pointer-events-none">
-            <div className="max-w-lg text-white space-y-2 md:space-y-4 pointer-events-auto">
-              <motion.span 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="inline-block px-2 py-0.5 md:px-3 md:py-1 bg-white/20 backdrop-blur-sm rounded-full text-[10px] md:text-sm font-medium border border-white/30"
-              >
-                {slides[current].subtitle}
-              </motion.span>
-              <motion.h2 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-xl md:text-4xl font-bold leading-tight"
-              >
-                {slides[current].title}
-              </motion.h2>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-sm md:text-lg text-gray-100 line-clamp-2 md:line-clamp-none"
-              >
-                {slides[current].description}
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="pt-2"
-              >
-                <Link href={slides[current].link}>
-                  <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 border-none text-sm md:text-base px-4 py-2 md:px-6 md:py-3 h-auto">
-                    Ver Productos
-                  </Button>
-                </Link>
-              </motion.div>
+              if (swipe < -swipeConfidenceThreshold) {
+                paginate(1);
+              } else if (swipe > swipeConfidenceThreshold) {
+                paginate(-1);
+              }
+            }}
+            className={`absolute inset-0 w-full h-full ${slides[current].color} flex items-center`}
+          >
+            <div className="absolute inset-0 z-0">
+              <Image
+                src={slides[current].image}
+                alt={slides[current].title}
+                fill
+                sizes="100vw"
+                className="object-cover opacity-60 mix-blend-overlay"
+                priority
+              />
             </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-20 bg-[url('/patterns/circuit.svg')] bg-repeat"></div>
+            <div className="absolute inset-0 bg-linear-to-r from-black/70 to-transparent"></div>
+            
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-12 w-full pointer-events-none">
+              <div className="max-w-lg text-white space-y-2 md:space-y-4 pointer-events-auto">
+                <motion.span 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="inline-block px-2 py-0.5 md:px-3 md:py-1 bg-white/20 backdrop-blur-sm rounded-full text-[10px] md:text-sm font-medium border border-white/30"
+                >
+                  {slides[current].subtitle}
+                </motion.span>
+                <motion.h2 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-xl md:text-4xl font-bold leading-tight"
+                >
+                  {slides[current].title}
+                </motion.h2>
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-sm md:text-lg text-gray-100 line-clamp-2 md:line-clamp-none"
+                >
+                  {slides[current].description}
+                </motion.p>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="pt-2"
+                >
+                  <Link href={slides[current].link}>
+                    <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 border-none text-sm md:text-base px-4 py-2 md:px-6 md:py-3 h-auto shadow-lg shadow-blue-900/20">
+                      Ver Productos
+                    </Button>
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
 
-      {/* Controls */}
+        {/* Indicators */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setDirection(i > current ? 1 : -1);
+                setCurrent(i);
+              }}
+              className={`w-2 h-2 rounded-full transition-all ${
+                current === i ? "bg-white w-6" : "bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Controls (Outside) */}
       <button 
         onClick={() => paginate(-1)} 
-        className="hidden md:block absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/40 transition-colors opacity-0 group-hover:opacity-100 z-20"
+        className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white shadow-lg text-gray-800 hover:text-blue-600 hover:scale-110 transition-all z-20 border border-gray-100"
       >
         <ChevronLeft size={24} />
       </button>
       <button 
         onClick={() => paginate(1)} 
-        className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/40 transition-colors opacity-0 group-hover:opacity-100 z-20"
+        className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white shadow-lg text-gray-800 hover:text-blue-600 hover:scale-110 transition-all z-20 border border-gray-100"
       >
         <ChevronRight size={24} />
       </button>
-
-      {/* Indicators */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => {
-              setDirection(i > current ? 1 : -1);
-              setCurrent(i);
-            }}
-            className={`w-2 h-2 rounded-full transition-all ${
-              current === i ? "bg-white w-6" : "bg-white/50"
-            }`}
-          />
-        ))}
-      </div>
     </div>
   );
 }
