@@ -16,6 +16,26 @@ const config: Config = {
     // Handle module aliases
     '^@/(.*)$': '<rootDir>/$1',
   },
+  // Test patterns
+  testMatch: [
+    '**/__tests__/**/*.(test|spec).(ts|tsx)',
+    '**/components/**/*.(test|spec).(ts|tsx)',
+  ],
+  // Ignore Playwright tests (they use their own runner)
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/tests/', // Playwright tests
+  ],
+  // Coverage collection
+  collectCoverageFrom: [
+    'components/**/*.{ts,tsx}',
+    'hooks/**/*.{ts,tsx}',
+    'lib/**/*.{ts,tsx}',
+    'store/**/*.{ts,tsx}',
+    'schemas/**/*.{ts,tsx}',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+  ],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
