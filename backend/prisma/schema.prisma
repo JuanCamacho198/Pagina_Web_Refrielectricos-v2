@@ -227,3 +227,18 @@ model ProductView {
   @@unique([userId, productId])
 }
 
+model StoreSettings {
+  id                      String   @id @default("store-settings")
+  storeName               String   @default("Refrielectricos G&E")
+  supportEmail            String   @default("contacto@refrielectricos.com")
+  phoneNumber             String   @default("+57 300 123 4567")
+  currency                String   @default("COP")
+  maintenanceMode         Boolean  @default(false)
+  emailNotifications      Boolean  @default(true)
+  freeShippingEnabled     Boolean  @default(true)
+  freeShippingBannerText  String   @default("Envío gratis en Curumaní desde $100,000")
+  freeShippingEmoji       String   @default("🚚")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+

@@ -16,6 +16,7 @@ import { CartModule } from './cart/cart.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { QuestionsModule } from './questions/questions.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { QuestionsModule } from './questions/questions.module';
     ReviewsModule,
     NotificationsModule,
     QuestionsModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [

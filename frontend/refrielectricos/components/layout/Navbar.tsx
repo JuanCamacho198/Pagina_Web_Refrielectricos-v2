@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { ShoppingCart, LogOut, Settings, MapPin, Package, LayoutDashboard, Heart, Menu, X, ChevronDown, ChevronRight, Clock, Star, Truck } from 'lucide-react';
+import { ShoppingCart, LogOut, Settings, MapPin, Package, LayoutDashboard, Heart, Menu, X, ChevronDown, ChevronRight, Clock, Star } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { useAddresses } from '@/hooks/useAddresses';
@@ -42,7 +42,7 @@ export default function Navbar() {
 
   const categories: CategoryStructure[] = metadata?.structure || [];
 
-  // Fetch store settings for free shipping threshold
+  // Fetch store settings for free shipping banner
   const { data: storeSettings } = useQuery({
     queryKey: ['store-settings'],
     queryFn: async () => {
@@ -50,7 +50,11 @@ export default function Navbar() {
         const { data } = await api.get('/settings');
         return data;
       } catch {
-        return { freeShippingThreshold: 100000, freeShippingCity: 'Curumaní' };
+        return { 
+          freeShippingEnabled: true, 
+          freeShippingBannerText: 'Envío gratis en Curumaní desde $100,000',
+          freeShippingEmoji: '🚚'
+        };
       }
     },
     staleTime: 1000 * 60 * 60,
@@ -131,11 +135,13 @@ export default function Navbar() {
               <SearchBox />
             </div>
 
-            {/* Free Shipping Badge */}
-            <div className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-300 ${isScrolled ? 'opacity-0 w-0 overflow-hidden px-0' : 'opacity-100'}`}>
-              <Truck size={14} />
-              <span>Envío gratis en {storeSettings?.freeShippingCity || 'Curumaní'} desde ${(storeSettings?.freeShippingThreshold || 100000).toLocaleString()}</span>
-            </div>
+            {/* Free Shipping Badge - Only show if enabled */}
+            {storeSettings?.freeShippingEnabled !== false && (
+              <div className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-300 ${isScrolled ? 'opacity-0 w-0 overflow-hidden px-0' : 'opacity-100'}`}>
+                <span className="text-sm">{storeSettings?.freeShippingEmoji || '🚚'}</span>
+                <span>{storeSettings?.freeShippingBannerText || 'Envío gratis en Curumaní desde $100,000'}</span>
+              </div>
+            )}
 
             {/* Theme Toggle (Moved to top right for balance) */}
             <div className={`hidden md:block transition-opacity duration-300 ${isScrolled ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
