@@ -178,7 +178,7 @@ export class PaymentsService {
       `Created PENDING order ${order.id} for user ${userId}, total: ${total}`,
     );
 
-    // 7. Build ePayco checkout form data
+    // 7. Build ePayco checkout data for JavaScript SDK
     const invoice = order.id; // Use order ID as invoice reference
     const description = `Compra Refrielectricos #${order.id.slice(-8).toUpperCase()}`;
 
@@ -186,50 +186,35 @@ export class PaymentsService {
     const responseUrl = `${this.baseFrontendUrl}/checkout/success?orderId=${order.id}`;
     const confirmationUrl = `${this.baseBackendUrl}/payments/epayco-confirmation`;
 
-    // ePayco form fields
+    // ePayco data for JavaScript SDK (checkout.js)
     const epaycoData: Record<string, string> = {
-      // Required merchant data
-      p_cust_id_cliente: this.epaycoCustId,
-      p_key: this.epaycoPKey,
+      // Public key for SDK configuration
+      public_key: this.epaycoPublicKey,
+      test: String(this.epaycoTest),
 
       // Transaction data
-      p_id_invoice: invoice,
-      p_description: description,
-      p_amount: total.toFixed(2),
-      p_amount_base: total.toFixed(2), // Base amount (before tax)
-      p_tax: '0', // Tax amount (adjust if needed)
-      p_currency_code: 'COP',
-      p_test_request: this.epaycoTest ? 'TRUE' : 'FALSE',
+      name: 'Compra Refrielectricos',
+      description: description,
+      invoice: invoice,
+      currency: 'cop',
+      amount: total.toFixed(0), // ePayco expects integer for COP
+      tax_base: '0',
+      tax: '0',
 
-      // Customer data
-      p_customer_email: user.email,
-      p_customer_name: user.name || address.fullName,
-      p_customer_phone: address.phone,
-      p_customer_doctype: 'CC', // Default document type
-      p_customer_doc: '', // Document number (optional)
-      p_customer_address: address.addressLine1,
-      p_customer_city: address.city,
-      p_customer_country: 'CO',
-
-      // Billing data (same as customer for simplicity)
-      p_billing_name: address.fullName,
-      p_billing_email: user.email,
-      p_billing_phone: address.phone,
-      p_billing_address: address.addressLine1,
-      p_billing_city: address.city,
-      p_billing_country: 'CO',
+      // Customer/billing info
+      name_billing: address.fullName,
+      address_billing: address.addressLine1,
+      mobilephone_billing: address.phone,
+      email_billing: user.email,
 
       // Callback URLs
-      p_url_response: responseUrl,
-      p_url_confirmation: confirmationUrl,
+      response: responseUrl,
+      confirmation: confirmationUrl,
 
       // Extra fields (to identify order in webhook)
-      p_extra1: order.id, // Store orderId for webhook
-      p_extra2: userId,
-      p_extra3: '',
-
-      // Confirmation method (POST)
-      p_confirm_method: 'POST',
+      extra1: order.id, // orderId
+      extra2: userId,
+      extra3: '',
     };
 
     return {

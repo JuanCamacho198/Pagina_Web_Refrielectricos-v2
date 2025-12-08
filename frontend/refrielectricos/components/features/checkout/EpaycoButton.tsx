@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, FormEvent } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Loader2, CreditCard } from 'lucide-react';
 import api from '@/lib/api';
 import Button from '@/components/ui/Button';
@@ -21,17 +21,27 @@ interface EpaycoButtonProps {
   onOrderCreated?: (orderId: string) => void;
 }
 
-// ePayco checkout URL
-const EPAYCO_CHECKOUT_URL = 'https://secure.epayco.co/checkout.php';
+// Declare ePayco global type
+declare global {
+  interface Window {
+    ePayco?: {
+      checkout: {
+        configure: (config: Record<string, unknown>) => {
+          open: (data: Record<string, unknown>) => void;
+        };
+      };
+    };
+  }
+}
 
 /**
  * EpaycoButton Component
  * 
- * Handles the ePayco payment flow:
- * 1. Calls backend to create payment session
- * 2. Receives ePayco form data
- * 3. Creates and submits hidden form to ePayco
- * 4. User is redirected to ePayco checkout
+ * Uses ePayco's Standard Checkout (JavaScript SDK) to open payment modal.
+ * Flow:
+ * 1. Load ePayco SDK script
+ * 2. Call backend to create payment session and get order data
+ * 3. Open ePayco checkout modal with the data
  */
 export default function EpaycoButton({
   userId,
@@ -44,12 +54,35 @@ export default function EpaycoButton({
   onOrderCreated,
 }: EpaycoButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [sdkLoaded, setSdkLoaded] = useState(false);
 
-  const handlePayWithEpayco = useCallback(async (e: FormEvent) => {
-    e.preventDefault();
-    
+  // Load ePayco SDK script on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.ePayco) {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.epayco.co/checkout.js';
+      script.async = true;
+      script.onload = () => {
+        setSdkLoaded(true);
+      };
+      script.onerror = () => {
+        console.error('Failed to load ePayco SDK');
+        onError?.('Error al cargar el sistema de pagos');
+      };
+      document.body.appendChild(script);
+    } else if (window.ePayco) {
+      setSdkLoaded(true);
+    }
+  }, [onError]);
+
+  const handlePayWithEpayco = useCallback(async () => {
     if (!userId || !addressId || items.length === 0) {
       onError?.('Faltan datos para procesar el pago');
+      return;
+    }
+
+    if (!window.ePayco) {
+      onError?.('El sistema de pagos no está disponible. Recarga la página.');
       return;
     }
 
@@ -76,36 +109,52 @@ export default function EpaycoButton({
       // Notify parent that order was created
       onOrderCreated?.(orderId);
 
-      // 2. Create hidden form and submit to ePayco
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = EPAYCO_CHECKOUT_URL;
-      form.style.display = 'none';
-
-      // Add all ePayco fields as hidden inputs
-      Object.entries(epaycoData).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = String(value);
-        form.appendChild(input);
+      // 2. Configure and open ePayco checkout
+      const handler = window.ePayco.checkout.configure({
+        key: epaycoData.public_key,
+        test: epaycoData.test === 'true' || epaycoData.test === true,
       });
 
-      // Append form to body and submit
-      document.body.appendChild(form);
-      form.submit();
+      // 3. Open checkout modal
+      handler.open({
+        // External reference (for identification)
+        external: 'false',
+        
+        // Transaction info
+        name: epaycoData.name || 'Compra Refrielectricos',
+        description: epaycoData.description,
+        invoice: epaycoData.invoice,
+        currency: epaycoData.currency || 'cop',
+        amount: epaycoData.amount,
+        tax_base: epaycoData.tax_base || '0',
+        tax: epaycoData.tax || '0',
+        tax_ico: '0',
+        country: 'co',
+        lang: 'es',
+        
+        // Customer info
+        name_billing: epaycoData.name_billing,
+        address_billing: epaycoData.address_billing,
+        mobilephone_billing: epaycoData.mobilephone_billing,
+        
+        // Callback URLs
+        response: epaycoData.response,
+        confirmation: epaycoData.confirmation,
+        
+        // Extra data (to identify order in webhook)
+        extra1: epaycoData.extra1, // orderId
+        extra2: epaycoData.extra2, // userId
+        extra3: epaycoData.extra3 || '',
 
-      // Form submission will redirect, but cleanup just in case
-      setTimeout(() => {
-        if (document.body.contains(form)) {
-          document.body.removeChild(form);
-        }
-      }, 5000);
+        // Method selection (show all available)
+        methodsDisable: [],
+      });
+
+      setIsLoading(false);
 
     } catch (error: unknown) {
       console.error('Error creating ePayco session:', error);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const err = error as any;
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
       const errorMessage = 
         err.response?.data?.message || 
         err.message || 
@@ -121,12 +170,17 @@ export default function EpaycoButton({
       onClick={handlePayWithEpayco}
       className="w-full bg-[#009EE3] hover:bg-[#0080B8] text-white"
       size="lg"
-      disabled={disabled || isLoading || !addressId || items.length === 0}
+      disabled={disabled || isLoading || !sdkLoaded || !addressId || items.length === 0}
     >
       {isLoading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Conectando con ePayco...
+        </>
+      ) : !sdkLoaded ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Cargando...
         </>
       ) : (
         <>
