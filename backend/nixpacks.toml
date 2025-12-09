@@ -1,5 +1,5 @@
 # Railway/Nixpacks configuration for NestJS + Prisma
-# IMPORTANT: Set SKIP_PRISMA_DB_PUSH=1 in Railway environment variables
+# Migrations are run at start time, not during build (database not accessible during build)
 
 # Disable automatic Prisma db push
 [variables]
@@ -17,6 +17,10 @@ cmds = [
   "npx prisma generate",
   "npm run build"
 ]
+
+# Explicitly disable the release phase - migrations will run at start time
+[phases.release]
+cmds = ["echo 'Skipping release phase - migrations run at start'"]
 
 [start]
 cmd = "npx prisma migrate deploy && npm run start:prod"
