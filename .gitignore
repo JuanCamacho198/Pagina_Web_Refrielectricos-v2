@@ -22,9 +22,10 @@ generated/
 
 # Prisma
 backend/prisma/generated/
-backend/prisma/migrations/
 prisma/generated/
-prisma/migrations/
+# IMPORTANTE: NO ignorar migrations - son necesarias para deploy
+# backend/prisma/migrations/
+# prisma/migrations/
 
 # Env files
 .env
