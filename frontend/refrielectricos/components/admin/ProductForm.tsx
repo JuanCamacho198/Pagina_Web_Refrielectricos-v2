@@ -72,7 +72,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
       image_url: '',
       images_url: [],
       specifications: [],
-      isActive: true,
+      isActive: false, // Default: inactivo para evitar publicar productos incompletos
     };
   };
 
@@ -88,6 +88,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(productSchema) as any,
     defaultValues: getInitialValues(),
+    mode: 'all', // Mostrar todos los errores simultáneamente
   });
 
   // Watch all fields to save draft
@@ -164,7 +165,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
         image_url: '',
         images_url: [],
         specifications: [],
-        isActive: true,
+        isActive: false, // Default: inactivo
       });
       addToast('Borrador eliminado', 'info');
     }
@@ -202,6 +203,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
           {...register('name')}
           error={errors.name?.message}
           placeholder="Ej: Nevera Samsung 300L"
+          required
         />
 
         <Controller
@@ -237,6 +239,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
                 error={errors.price?.message}
                 placeholder="0"
                 disabled={isSaving}
+                required
               />
             )}
           />
@@ -279,7 +282,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
             render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                  Categoría
+                  Categoría <span className="text-red-500">*</span>
                 </label>
                 <Combobox
                   options={metadata?.categories || []}
@@ -389,7 +392,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
           render={({ field }) => (
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                Imagen Principal
+                Imagen Principal <span className="text-red-500">*</span>
               </label>
               <ImageUpload
                 value={field.value || ''}

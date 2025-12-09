@@ -41,6 +41,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* Preconnect para mejorar LCP - Backend API */}
+        <link
+          rel="preconnect"
+          href="https://paginawebrefrielectricos-v2-production.up.railway.app"
+          crossOrigin="anonymous"
+        />
+        {/* Preconnect para Cloudinary CDN */}
+        <link
+          rel="preconnect"
+          href="https://res.cloudinary.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://res.cloudinary.com"
+        />
+      </head>
       <body className={`${roboto.variable} font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}>
         <ThemeProvider
           attribute="class"

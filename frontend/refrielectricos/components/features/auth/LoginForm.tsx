@@ -7,6 +7,7 @@ import { useCartStore } from '@/store/cartStore';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Link from 'next/link';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function LoginForm() {
     email: '',
     password: '',
   });
+  const [serverError, setServerError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   
   const registered = searchParams.get('registered');
@@ -59,6 +61,7 @@ export default function LoginForm() {
         [e.target.name]: '',
       });
     }
+    if (serverError) setServerError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,8 +77,11 @@ export default function LoginForm() {
 
       const redirect = searchParams.get('redirect');
       router.push(redirect || '/');
-    } catch {
-      // Error handled in hook
+    } catch (error: unknown) {
+      // Error handled in hook but we also show it here for better UX
+      const err = error as { response?: { data?: { message?: string } } };
+      const message = err.response?.data?.message || 'Credenciales inválidas';
+      setServerError(message);
     }
   };
 
@@ -84,6 +90,13 @@ export default function LoginForm() {
       {registered && (
         <div className="bg-green-50 text-green-600 p-3 rounded-md text-sm">
           Cuenta creada exitosamente. Por favor inicia sesión.
+        </div>
+      )}
+
+      {serverError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center gap-2" role="alert">
+          <AlertTriangle className="h-5 w-5" />
+          <span className="block sm:inline">{serverError}</span>
         </div>
       )}
       
@@ -133,9 +146,10 @@ export default function LoginForm() {
 
       <Button
         type="submit"
-        className="w-full"
+        className="w-full flex justify-center items-center gap-2"
         disabled={isLoggingIn}
       >
+        {isLoggingIn && <Loader2 className="h-4 w-4 animate-spin" />}
         {isLoggingIn ? 'Iniciando sesión...' : 'Iniciar sesión'}
       </Button>
 

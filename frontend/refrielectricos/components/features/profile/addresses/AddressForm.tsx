@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { Loader2 } from 'lucide-react';
 import { departamentos } from '@/data/colombiaData';
 import { CreateAddressDto } from '@/types/address';
 import Combobox from '@/components/ui/Combobox';
@@ -126,7 +127,7 @@ export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFo
             options={selectedDeptData ? selectedDeptData.ciudades : []}
             value={formData.city}
             onChange={(val) => setFormData({ ...formData, city: val })}
-            placeholder="Seleccionar ciudad"
+            placeholder={!formData.department ? "Seleccione un departamento primero" : "Seleccionar ciudad"}
             searchPlaceholder="Buscar ciudad..."
             disabled={!formData.department}
           />
@@ -225,8 +226,9 @@ export default function AddressForm({ onSubmit, onCancel, isLoading }: AddressFo
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
           {isLoading ? 'Guardando...' : 'Guardar Dirección'}
         </button>
       </div>

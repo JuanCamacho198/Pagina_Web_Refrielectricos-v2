@@ -7,6 +7,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/ui/Button';
 
+// Blur placeholders base64 para carga instantánea (10x10px)
+const BLUR_DATA_URL = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAKAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABgUH/8QAIhAAAgEDBAMBAAAAAAAAAAAAAQIDBAURAAYSIRMxQVH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBf/EABkRAAIDAQAAAAAAAAAAAAAAAAECAAMRIf/aAAwDAQACEQMRAD8AqbWsdPcLlULUTSwxxKrfu8ckEfoOsHONa3cdg26noquop6d4p6eB5Y3EjHkQpIyDwIP7p0aNJKBmYkruULWTPZ//2Q==";
+
 const slides = [
   {
     id: 1,
@@ -14,6 +17,7 @@ const slides = [
     subtitle: "La mejor calidad para tus reparaciones",
     description: "Encuentra compresores, termostatos, gases refrigerantes y más.",
     image: "/images/carrusel2.jpg",
+    blurDataURL: BLUR_DATA_URL,
     color: "bg-blue-600",
     link: "/products?category=Refrigeración"
   },
@@ -23,6 +27,7 @@ const slides = [
     subtitle: "Equípate con lo mejor",
     description: "Bombas de vacío, manómetros y herramientas especializadas.",
     image: "/images/carrusel1.jpg",
+    blurDataURL: BLUR_DATA_URL,
     color: "bg-cyan-600",
     link: "/products?category=Herramientas"
   },
@@ -32,6 +37,7 @@ const slides = [
     subtitle: "Precios increíbles por tiempo limitado",
     description: "Aprovecha nuestros descuentos en productos seleccionados.",
     image: "/images/carrusel3.jpg",
+    blurDataURL: BLUR_DATA_URL,
     color: "bg-indigo-600",
     link: "/products?sort=price_asc"
   }
@@ -112,6 +118,9 @@ export default function HeroCarousel() {
                 alt={slides[current].title}
                 fill
                 sizes="100vw"
+                quality={60}
+                placeholder="blur"
+                blurDataURL={slides[current].blurDataURL}
                 className="object-cover opacity-60 mix-blend-overlay"
                 priority
               />

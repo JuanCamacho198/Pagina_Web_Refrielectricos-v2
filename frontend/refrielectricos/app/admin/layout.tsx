@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const currentPath = window.location.pathname;
       router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
     } else if (user && user.role !== 'ADMIN') {
-      router.push('/');
+      router.push('/forbidden');
     }
   }, [user, isAuthenticated, isLoading, router]);
 

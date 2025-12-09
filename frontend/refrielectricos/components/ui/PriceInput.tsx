@@ -9,6 +9,7 @@ interface PriceInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElemen
   value: number | string;
   onChange: (value: number) => void;
   currencySymbol?: string;
+  required?: boolean;
 }
 
 /**
@@ -32,7 +33,7 @@ function parseFormattedValue(str: string): number {
 }
 
 const PriceInput = forwardRef<HTMLInputElement, PriceInputProps>(
-  ({ label, error, className, value, onChange, currencySymbol = '$', disabled, ...props }, ref) => {
+  ({ label, error, className, value, onChange, currencySymbol = '$', disabled, required, ...props }, ref) => {
     const numericValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
     const formattedValue = formatWithThousandsSeparator(numericValue);
 
@@ -57,6 +58,7 @@ const PriceInput = forwardRef<HTMLInputElement, PriceInputProps>(
         {label && (
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
             {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
         <div className="relative">
