@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { useCartStore } from '@/store/cartStore';
@@ -11,6 +11,7 @@ import Link from 'next/link';
 
 export default function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register, login, isRegistering } = useAuth();
   const { mergeCart } = useCart();
   const localItems = useCartStore(state => state.items);
@@ -21,17 +22,60 @@ export default function RegisterForm() {
     email: '',
     password: '',
   });
+  const [errors, setErrors] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const validate = () => {
+    const newErrors = { name: '', email: '', password: '' };
+    let isValid = true;
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'El nombre es requerido';
+      isValid = false;
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'El correo es requerido';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'El correo no es válido';
+      isValid = false;
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'La contraseña es requerida';
+      isValid = false;
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear error when user types
+    if (errors[e.target.name as keyof typeof errors]) {
+      setErrors({
+        ...errors,
+        [e.target.name]: '',
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
+
     try {
       // 1. Register the user
       await register(formData);
@@ -50,7 +94,8 @@ export default function RegisterForm() {
         clearLocalCart();
       }
 
-      router.push('/');
+      const redirect = searchParams.get('redirect');
+      router.push(redirect || '/');
     } catch {
       // Error handled in hook
       setIsLoggingIn(false);
@@ -71,6 +116,7 @@ export default function RegisterForm() {
           onChange={handleChange}
           placeholder="Juan Pérez"
           autoComplete="name"
+          error={errors.name}
         />
       </div>
 
@@ -84,6 +130,7 @@ export default function RegisterForm() {
           onChange={handleChange}
           placeholder="juan@ejemplo.com"
           autoComplete="email"
+          error={errors.email}
         />
       </div>
 
@@ -98,6 +145,7 @@ export default function RegisterForm() {
           placeholder="••••••••"
           minLength={6}
           autoComplete="new-password"
+          error={errors.password}
         />
       </div>
 
@@ -111,7 +159,10 @@ export default function RegisterForm() {
 
       <div className="text-center text-sm text-gray-600 dark:text-gray-400">
         ¿Ya tienes una cuenta?{' '}
-        <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+        <Link 
+          href={searchParams.get('redirect') ? `/login?redirect=${encodeURIComponent(searchParams.get('redirect')!)}` : '/login'} 
+          className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+        >
           Inicia sesión
         </Link>
       </div>

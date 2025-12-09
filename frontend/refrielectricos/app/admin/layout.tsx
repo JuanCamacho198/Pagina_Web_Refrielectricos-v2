@@ -7,18 +7,21 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Loader2 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!isAuthenticated) {
-      router.push('/login');
+      const currentPath = window.location.pathname;
+      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
     } else if (user && user.role !== 'ADMIN') {
       router.push('/');
     }
-  }, [user, isAuthenticated, router]);
+  }, [user, isAuthenticated, isLoading, router]);
 
-  if (!user || user.role !== 'ADMIN') {
+  if (isLoading || !user || user.role !== 'ADMIN') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />

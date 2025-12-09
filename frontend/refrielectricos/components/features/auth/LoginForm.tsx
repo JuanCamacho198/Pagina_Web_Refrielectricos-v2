@@ -18,19 +18,53 @@ export default function LoginForm() {
     email: '',
     password: '',
   });
+  const [errors, setErrors] = useState({
+    email: '',
+    password: '',
+  });
   const [rememberMe, setRememberMe] = useState(false);
   
   const registered = searchParams.get('registered');
+
+  const validate = () => {
+    const newErrors = { email: '', password: '' };
+    let isValid = true;
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'El correo es requerido';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'El correo no es válido';
+      isValid = false;
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'La contraseña es requerida';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear error when user types
+    if (errors[e.target.name as keyof typeof errors]) {
+      setErrors({
+        ...errors,
+        [e.target.name]: '',
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
+
     try {
       await login({ ...formData, rememberMe });
       
@@ -38,7 +72,8 @@ export default function LoginForm() {
       // (merge only happens on registration)
       clearLocalCart();
 
-      router.push('/');
+      const redirect = searchParams.get('redirect');
+      router.push(redirect || '/');
     } catch {
       // Error handled in hook
     }
@@ -62,6 +97,7 @@ export default function LoginForm() {
           onChange={handleChange}
           placeholder="juan@ejemplo.com"
           autoComplete="email"
+          error={errors.email}
         />
       </div>
 
@@ -75,6 +111,7 @@ export default function LoginForm() {
           onChange={handleChange}
           placeholder="••••••••"
           autoComplete="current-password"
+          error={errors.password}
         />
       </div>
 
@@ -104,7 +141,10 @@ export default function LoginForm() {
 
       <div className="text-center text-sm text-gray-600 dark:text-gray-400">
         ¿No tienes una cuenta?{' '}
-        <Link href="/register" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+        <Link 
+          href={searchParams.get('redirect') ? `/register?redirect=${encodeURIComponent(searchParams.get('redirect')!)}` : '/register'} 
+          className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+        >
           Regístrate aquí
         </Link>
       </div>
