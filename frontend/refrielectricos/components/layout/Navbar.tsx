@@ -28,6 +28,8 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const categoriesRef = useRef<HTMLDivElement>(null);
+  const scrollTickingRef = useRef(false);
+  const scrollLockUntilRef = useRef(0);
 
   const defaultAddress = user ? (addresses.find(a => a.isDefault) || addresses[0]) : null;
 
@@ -60,20 +62,40 @@ export default function Navbar() {
     staleTime: 1000 * 60 * 60,
   });
 
-  // Stable scroll logic with hysteresis to prevent flickering
+  // Stable scroll logic with hysteresis + lock to prevent rapid toggle glitches.
+  // The lock helps when navbar height transitions slightly nudge scrollY near the threshold.
   const handleScroll = useCallback(() => {
-    const scrollY = window.scrollY;
-    // Use hysteresis: scroll down past 80px to compress, scroll up past 40px to expand
-    setIsScrolled(prev => {
-      if (!prev && scrollY > 80) return true;
-      if (prev && scrollY < 40) return false;
-      return prev;
+    if (scrollTickingRef.current) return;
+    scrollTickingRef.current = true;
+
+    window.requestAnimationFrame(() => {
+      scrollTickingRef.current = false;
+
+      const scrollY = window.scrollY;
+      setIsScrolled(prev => {
+        const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+        if (now < scrollLockUntilRef.current) return prev;
+
+        // Use hysteresis: scroll down past 80px to compress, scroll up past 40px to expand
+        let next = prev;
+        if (!prev && scrollY > 80) next = true;
+        if (prev && scrollY < 40) next = false;
+
+        if (next !== prev) {
+          // Match the CSS transition duration (300ms) + a small buffer.
+          scrollLockUntilRef.current = now + 360;
+        }
+
+        return next;
+      });
     });
   }, []);
 
   useEffect(() => {
     // Use passive listener for performance
     window.addEventListener('scroll', handleScroll, { passive: true });
+    // Initialize state on mount (e.g. refresh mid-page)
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
