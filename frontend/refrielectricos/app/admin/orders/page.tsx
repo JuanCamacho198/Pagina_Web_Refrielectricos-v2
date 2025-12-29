@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Eye, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { Eye, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Trash2, Check } from 'lucide-react';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { Order } from '@/types/order';
 import { useToast } from '@/context/ToastContext';
 import { Skeleton } from '@/components/ui/Skeleton';
 import Button from '@/components/ui/Button';
+import { useAuthStore } from '@/store/authStore';
+import { useDeleteOrder } from '@/hooks/useOrders';
 
 type SortKey = 'id' | 'createdAt' | 'total' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -18,14 +20,15 @@ export default function AdminOrdersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'createdAt', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const itemsPerPage = 10;
   const { addToast } = useToast();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'ADMIN';
+  const deleteOrderMutation = useDeleteOrder();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const response = await api.get('/orders');
       setOrders(response.data);
@@ -35,7 +38,22 @@ export default function AdminOrdersPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [addToast]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
@@ -44,9 +62,25 @@ export default function AdminOrdersPage() {
         order.id === orderId ? { ...order, status: newStatus as Order['status'] } : order
       ));
       addToast('Estado del pedido actualizado', 'success');
+      setOpenDropdownId(null);
     } catch (error) {
       console.error('Error updating order status:', error);
       addToast('Error al actualizar el estado', 'error');
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este pedido? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      await deleteOrderMutation.mutateAsync(orderId);
+      setOrders(orders.filter(order => order.id !== orderId));
+      addToast('Pedido eliminado correctamente', 'success');
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      addToast('Error al eliminar el pedido', 'error');
     }
   };
 
@@ -76,7 +110,7 @@ export default function AdminOrdersPage() {
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   });
 
-  const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
+const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
   const paginatedOrders = sortedOrders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -85,6 +119,19 @@ export default function AdminOrdersPage() {
   const renderSortIcon = (columnKey: SortKey) => {
     if (sortConfig.key !== columnKey) return <div className="w-4 h-4" />;
     return sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
+  };
+
+  const statusOptions = [
+    { value: 'PENDING', label: 'Pendiente', color: 'bg-yellow-500' },
+    { value: 'PAID', label: 'Pagado', color: 'bg-blue-500' },
+    { value: 'SHIPPED', label: 'Enviado', color: 'bg-purple-500' },
+    { value: 'DELIVERED', label: 'Entregado', color: 'bg-green-500' },
+    { value: 'CANCELLED', label: 'Cancelado', color: 'bg-red-500' },
+  ];
+
+  const getStatusLabel = (status: string) => {
+    const option = statusOptions.find(o => o.value === status);
+    return option?.label || status;
   };
 
   if (isLoading) {
@@ -198,29 +245,55 @@ export default function AdminOrdersPage() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
                   ${order.total.toLocaleString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <select
-                    value={order.status}
-                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                    className={`text-xs font-semibold rounded-full px-2 py-1 border-0 cursor-pointer focus:ring-2 focus:ring-blue-500 ${
-                      getStatusColor(order.status)
-                    }`}
-                  >
-                    <option value="PENDING">Pendiente</option>
-                    <option value="PAID">Pagado</option>
-                    <option value="SHIPPED">Enviado</option>
-                    <option value="DELIVERED">Entregado</option>
-                    <option value="CANCELLED">Cancelado</option>
-                  </select>
+<td className="px-6 py-4 whitespace-nowrap">
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={() => setOpenDropdownId(openDropdownId === order.id ? null : order.id)}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border-0 cursor-pointer transition-all ${getStatusColor(order.status)}`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                      {getStatusLabel(order.status)}
+                      <ChevronDown size={12} className={`transition-transform ${openDropdownId === order.id ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {openDropdownId === order.id && (
+                      <div className="absolute z-10 mt-1 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 animate-in fade-in zoom-in-95 duration-100">
+                        {statusOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => handleStatusChange(order.id, option.value)}
+                            className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 ${order.status === option.value ? 'bg-gray-50 dark:bg-gray-700/50' : ''}`}
+                          >
+                            <span className={`w-2 h-2 rounded-full ${option.color}`} />
+                            {option.label}
+                            {order.status === option.value && <Check size={14} className="ml-auto text-blue-600" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                  <Link href={`/admin/orders/${order.id}`}>
-                    <Button variant="ghost" size="sm" className="gap-1">
-                      <Eye size={14} />
-                      <span>Ver</span>
-                    </Button>
-                  </Link>
-                </td>
+                  <div className="flex items-center justify-center gap-1">
+                    <Link href={`/admin/orders/${order.id}`}>
+                      <Button variant="ghost" size="sm" className="gap-1">
+                        <Eye size={14} />
+                        <span>Ver</span>
+                      </Button>
+                    </Link>
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        onClick={() => handleDeleteOrder(order.id)}
+                        disabled={deleteOrderMutation.isPending}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    )}
+                  </div>
+</td>
               </tr>
             ))}
           </tbody>
