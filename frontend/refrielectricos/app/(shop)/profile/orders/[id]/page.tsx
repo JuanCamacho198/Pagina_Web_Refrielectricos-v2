@@ -111,13 +111,17 @@ export default function OrderDetailPage() {
                         <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">Sin img</div>
                       )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 dark:text-white truncate">{item.product.name}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Cantidad: {item.quantity}</p>
-                    <p className="text-blue-600 font-medium mt-2">${item.price.toLocaleString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-gray-900 dark:text-white">${(item.price * item.quantity).toLocaleString()}</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 dark:text-white truncate">{item.product.name}</h3>
+                      <p className="text-sm text-gray-500 mt-1">Cantidad: {item.quantity}</p>
+                      <p className="text-blue-600 font-medium mt-2">
+                        ${typeof item.price === 'number' ? item.price.toLocaleString() : '0'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-gray-900 dark:text-white">
+                        ${typeof item.price === 'number' && typeof item.quantity === 'number' ? (item.price * item.quantity).toLocaleString() : '0'}
+                      </p>
                     {order.status === 'DELIVERED' && (
                       <Button
                         variant="outline"
@@ -138,7 +142,9 @@ export default function OrderDetailPage() {
             <div className="bg-gray-50 dark:bg-gray-900/50 p-6 border-t border-gray-100 dark:border-gray-700">
               <div className="flex justify-between items-center">
                 <span className="font-medium text-gray-900 dark:text-white">Total Pagado</span>
-                <span className="text-2xl font-bold text-blue-600">${order.total.toLocaleString()}</span>
+                <span className="text-2xl font-bold text-blue-600">
+                  ${typeof order.total === 'number' ? order.total.toLocaleString() : '0'}
+                </span>
               </div>
             </div>
           </div>

@@ -114,15 +114,21 @@ export default function AdminOrderDetailPage() {
                     <p className="text-sm text-gray-500">Cantidad: {item.quantity}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-gray-900 dark:text-white">${item.price.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500">Total: ${(item.price * item.quantity).toLocaleString()}</p>
-                  </div>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        ${typeof item.price === 'number' ? item.price.toLocaleString() : '0'}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Total: ${typeof item.price === 'number' && typeof item.quantity === 'number' ? (item.price * item.quantity).toLocaleString() : '0'}
+                      </p>
+                    </div>
                 </div>
               ))}
             </div>
             <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
               <span className="font-medium text-gray-900 dark:text-white">Total Pedido</span>
-              <span className="text-xl font-bold text-blue-600">${order.total.toLocaleString()}</span>
+              <span className="text-xl font-bold text-blue-600">
+                ${typeof order.total === 'number' ? order.total.toLocaleString() : '0'}
+              </span>
             </div>
           </div>
         </div>

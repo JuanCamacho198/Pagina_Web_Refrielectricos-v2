@@ -250,7 +250,7 @@ const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
-                  ${order.total.toLocaleString()}
+                  ${typeof order.total === 'number' ? order.total.toLocaleString() : '0'}
                 </td>
 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="relative" ref={dropdownRef}>

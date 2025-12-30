@@ -67,6 +67,11 @@ export default function AdminDashboard() {
     recentOrders: [],
   };
 
+  const formatNumber = (value: unknown): string => {
+    const num = typeof value === 'number' ? value : 0;
+    return num.toLocaleString();
+  };
+
   return (
     <div className="space-y-8">
       <div className="relative overflow-hidden">
@@ -104,7 +109,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         <StatsCard 
           title="Ingresos Totales" 
-          value={`$${stats.revenue.toLocaleString()}`} 
+          value={`$${formatNumber(stats.revenue)}`} 
           icon={DollarSign} 
           trend="+12.5%"
           trendUp={true}
@@ -112,7 +117,7 @@ export default function AdminDashboard() {
         />
         <StatsCard 
           title="Pedidos" 
-          value={stats.orders.toLocaleString()} 
+          value={formatNumber(stats.orders)} 
           icon={ShoppingBag} 
           trend="+8.2%"
           trendUp={true}
@@ -120,7 +125,7 @@ export default function AdminDashboard() {
         />
         <StatsCard 
           title="Productos" 
-          value={stats.products.toLocaleString()} 
+          value={formatNumber(stats.products)} 
           icon={Package} 
           trend="+2.1%"
           trendUp={true}
@@ -128,7 +133,7 @@ export default function AdminDashboard() {
         />
         <StatsCard 
           title="Usuarios" 
-          value={stats.users.toLocaleString()} 
+          value={formatNumber(stats.users)} 
           icon={Users} 
           trend="+5.7%"
           trendUp={true}

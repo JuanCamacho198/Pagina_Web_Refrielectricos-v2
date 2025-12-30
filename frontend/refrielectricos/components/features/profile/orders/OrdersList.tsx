@@ -105,7 +105,7 @@ export default function OrdersList() {
                   {translateStatus(order.status)}
                 </span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  ${order.total.toLocaleString()}
+                  ${typeof order.total === 'number' ? order.total.toLocaleString() : '0'}
                 </span>
               </div>
             </div>
@@ -123,7 +123,7 @@ export default function OrdersList() {
                       </span>
                     </div>
                     <span className="text-gray-500 dark:text-gray-400">
-                      ${(item.price * item.quantity).toLocaleString()}
+                      ${typeof item.price === 'number' && typeof item.quantity === 'number' ? (item.price * item.quantity).toLocaleString() : '0'}
                     </span>
                   </div>
                 ))}

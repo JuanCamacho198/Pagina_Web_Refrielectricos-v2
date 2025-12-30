@@ -90,7 +90,7 @@ export default function RecentOrders({ orders }: RecentOrdersProps) {
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    ${order.total.toLocaleString()}
+                    ${typeof order.total === 'number' ? order.total.toLocaleString() : '0'}
                   </p>
                   <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${status.bg} ${status.text}`}>
                     {status.label}

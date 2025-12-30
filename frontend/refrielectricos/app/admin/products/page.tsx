@@ -178,7 +178,9 @@ export default function AdminProductsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">${product.price.toLocaleString()}</div>
+                    <div className="text-sm text-gray-900 dark:text-white">
+                      ${typeof product.price === 'number' ? product.price.toLocaleString() : '0'}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

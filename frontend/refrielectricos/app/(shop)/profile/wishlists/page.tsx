@@ -166,7 +166,7 @@ export default function WishlistsPage() {
                                                             {item.product.name}
                                                         </Link>
                                                         <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                                            ${item.product.price.toLocaleString()}
+                                                            ${typeof item.product.price === 'number' ? item.product.price.toLocaleString() : '0'}
                                                         </p>
                                                     </div>
                                                     <div className="flex justify-end gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

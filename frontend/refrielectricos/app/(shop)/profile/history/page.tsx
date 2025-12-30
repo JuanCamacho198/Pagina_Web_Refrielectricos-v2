@@ -84,7 +84,7 @@ export default function HistoryPage() {
                 </h3>
                 <div className="flex items-center justify-between mt-2">
                   <span className="font-bold text-lg text-gray-900 dark:text-white">
-                    ${item.product.price.toLocaleString()}
+                    ${typeof item.product.price === 'number' ? item.product.price.toLocaleString() : '0'}
                   </span>
                   <ArrowRight className="w-5 h-5 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity transform -translate-x-2.5 group-hover:translate-x-0" />
                 </div>
