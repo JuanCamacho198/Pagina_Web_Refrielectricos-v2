@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, Check, Filter, SlidersHorizontal } from 'lucide-react';
+import { X, ChevronDown, Check, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ProductFiltersProps {
