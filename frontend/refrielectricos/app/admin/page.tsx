@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { Package, ShoppingBag, Users, DollarSign, TrendingUp, ArrowUpRight, Activity } from 'lucide-react';
+import { Package, ShoppingBag, Users, DollarSign, TrendingUp, ArrowUpRight, Activity, RefreshCw } from 'lucide-react';
 import api from '@/lib/api';
 import DashboardSkeleton from '@/components/features/admin/dashboard/DashboardSkeleton';
 
@@ -42,7 +42,21 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
+  const { data, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
+      const { data } = await api.get<DashboardStats>('/dashboard/stats');
+      return data;
+    },
+    staleTime: 1000 * 60, // 1 minute
+    refetchOnWindowFocus: true,
+  });
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  const stats = data || {
     products: 0,
     orders: 0,
     users: 0,
@@ -51,38 +65,7 @@ export default function AdminDashboard() {
     orderStatusDistribution: [],
     topProducts: [],
     recentOrders: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await api.get('/dashboard/stats');
-        const data = response.data;
-
-        setStats({
-          products: data.totalProducts,
-          orders: data.totalOrders,
-          users: data.totalUsers,
-          revenue: data.totalRevenue,
-          revenueByMonth: data.revenueByMonth,
-          orderStatusDistribution: data.orderStatusDistribution,
-          topProducts: data.topProducts,
-          recentOrders: data.recentOrders,
-        });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
-  if (isLoading) {
-    return <DashboardSkeleton />;
-  }
+  };
 
   return (
     <div className="space-y-8">
@@ -97,9 +80,23 @@ export default function AdminDashboard() {
               Resumen de tu negocio en tiempo real
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-200 dark:border-gray-700">
-            <Activity className="h-4 w-4 text-emerald-500 animate-pulse" />
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Actualizado ahora</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                {isFetching ? 'Actualizando...' : 'Actualizar'}
+              </span>
+            </button>
+            <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-sm border border-gray-200 dark:border-gray-700">
+              <Activity className={`h-4 w-4 ${isFetching ? 'text-amber-500' : 'text-emerald-500'} ${!isFetching ? 'animate-pulse' : ''}`} />
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                {isFetching ? 'Sincronizando...' : 'Actualizado'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
