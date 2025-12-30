@@ -1,44 +1,54 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useQuery } from '@tanstack/react-query';
 import { reviewsService, Review, PendingProduct } from '@/lib/reviews';
 import Button from '@/components/ui/Button';
-import { Star, MessageSquare, Package } from 'lucide-react';
+import { Star, MessageSquare, Package, RefreshCw } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export default function ReviewsPage() {
   const [activeTab, setActiveTab] = useState<'pending' | 'history'>('pending');
-  const [pendingProducts, setPendingProducts] = useState<PendingProduct[]>([]);
-  const [myReviews, setMyReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const { data: pendingProducts = [], isLoading: isLoadingPending, refetch: refetchPending } = useQuery({
+    queryKey: ['pending-reviews'],
+    queryFn: () => reviewsService.getPendingReviews(),
+    staleTime: 1000 * 60,
+  });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [pending, history] = await Promise.all([
-        reviewsService.getPendingReviews(),
-        reviewsService.getMyReviews(),
-      ]);
-      setPendingProducts(pending);
-      setMyReviews(history);
-    } catch (error) {
-      console.error('Error loading reviews:', error);
-    } finally {
-      setLoading(false);
-    }
+  const { data: myReviews = [], isLoading: isLoadingHistory, refetch: refetchHistory } = useQuery({
+    queryKey: ['my-reviews'],
+    queryFn: () => reviewsService.getMyReviews(),
+    staleTime: 1000 * 60,
+  });
+
+  const isLoading = isLoadingPending || isLoadingHistory;
+  const isFetching = isLoadingPending || isLoadingHistory;
+
+  const refetch = () => {
+    refetchPending();
+    refetchHistory();
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center gap-3 mb-8">
-        <Star className="w-8 h-8 text-yellow-500" />
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Mis Reseñas</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex items-center gap-3">
+          <Star className="w-8 h-8 text-yellow-500" />
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Mis Reseñas</h1>
+        </div>
+        <button
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+            {isFetching ? 'Actualizando...' : 'Actualizar'}
+          </span>
+        </button>
       </div>
 
       {/* Tabs */}
@@ -78,7 +88,7 @@ export default function ReviewsPage() {
         </button>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-32 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse" />

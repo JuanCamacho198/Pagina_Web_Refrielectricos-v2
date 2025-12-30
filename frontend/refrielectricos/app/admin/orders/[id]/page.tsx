@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Package, User, MapPin, Loader2 } from 'lucide-react';
+import { ArrowLeft, Package, User, MapPin, Loader2, RefreshCw } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import Image from 'next/image';
 import { Order } from '@/types/order';
@@ -12,33 +13,26 @@ import { useToast } from '@/context/ToastContext';
 export default function AdminOrderDetailPage() {
   const params = useParams();
   const { addToast } = useToast();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const response = await api.get(`/orders/${params.id}`);
-        setOrder(response.data);
-      } catch (error) {
-        console.error('Error fetching order:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (params.id) {
-      fetchOrder();
-    }
-  }, [params.id]);
+  const { data: order, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['admin-order', params.id],
+    queryFn: async () => {
+      const { data } = await api.get<Order>(`/orders/${params.id}`);
+      return data;
+    },
+    enabled: !!params.id,
+    staleTime: 1000 * 60,
+  });
 
   const handleStatusChange = async (newStatus: string) => {
     if (!order) return;
     setIsUpdating(true);
     try {
-      const res = await api.patch(`/orders/${order.id}`, { status: newStatus });
-      setOrder(res.data);
+      const { data: updatedOrder } = await api.patch<Order>(`/orders/${order.id}`, { status: newStatus });
+      queryClient.setQueryData(['admin-order', params.id], updatedOrder);
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       addToast('Estado actualizado correctamente', 'success');
     } catch (error) {
       console.error('Error updating status:', error);
@@ -58,9 +52,18 @@ export default function AdminOrderDetailPage() {
           <Link href="/admin/orders" className="text-gray-500 hover:text-blue-600">
             <ArrowLeft size={24} />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Pedido #{order.id.slice(-6).toUpperCase()}
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Pedido #{order.id.slice(-6).toUpperCase()}
+            </h1>
+            <button
+              onClick={() => refetch()}
+              disabled={isFetching || isUpdating}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
         
         <div className="flex items-center gap-2">

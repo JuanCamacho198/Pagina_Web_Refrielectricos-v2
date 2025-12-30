@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { Eye, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Trash2, Check } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Eye, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Trash2, Check, RefreshCw } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { Order } from '@/types/order';
@@ -15,8 +16,6 @@ type SortKey = 'id' | 'createdAt' | 'total' | 'status';
 type SortDirection = 'asc' | 'desc';
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'createdAt', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,40 +26,23 @@ export default function AdminOrdersPage() {
   const isAdmin = user?.role === 'ADMIN';
   const deleteOrderMutation = useDeleteOrder();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
-  const fetchOrders = useCallback(async () => {
-    try {
-      const response = await api.get('/orders');
-      setOrders(response.data);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      addToast('Error al cargar pedidos', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [addToast]);
-
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setOpenDropdownId(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const { data: orders = [], isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['admin-orders'],
+    queryFn: async () => {
+      const { data } = await api.get<Order[]>('/orders');
+      return data;
+    },
+    staleTime: 1000 * 60,
+  });
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
       await api.patch(`/orders/${orderId}`, { status: newStatus });
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus as Order['status'] } : order
-      ));
+      queryClient.setQueryData(['admin-orders'], (old: Order[] | undefined) => 
+        old?.map(order => order.id === orderId ? { ...order, status: newStatus as Order['status'] } : order)
+      );
       addToast('Estado del pedido actualizado', 'success');
       setOpenDropdownId(null);
     } catch (error) {
@@ -76,13 +58,26 @@ export default function AdminOrdersPage() {
 
     try {
       await deleteOrderMutation.mutateAsync(orderId);
-      setOrders(orders.filter(order => order.id !== orderId));
+      queryClient.setQueryData(['admin-orders'], (old: Order[] | undefined) => 
+        old?.filter(order => order.id !== orderId)
+      );
       addToast('Pedido eliminado correctamente', 'success');
     } catch (error) {
       console.error('Error deleting order:', error);
       addToast('Error al eliminar el pedido', 'error');
     }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const filteredOrders = orders.filter(order => 
     order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -169,7 +164,19 @@ const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pedidos</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pedidos</h1>
+        <button
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+            {isFetching ? 'Actualizando...' : 'Actualizar'}
+          </span>
+        </button>
+      </div>
 
       <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <Search className="text-gray-400" />

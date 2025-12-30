@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Package, MapPin, Calendar, CreditCard } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, Calendar, CreditCard, RefreshCw } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import Image from 'next/image';
 import { Order } from '@/types/order';
@@ -13,27 +14,18 @@ import { ReviewForm } from '@/components/features/reviews/ReviewForm';
 
 export default function OrderDetailPage() {
   const params = useParams();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedProductToReview, setSelectedProductToReview] = useState<{ id: string; name: string } | null>(null);
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const response = await api.get(`/orders/${params.id}`);
-        setOrder(response.data);
-      } catch (error) {
-        console.error('Error fetching order:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (params.id) {
-      fetchOrder();
-    }
-  }, [params.id]);
+  const { data: order, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['order', params.id],
+    queryFn: async () => {
+      const { data } = await api.get<Order>(`/orders/${params.id}`);
+      return data;
+    },
+    enabled: !!params.id,
+    staleTime: 1000 * 60,
+  });
 
   if (isLoading) {
     return (
@@ -64,9 +56,18 @@ export default function OrderDetailPage() {
             <ArrowLeft size={24} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Pedido #{order.id.slice(-6).toUpperCase()}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Pedido #{order.id.slice(-6).toUpperCase()}
+              </h1>
+              <button
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
               <Calendar size={14} />
               {new Date(order.createdAt).toLocaleDateString('es-CO', {

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Save, Globe, Mail, Bell, Truck, RefreshCw } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -33,62 +34,45 @@ const EMOJI_OPTIONS = [
 ];
 
 export default function AdminSettingsPage() {
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { addToast } = useToast();
-  
-  const [settings, setSettings] = useState<StoreSettings>({
-    storeName: '',
-    supportEmail: '',
-    phoneNumber: '',
-    currency: 'COP',
-    maintenanceMode: false,
-    emailNotifications: true,
-    freeShippingEnabled: true,
-    freeShippingBannerText: 'Envío gratis en Curumaní desde $100,000',
-    freeShippingEmoji: '🚚',
+  const queryClient = useQueryClient();
+
+  const { data: apiSettings, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['store-settings'],
+    queryFn: async () => {
+      const { data } = await api.get<StoreSettings>('/settings');
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
   });
 
-  // Fetch settings from API on mount
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const { data } = await api.get('/settings');
-        setSettings({
-          storeName: data.storeName || '',
-          supportEmail: data.supportEmail || '',
-          phoneNumber: data.phoneNumber || '',
-          currency: data.currency || 'COP',
-          maintenanceMode: data.maintenanceMode ?? false,
-          emailNotifications: data.emailNotifications ?? true,
-          freeShippingEnabled: data.freeShippingEnabled ?? true,
-          freeShippingBannerText: data.freeShippingBannerText || 'Envío gratis en Curumaní desde $100,000',
-          freeShippingEmoji: data.freeShippingEmoji || '🚚',
-        });
-      } catch (error) {
-        console.error('Error fetching settings:', error);
-        addToast('Error al cargar la configuración', 'error');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSettings();
-  }, [addToast]);
+  const settings: StoreSettings = {
+    storeName: apiSettings?.storeName || '',
+    supportEmail: apiSettings?.supportEmail || '',
+    phoneNumber: apiSettings?.phoneNumber || '',
+    currency: apiSettings?.currency || 'COP',
+    maintenanceMode: apiSettings?.maintenanceMode ?? false,
+    emailNotifications: apiSettings?.emailNotifications ?? true,
+    freeShippingEnabled: apiSettings?.freeShippingEnabled ?? true,
+    freeShippingBannerText: apiSettings?.freeShippingBannerText || 'Envío gratis en Curumaní desde $100,000',
+    freeShippingEmoji: apiSettings?.freeShippingEmoji || '🚚',
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
     
-    setSettings(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
+    queryClient.setQueryData(['store-settings'], (old: StoreSettings | undefined) => ({
+      ...old || settings,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleToggle = (fieldName: keyof StoreSettings) => {
-    setSettings(prev => ({
-      ...prev,
-      [fieldName]: !prev[fieldName]
+    queryClient.setQueryData(['store-settings'], (old: StoreSettings | undefined) => ({
+      ...old || settings,
+      [fieldName]: !(old || settings)[fieldName],
     }));
   };
 
@@ -131,7 +115,19 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Configuración de la Tienda</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Configuración de la Tienda</h1>
+        <button
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+            {isFetching ? 'Actualizando...' : 'Actualizar'}
+          </span>
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* General Info */}

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { User, Shield, Trash2, Search, Mail, Calendar, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { User, Shield, Trash2, Search, Mail, Calendar, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -21,36 +22,30 @@ type SortKey = 'name' | 'email' | 'role' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'createdAt', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { addToast } = useToast();
+  const queryClient = useQueryClient();
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      const response = await api.get('/users');
-      setUsers(response.data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      addToast('Error al cargar usuarios', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [addToast]);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  const { data: users = [], isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['admin-users'],
+    queryFn: async () => {
+      const { data } = await api.get<UserData[]>('/users');
+      return data;
+    },
+    staleTime: 1000 * 60,
+  });
 
   const handleRoleChange = async (userId: string, newRole: 'USER' | 'ADMIN') => {
     if (!confirm(`¿Cambiar rol de usuario a ${newRole}?`)) return;
     
     try {
       await api.patch(`/users/${userId}`, { role: newRole });
-      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      queryClient.setQueryData(['admin-users'], (old: UserData[] | undefined) => 
+        old?.map(u => u.id === userId ? { ...u, role: newRole } : u)
+      );
       addToast(`Rol actualizado a ${newRole}`, 'success');
     } catch (error) {
       console.error('Error updating role:', error);
@@ -63,7 +58,9 @@ export default function AdminUsersPage() {
 
     try {
       await api.delete(`/users/${userId}`);
-      setUsers(users.filter(u => u.id !== userId));
+      queryClient.setQueryData(['admin-users'], (old: UserData[] | undefined) => 
+        old?.filter(u => u.id !== userId)
+      );
       addToast('Usuario eliminado correctamente', 'success');
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -149,11 +146,23 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Usuarios</h1>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Total: {users.length} usuarios
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Usuarios</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Total: {users.length} usuarios
+          </p>
         </div>
+        <button
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+            {isFetching ? 'Actualizando...' : 'Actualizar'}
+          </span>
+        </button>
       </div>
 
       <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
