@@ -45,18 +45,14 @@ export default function Navbar() {
   const categories: CategoryStructure[] = metadata?.structure || [];
 
   // Fetch store settings for free shipping banner
-  const { data: storeSettings } = useQuery({
+  const { data: storeSettings, isFetched } = useQuery({
     queryKey: ['store-settings'],
     queryFn: async () => {
       try {
         const { data } = await api.get('/settings');
         return data;
       } catch {
-        return { 
-          freeShippingEnabled: true, 
-          freeShippingBannerText: 'Envío gratis en Curumaní desde $100,000',
-          freeShippingEmoji: '🚚'
-        };
+        return null;
       }
     },
     staleTime: 1000 * 60 * 60,
@@ -158,7 +154,7 @@ export default function Navbar() {
             </div>
 
             {/* Free Shipping Badge - Only show if enabled */}
-            {storeSettings?.freeShippingEnabled !== false && (
+            {isFetched && storeSettings?.freeShippingEnabled && (
               <div className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-300 ${isScrolled ? 'opacity-0 w-0 overflow-hidden px-0' : 'opacity-100'}`}>
                 <span className="text-sm">{storeSettings?.freeShippingEmoji || '🚚'}</span>
                 <span>{storeSettings?.freeShippingBannerText || 'Envío gratis en Curumaní desde $100,000'}</span>
