@@ -13,14 +13,14 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="space-y-6">
             <Link href="/" className="inline-block">
-               <div className="relative h-16 w-48">
-                  <Image
-                    src="/images/RefriLogo.png"
-                    alt="Refrielectricos Logo"
-                    fill
-                    className="object-contain object-left"
-                  />
-               </div>
+           <div className="relative h-24 w-64">
+                   <Image
+                     src="/images/RefriLogo.png"
+                     alt="Refrielectricos Logo"
+                     fill
+                     className="object-contain object-left"
+                   />
+                </div>
             </Link>
             <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
               Tu aliado experto en repuestos de refrigeración y electricidad. Calidad garantizada y el mejor servicio para tus proyectos.

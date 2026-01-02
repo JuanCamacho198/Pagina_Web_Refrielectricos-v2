@@ -3,7 +3,6 @@
 import HeroCarousel from '@/components/features/home/HeroCarousel';
 import FeaturesSection from '@/components/features/home/FeaturesSection';
 import ProductCarousel from '@/components/features/home/ProductCarousel';
-import CategoriesGrid from '@/components/features/home/CategoriesGrid';
 import Button from '@/components/ui/Button';
 import { Mail } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
@@ -20,8 +19,6 @@ export default function Home() {
       {/* Features (Envío gratis, etc) */}
       <FeaturesSection />
 
-      {/* Categorías */}
-      <CategoriesGrid />
 
       {/* Productos Destacados (Carousel) */}
       {loading ? (

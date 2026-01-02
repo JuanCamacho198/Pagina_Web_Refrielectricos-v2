@@ -135,21 +135,22 @@ export default function Navbar() {
               className="shrink-0 flex items-center gap-2 hover:scale-105 transition-transform duration-200"
             >
               <Image 
-                src="/images/RefriLogo.png" 
+                src="/icons/logoRefri.svg" 
                 alt="Refrielectricos Logo" 
-                width={32} 
-                height={32} 
-                className={`transition-all duration-300 ${isScrolled ? 'w-6 h-6 md:w-8 md:h-8' : 'w-8 h-8 md:w-10 md:h-10'}`}
+                width={40} 
+                height={40} 
+                className={`transition-all duration-300 ${isScrolled ? 'w-7 h-7 md:w-9 md:h-9' : 'w-10 h-10 md:w-12 md:h-12'}`}
+                priority
               />
-              <span className={`font-extrabold tracking-tight leading-none whitespace-nowrap bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent block transition-all duration-300 ${
+              <span className={`font-extrabold tracking-tight leading-none whitespace-nowrap block transition-all duration-300 ${
                 isScrolled ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'
               }`}>
-                Refrielectricos
+                <span className="text-blue-600">REFRI</span><span className="text-gray-900 dark:text-white">ELECTRICOS</span>
               </span>
             </Link>
 
             {/* Search Bar (Expanded) */}
-            <div className="flex-1 max-w-md mx-auto hidden md:block">
+            <div className="flex-1 max-w-md ml-6 hidden md:block">
               <SearchBox />
             </div>
 
