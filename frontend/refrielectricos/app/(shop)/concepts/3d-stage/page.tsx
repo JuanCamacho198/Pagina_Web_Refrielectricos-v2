@@ -3,7 +3,6 @@
 import StageHero from '@/components/features/home/concepts/StageHero';
 import FeaturesSection from '@/components/features/home/FeaturesSection';
 import ProductCarousel from '@/components/features/home/ProductCarousel';
-import CategoriesGrid from '@/components/features/home/CategoriesGrid';
 import Button from '@/components/ui/Button';
 import { useProducts } from '@/hooks/useProducts';
 
@@ -17,7 +16,6 @@ export default function StageConceptPage() {
 
       {/* Existing Homepage Content */}
       <FeaturesSection />
-      <CategoriesGrid />
 
       {loading ? (
         <div className="py-8 container mx-auto">
