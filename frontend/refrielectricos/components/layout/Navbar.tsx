@@ -137,36 +137,27 @@ export default function Navbar() {
               <Image 
                 src="/icons/logoRefri.svg" 
                 alt="Refrielectricos Logo" 
-                width={40} 
-                height={40} 
-                className={`transition-all duration-300 ${isScrolled ? 'w-7 h-7 md:w-9 md:h-9' : 'w-10 h-10 md:w-12 md:h-12'}`}
+                width={50} 
+                height={50} 
+                className={`transition-all duration-300 ${isScrolled ? 'w-10 h-10 md:w-12 md:h-12' : 'w-12 h-12 md:w-14 md:h-14'}`}
                 priority
               />
               <span className={`font-extrabold tracking-tight leading-none whitespace-nowrap block transition-all duration-300 ${
                 isScrolled ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'
               }`}>
-                <span className="text-blue-600 drop-shadow-sm">REFRI</span><span className="bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent drop-shadow-sm">ELECTRICOS</span>
+                <span className="text-blue-600 drop-shadow-sm">REFRIELECTRICOS</span>
+                <span className="text-blue-500 drop-shadow-sm ml-1">G&E</span>
               </span>
             </Link>
 
-            {/* Search Bar (Expanded) */}
-            <div className="flex-1 max-w-md ml-6 hidden md:block">
+            {/* Search Bar (Centered) */}
+            <div className="flex-1 flex justify-center max-w-2xl mx-auto hidden md:block">
               <SearchBox />
             </div>
 
-            {/* Free Shipping Badge - Only show if enabled */}
-            {isFetched && storeSettings && storeSettings.freeShippingEnabled === true && (
-              <div className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-300 ${isScrolled ? 'opacity-0 w-0 overflow-hidden px-0' : 'opacity-100'}`}>
-                <span className="text-sm">{storeSettings?.freeShippingEmoji || '🚚'}</span>
-                <span>{storeSettings?.freeShippingBannerText || 'Envío gratis en Curumaní desde $100,000'}</span>
-              </div>
-            )}
-
-            {/* Theme Toggle (Moved to top right for balance) */}
-            <div className="hidden md:flex items-center gap-4">
-              <div>
-                <ThemeToggle />
-              </div>
+            {/* Theme Toggle - Far Right */}
+            <div className="hidden md:flex items-center ml-auto">
+              <ThemeToggle />
             </div>
 
             {/* Right Actions (Visible on Scroll) */}
