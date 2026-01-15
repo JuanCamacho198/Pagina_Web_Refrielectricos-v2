@@ -151,7 +151,7 @@ export default function Navbar() {
             </Link>
 
             {/* Search Bar (Centered) */}
-            <div className="flex-1 flex justify-center max-w-2xl mx-auto hidden md:block">
+            <div className="flex-1 justify-center max-w-2xl mx-auto hidden md:block">
               <SearchBox />
             </div>
 
