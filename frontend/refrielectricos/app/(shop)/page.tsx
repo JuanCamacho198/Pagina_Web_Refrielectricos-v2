@@ -2,6 +2,7 @@
 
 import HeroCarousel from '@/components/features/home/HeroCarousel';
 import FeaturesSection from '@/components/features/home/FeaturesSection';
+import BrandsCarousel from '@/components/features/home/BrandsCarousel';
 import ProductCarousel from '@/components/features/home/ProductCarousel';
 import Button from '@/components/ui/Button';
 import { Mail } from 'lucide-react';
@@ -19,6 +20,8 @@ export default function Home() {
       {/* Features (Envío gratis, etc) */}
       <FeaturesSection />
 
+      {/* Carrusel de Marcas */}
+      <BrandsCarousel />
 
       {/* Productos Destacados (Carousel) */}
       {loading ? (
