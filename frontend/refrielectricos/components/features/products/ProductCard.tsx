@@ -115,7 +115,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       >
         <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg border-gray-200 dark:border-gray-700">
           {/* Imagen */}
-          <div className="relative w-full pt-[100%] bg-gray-50 dark:bg-gray-800 overflow-hidden block group">
+          <div className="relative w-full pt-[100%] bg-white dark:bg-gray-800 overflow-hidden block group">
             <Link href={computedValues.productLink} className="absolute inset-0 p-4">
               {product.image_url ? (
                 <Image
