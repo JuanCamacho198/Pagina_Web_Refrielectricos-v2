@@ -88,7 +88,9 @@ export default function BrandsCarousel() {
         </div>
       </div>
 
-      <style jsx global>{BRAND_STYLES}</style>
+      <style jsx global>
+        {BRAND_STYLES}
+      </style>
     </section>
   );
 }

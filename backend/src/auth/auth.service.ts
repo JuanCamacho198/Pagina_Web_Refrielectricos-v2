@@ -43,7 +43,7 @@ export class AuthService {
     pass: string,
   ): Promise<Omit<User, 'password'> | null> {
     const user = await this.usersService.findByEmail(email);
-    
+
     // Check if user exists and uses LOCAL provider
     if (!user) {
       return null;
@@ -62,7 +62,7 @@ export class AuthService {
       const { password, ...result } = user;
       return result;
     }
-    
+
     return null;
   }
 
@@ -406,7 +406,9 @@ export class AuthService {
 
     if (!user) {
       // Don't reveal if user exists for security
-      return { message: 'Si el correo existe, recibirás un enlace de verificación' };
+      return {
+        message: 'Si el correo existe, recibirás un enlace de verificación',
+      };
     }
 
     if (user.emailVerified) {
@@ -440,7 +442,9 @@ export class AuthService {
       throw new BadRequestException('Error al enviar el correo');
     }
 
-    return { message: 'Si el correo existe, recibirás un enlace de verificación' };
+    return {
+      message: 'Si el correo existe, recibirás un enlace de verificación',
+    };
   }
 
   /**

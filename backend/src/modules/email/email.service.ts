@@ -12,8 +12,7 @@ export class EmailService {
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     this.frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') ||
-      'http://localhost:3000';
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
     this.fromEmail =
       this.configService.get<string>('FROM_EMAIL') ||
       'noreply@refrielectricos.com';
@@ -86,7 +85,10 @@ export class EmailService {
 
       this.logger.log(`Password reset email sent to ${email}`);
     } catch (error) {
-      this.logger.error(`Failed to send password reset email to ${email}`, error);
+      this.logger.error(
+        `Failed to send password reset email to ${email}`,
+        error,
+      );
       throw error;
     }
   }
