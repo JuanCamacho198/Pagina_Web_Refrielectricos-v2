@@ -69,6 +69,12 @@ pnpm run lint
 
 # Format entire project
 pnpm run format
+
+# Sync environment variables with Railway
+pnpm run env:push:backend    # Upload backend/.env to Railway
+pnpm run env:pull:backend    # Download Railway vars to backend/.env
+pnpm run env:push:frontend   # Upload frontend/.env.local to Railway
+pnpm run env:pull:frontend   # Download Railway vars to frontend/.env.local
 ```
 
 ---
@@ -520,7 +526,9 @@ chore(deps): update dependencies
 
 ### Environment Variables
 - Never commit `.env` files
-- Use Railway environment variables
+- Use Railway environment variables for production
+- Use sync scripts to avoid manual copying: `pnpm run env:push:backend` or `pnpm run env:pull:backend`
+- See `.docs/railway-env-sync.md` for detailed Railway CLI usage
 - Prefix sensitive variables: `JWT_SECRET`, `DATABASE_URL`
 
 ---
