@@ -8,6 +8,8 @@ import { useCartStore } from '@/store/cartStore';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Link from 'next/link';
+import GoogleLoginButton from './GoogleLoginButton';
+import { Loader2 } from 'lucide-react';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -28,6 +30,7 @@ export default function RegisterForm() {
     password: '',
   });
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const validate = () => {
     const newErrors = { name: '', email: '', password: '' };
@@ -96,9 +99,11 @@ export default function RegisterForm() {
 
       const redirect = searchParams.get('redirect');
       router.push(redirect || '/');
-    } catch {
+    } catch (error) {
       // Error handled in hook
       setIsLoggingIn(false);
+      const err = error as { response?: { data?: { message?: string } } };
+      setServerError(err.response?.data?.message || 'Error al crear la cuenta');
     }
   };
 
@@ -106,6 +111,46 @@ export default function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Google Sign-In Button */}
+      <div className="space-y-4">
+        <GoogleLoginButton
+          text="signup_with"
+          onSuccess={async () => {
+            // Merge cart after Google registration
+            if (localItems.length > 0) {
+              const itemsToMerge = localItems.map(item => ({
+                productId: item.id,
+                quantity: item.quantity
+              }));
+              await mergeCart(itemsToMerge);
+              clearLocalCart();
+            }
+            const redirect = searchParams.get('redirect');
+            router.push(redirect || '/');
+          }}
+          onError={(error) => setServerError(error)}
+          className="relative"
+        />
+        
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+              O continúa con
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {serverError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm">
+          {serverError}
+        </div>
+      )}
+
       <div>
         <Input
           label="Nombre completo"
@@ -151,9 +196,11 @@ export default function RegisterForm() {
 
       <Button
         type="submit"
-        className="w-full"
+        className="w-full flex justify-center items-center gap-2"
         disabled={isProcessing}
       >
+        {isRegistering && <Loader2 className="h-4 w-4 animate-spin" />}
+        {isLoggingIn && <Loader2 className="h-4 w-4 animate-spin" />}
         {isRegistering ? 'Creando cuenta...' : isLoggingIn ? 'Iniciando sesión...' : 'Crear cuenta'}
       </Button>
 

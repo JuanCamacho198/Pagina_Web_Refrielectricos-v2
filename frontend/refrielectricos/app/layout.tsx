@@ -4,6 +4,7 @@ import "./globals.css";
 import { ToastProvider } from "@/context/ToastContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import QueryProvider from "@/components/providers/QueryProvider";
+import GoogleAuthProvider from "@/components/providers/GoogleAuthProvider";
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -58,6 +59,8 @@ export default function RootLayout({
           rel="dns-prefetch"
           href="https://res.cloudinary.com"
         />
+        {/* Google Identity Services */}
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
       <body className={`${roboto.variable} font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}>
         <ThemeProvider
@@ -66,11 +69,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </QueryProvider>
+          <GoogleAuthProvider>
+            <QueryProvider>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
+            </QueryProvider>
+          </GoogleAuthProvider>
         </ThemeProvider>
       </body>
     </html>

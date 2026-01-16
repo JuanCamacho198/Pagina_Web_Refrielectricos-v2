@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Link from 'next/link';
 import { AlertTriangle, Loader2 } from 'lucide-react';
+import GoogleLoginButton from './GoogleLoginButton';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -99,6 +100,32 @@ export default function LoginForm() {
           <span className="block sm:inline">{serverError}</span>
         </div>
       )}
+
+      {/* Google Sign-In Button */}
+      <div className="space-y-4">
+        <GoogleLoginButton
+          text="signin_with"
+          onSuccess={() => {
+            clearLocalCart();
+            const redirect = searchParams.get('redirect');
+            router.push(redirect || '/');
+          }}
+          onError={(error) => setServerError(error)}
+          className="relative"
+        />
+        
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+              O continúa con
+            </span>
+          </div>
+        </div>
+      </div>
       
       <div>
         <Input
@@ -141,6 +168,14 @@ export default function LoginForm() {
           <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300 cursor-pointer">
             Recordar contraseña
           </label>
+        </div>
+        <div className="text-sm">
+          <Link
+            href="/forgot-password"
+            className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
         </div>
       </div>
 
