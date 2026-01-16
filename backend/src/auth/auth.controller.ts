@@ -113,4 +113,10 @@ export class AuthController {
     await this.authService.revokeOtherTokens(req.user.userId, refreshToken);
     return { message: 'Logged out from other devices successfully' };
   }
+
+  @Throttle({ short: { limit: 10, ttl: 1000 } }) // 10 requests por segundo
+  @Get('check-provider')
+  async checkProvider(@Query('email') email: string) {
+    return this.authService.checkAuthProvider(email);
+  }
 }

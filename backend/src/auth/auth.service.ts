@@ -480,4 +480,32 @@ export class AuthService {
       },
     });
   }
+
+  /**
+   * Check authentication provider for an email
+   * Returns the provider (LOCAL or GOOGLE) if user exists, or null if not found
+   */
+  async checkAuthProvider(email: string): Promise<{
+    exists: boolean;
+    provider?: 'LOCAL' | 'GOOGLE';
+    message: string;
+  }> {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      return {
+        exists: false,
+        message: 'Usuario no encontrado',
+      };
+    }
+
+    return {
+      exists: true,
+      provider: user.provider,
+      message:
+        user.provider === 'GOOGLE'
+          ? 'Esta cuenta usa Google Sign-In'
+          : 'Esta cuenta usa email y contraseña',
+    };
+  }
 }

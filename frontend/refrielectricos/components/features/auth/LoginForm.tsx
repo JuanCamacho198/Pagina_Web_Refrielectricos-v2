@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartStore } from '@/store/cartStore';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Link from 'next/link';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Info } from 'lucide-react';
 import GoogleLoginButton from './GoogleLoginButton';
+import { api } from '@/lib/api';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -25,9 +26,41 @@ export default function LoginForm() {
     password: '',
   });
   const [serverError, setServerError] = useState('');
+  const [providerWarning, setProviderWarning] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   
   const registered = searchParams.get('registered');
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check auth provider when email is typed
+  const checkProvider = useCallback(async (email: string) => {
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setProviderWarning('');
+      return;
+    }
+
+    // Debounce by 500ms
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        const response = await api.get(`/auth/check-provider?email=${encodeURIComponent(email)}`);
+        const data = response.data;
+
+        if (data.exists && data.provider === 'GOOGLE') {
+          setProviderWarning('Esta cuenta usa Google Sign-In. Usa el botón "Continuar con Google" arriba.');
+        } else {
+          setProviderWarning('');
+        }
+      } catch (error) {
+        // Silently fail - don't show errors for this check
+        setProviderWarning('');
+      }
+    }, 500);
+  }, []);
 
   const validate = () => {
     const newErrors = { email: '', password: '' };
@@ -51,18 +84,26 @@ export default function LoginForm() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+    
     // Clear error when user types
-    if (errors[e.target.name as keyof typeof errors]) {
+    if (errors[name as keyof typeof errors]) {
       setErrors({
         ...errors,
-        [e.target.name]: '',
+        [name]: '',
       });
     }
     if (serverError) setServerError('');
+    
+    // Check provider when email changes
+    if (name === 'email') {
+      checkProvider(value);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,6 +139,13 @@ export default function LoginForm() {
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center gap-2" role="alert">
           <AlertTriangle className="h-5 w-5" />
           <span className="block sm:inline">{serverError}</span>
+        </div>
+      )}
+
+      {providerWarning && (
+        <div className="bg-blue-50 border border-blue-400 text-blue-700 px-4 py-3 rounded relative flex items-center gap-2" role="alert">
+          <Info className="h-5 w-5 flex-shrink-0" />
+          <span className="block sm:inline">{providerWarning}</span>
         </div>
       )}
 
