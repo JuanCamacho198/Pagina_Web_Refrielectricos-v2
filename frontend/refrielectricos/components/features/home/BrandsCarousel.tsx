@@ -68,7 +68,7 @@ export default function BrandsCarousel() {
             {DUPLICATED_BRANDS.map((brand, index) => (
               <div
                 key={`${brand.name}-${index}`}
-                className="flex-shrink-0 mx-8 grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 brands-pause"
+                className="flex-shrink-0 mx-8 transition-all duration-300 hover:scale-105 brands-pause"
                 style={{ width: '160px' }}
               >
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center justify-center h-24 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">

@@ -20,28 +20,6 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-// Banner promocional hoisted
-const PromoTechnicianBanner = () => (
-  <div className="relative rounded-2xl overflow-hidden bg-linear-to-r from-blue-900 to-blue-600 text-white p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-lg my-12">
-    <div className="absolute inset-0 opacity-10 bg-[url('/patterns/circuit.svg')]"></div>
-    <div className="relative z-10 max-w-xl">
-      <h2 className="text-3xl font-bold mb-4">¿Eres técnico profesional?</h2>
-      <p className="text-blue-100 text-lg mb-6">
-        Regístrate como técnico y obtén precios especiales, acceso a manuales técnicos y soporte prioritario.
-      </p>
-      <Button className="bg-white text-blue-900 hover:bg-blue-50 border-none">
-        Registrarme como Técnico
-      </Button>
-    </div>
-    <div className="relative z-10 hidden md:block">
-      {/* Aquí podría ir una imagen ilustrativa */}
-      <div className="w-32 h-32 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
-        <span className="text-4xl">🛠️</span>
-      </div>
-    </div>
-  </div>
-);
-
 // Newsletter section hoisted
 const NewsletterSection = () => (
   <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-8 md:p-12 text-center border border-gray-100 dark:border-gray-700">
@@ -70,14 +48,23 @@ const NewsletterSection = () => (
 export default function Home() {
   const { data: products = [], isLoading: loading } = useProducts();
 
+  // Filtrar productos por categoría
+  const lightingProducts = products.filter(p => 
+    p.category?.toLowerCase().includes('iluminación') || 
+    p.category?.toLowerCase().includes('iluminacion')
+  );
+  
+  const electricalProducts = products.filter(p => 
+    p.category?.toLowerCase().includes('eléctricos') || 
+    p.category?.toLowerCase().includes('electricos') ||
+    p.category?.toLowerCase().includes('electricidad')
+  );
+
   return (
     <div className="space-y-8 pb-12">
       <h1 className="sr-only">Refrielectricos: Repuestos de Refrigeración y Electricidad</h1>
       {/* Hero Section */}
       <HeroCarousel />
-
-      {/* Features (Envío gratis, etc) */}
-      <FeaturesSection />
 
       {/* Carrusel de Marcas */}
       <BrandsCarousel />
@@ -86,11 +73,23 @@ export default function Home() {
       {loading ? (
         <LoadingSkeleton />
       ) : (
-        <ProductCarousel title="Productos Destacados" products={products} />
+        <>
+          <ProductCarousel title="Productos Destacados" products={products.slice(0, 12)} />
+          
+          {/* Carrusel de Iluminación */}
+          {lightingProducts.length > 0 && (
+            <ProductCarousel title="Iluminación" products={lightingProducts.slice(0, 12)} />
+          )}
+          
+          {/* Carrusel de Productos Eléctricos */}
+          {electricalProducts.length > 0 && (
+            <ProductCarousel title="Productos Eléctricos" products={electricalProducts.slice(0, 12)} />
+          )}
+        </>
       )}
 
-      {/* Banner Promocional */}
-      <PromoTechnicianBanner />
+      {/* Features (Envío gratis, etc) */}
+      <FeaturesSection />
 
       {/* Newsletter */}
       <NewsletterSection />

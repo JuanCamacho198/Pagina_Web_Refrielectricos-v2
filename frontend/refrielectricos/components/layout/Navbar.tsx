@@ -145,7 +145,7 @@ export default function Navbar() {
               <span className={`font-extrabold tracking-tight leading-none whitespace-nowrap block transition-all duration-300 ${
                 isScrolled ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'
               }`}>
-                <span className="text-blue-600 drop-shadow-sm">REFRIELECTRICOS</span>
+                <span className="text-blue-600 drop-shadow-sm">Refrielectricos</span>
                 <span className="text-blue-500 drop-shadow-sm ml-1">G&E</span>
               </span>
             </Link>
