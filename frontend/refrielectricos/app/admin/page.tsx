@@ -102,7 +102,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => refetch()}
             disabled={isFetching}
-            className="group relative inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-600 text-white rounded-xl shadow-lg shadow-slate-900/20 dark:shadow-blue-600/20 hover:translate-y-[-1px] active:translate-y-[1px] transition-all disabled:opacity-70 disabled:hover:translate-y-0 overflow-hidden"
+            className="group relative inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-600 text-white rounded-xl shadow-lg shadow-slate-900/20 dark:shadow-blue-600/20 hover:translate-y-px active:translate-y-px transition-all disabled:opacity-70 disabled:hover:translate-y-0 overflow-hidden"
           >
             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
@@ -251,7 +251,7 @@ function StatsCard({ title, value, icon: Icon, trend, trendUp, colorScheme, subt
   
   return (
     <div className="group relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-black/30 hover:-translate-y-1">
-      <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${scheme.gradient} opacity-5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 transition-all duration-500 group-hover:scale-150 group-hover:opacity-10`} />
+      <div className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${scheme.gradient} opacity-5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 transition-all duration-500 group-hover:scale-150 group-hover:opacity-10`} />
       
       <div className="relative p-6 h-full flex flex-col justify-between z-10">
         <div className="flex items-start justify-between mb-4">
@@ -276,7 +276,7 @@ function StatsCard({ title, value, icon: Icon, trend, trendUp, colorScheme, subt
       </div>
       
       {/* Bottom border gradient */}
-      <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${scheme.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+      <div className={`absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r ${scheme.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
     </div>
   );
 }
