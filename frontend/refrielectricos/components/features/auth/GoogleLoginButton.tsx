@@ -1,7 +1,6 @@
 'use client';
 
-import { useGoogleLogin, googleLogout } from '@react-oauth/google';
-import { useEffect, useState } from 'react';
+import { GoogleLogin, useGoogleOneTapLogin } from '@react-oauth/google';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import axios from 'axios';
@@ -23,23 +22,14 @@ export default function GoogleLoginButton({
 }: GoogleLoginButtonProps) {
   const router = useRouter();
   const { login: setAuthUser } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const buttonText = {
-    signin_with: 'Iniciar sesión con Google',
-    signup_with: 'Registrarse con Google',
-    continue_with: 'Continuar con Google',
-  };
-
-  const handleGoogleLogin = async (credentialResponse: any) => {
+  const handleGoogleResponse = async (credentialResponse: any) => {
     if (!credentialResponse.credential) {
       const errorMsg = 'No se recibió credencial de Google';
       console.error(errorMsg);
       onError?.(errorMsg);
       return;
     }
-
-    setIsLoading(true);
 
     try {
       // Send credential to backend
@@ -74,73 +64,36 @@ export default function GoogleLoginButton({
         refresh_token
       );
 
-      onSuccess?.();
-      router.push('/');
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/');
+      }
     } catch (error: any) {
       console.error('Google login error:', error);
       const errorMsg =
         error.response?.data?.message || 'Error al iniciar sesión con Google';
       onError?.(errorMsg);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Initialize Google Sign-In button
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.google) return;
-
-    window.google.accounts.id.initialize({
-      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-      callback: handleGoogleLogin,
-      auto_select: false,
-      cancel_on_tap_outside: true,
-    });
-
-    // Render the button
-    const buttonDiv = document.getElementById('google-signin-button');
-    if (buttonDiv) {
-      window.google.accounts.id.renderButton(buttonDiv, {
-        type: 'standard',
-        theme: 'outline',
-        size: 'large',
-        text: text,
-        shape: 'rectangular',
-        logo_alignment: 'left',
-        width: buttonDiv.offsetWidth,
-      });
-    }
-
-    // Show One Tap if on login page
-    if (window.location.pathname === '/login') {
-      window.google.accounts.id.prompt();
-    }
-  }, [text]);
+  useGoogleOneTapLogin({
+    onSuccess: handleGoogleResponse,
+    onError: () => console.log('Google One Tap Failed'),
+    auto_select: true,
+  });
 
   return (
-    <div className={className}>
-      {isLoading && (
-        <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center rounded-md z-10">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        </div>
-      )}
-      <div id="google-signin-button" className="w-full"></div>
+    <div className={`${className} flex justify-center w-full`}>
+      <GoogleLogin
+        onSuccess={handleGoogleResponse}
+        onError={() => onError?.('Error al iniciar sesión con Google')}
+        text={text}
+        theme="outline"
+        shape="rectangular"
+        size="large"
+        width="100%"
+      />
     </div>
   );
-}
-
-// TypeScript declarations for Google Identity Services
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: any) => void;
-          renderButton: (element: HTMLElement, config: any) => void;
-          prompt: () => void;
-          disableAutoSelect: () => void;
-        };
-      };
-    };
-  }
 }

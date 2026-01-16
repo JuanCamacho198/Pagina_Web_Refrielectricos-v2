@@ -7,7 +7,7 @@ export default function RegisterPage() {
       <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
         <div className="text-center">
           <Link href="/" className="text-3xl font-bold text-blue-600 dark:text-blue-500">
-            Refrielectricos
+            Refrielectricos G&E
           </Link>
           <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
             Crea tu cuenta
