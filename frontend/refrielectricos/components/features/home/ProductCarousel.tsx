@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '@/components/features/products/ProductCard';
 import { Product } from '@/types/product';
@@ -10,20 +10,21 @@ interface ProductCarouselProps {
   products: Product[];
 }
 
+const SCROLL_AMOUNT = 300; // Ancho aproximado de una tarjeta + gap
+
 export default function ProductCarousel({ title, products }: ProductCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const scroll = (direction: 'left' | 'right') => {
+  const scroll = useCallback((direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const { current } = scrollRef;
-      const scrollAmount = 300; // Ancho aproximado de una tarjeta + gap
       if (direction === 'left') {
-        current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        current.scrollBy({ left: -SCROLL_AMOUNT, behavior: 'smooth' });
       } else {
-        current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        current.scrollBy({ left: SCROLL_AMOUNT, behavior: 'smooth' });
       }
     }
-  };
+  }, []);
 
   if (products.length === 0) return null;
 

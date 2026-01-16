@@ -3,7 +3,7 @@
 import { Heart, ShoppingCart, Check, Eye, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -20,6 +20,18 @@ interface ProductCardProps {
   priority?: boolean;
 }
 
+// Animación variants hoisted a nivel de módulo
+const iconVariants = {
+  initial: { scale: 0 },
+  animate: { scale: 1 },
+  exit: { scale: 0 }
+};
+
+const cardVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 }
+};
+
 export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -27,67 +39,87 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { user } = useAuthStore();
   
-  const isAdmin = user?.role === 'ADMIN';
-  const isFavorite = isInWishlist(product.id);
-  const productLink = `/products/${product.slug || product.id}`;
-  const isLowStock = product.stock > 0 && product.stock < 5;
-  const isOutOfStock = product.stock === 0;
-  
-  // Discount calculation
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-  const discountPercentage = hasDiscount 
-    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100) 
-    : 0;
+  // Derivar valores calculados usando useMemo para evitar recalcular en cada render
+  const computedValues = useMemo(() => {
+    const isAdmin = user?.role === 'ADMIN';
+    const isFavorite = isInWishlist(product.id);
+    const productLink = `/products/${product.slug || product.id}`;
+    const isLowStock = product.stock > 0 && product.stock < 5;
+    const isOutOfStock = product.stock === 0;
+    
+    // Discount calculation
+    const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+    const discountPercentage = hasDiscount 
+      ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100) 
+      : 0;
 
-  // Generate optimized URL for the card (thumbnail)
-  const imageUrl = getCloudinaryUrl(product.image_url, {
-    width: 400, // Slightly larger than 300 to look good on high DPI mobile
-    height: 400,
-    crop: 'fill',
-    quality: 'auto',
-    format: 'auto'
-  });
+    // Generate optimized URL for the card (thumbnail)
+    const imageUrl = getCloudinaryUrl(product.image_url, {
+      width: 400, // Slightly larger than 300 to look good on high DPI mobile
+      height: 400,
+      crop: 'fill',
+      quality: 'auto',
+      format: 'auto'
+    });
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+    return {
+      isAdmin,
+      isFavorite,
+      productLink,
+      isLowStock,
+      isOutOfStock,
+      hasDiscount,
+      discountPercentage,
+      imageUrl
+    };
+  }, [user?.role, isInWishlist, product.id, product.slug, product.stock, product.originalPrice, product.price, product.image_url]);
+
+  // Usar useCallback para funciones que se pasan como props
+  const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (isOutOfStock) return;
+    if (computedValues.isOutOfStock) return;
 
     addItem(product);
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
-  };
+  }, [computedValues.isOutOfStock, addItem, product]);
 
-  const handleToggleFavorite = async (e: React.MouseEvent) => {
+  const handleToggleFavorite = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     await toggleWishlist(product.id);
-  };
+  }, [toggleWishlist, product.id]);
 
-  const handleQuickView = (e: React.MouseEvent) => {
+  const handleQuickView = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsQuickViewOpen(true);
-  };
+  }, []);
+
+  const handleCloseQuickView = useCallback(() => {
+    setIsQuickViewOpen(false);
+  }, []);
 
   return (
     <>
       <motion.div 
         className="group block h-full relative"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        variants={cardVariants}
+        initial="initial"
+        whileInView="animate"
         viewport={{ once: true }}
         transition={{ duration: 0.4 }}
       >
         <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg border-gray-200 dark:border-gray-700">
           {/* Imagen */}
           <div className="relative w-full pt-[100%] bg-white overflow-hidden block group">
-            <Link href={productLink} className="absolute inset-0 p-4">
+            <Link href={computedValues.productLink} className="absolute inset-0 p-4">
               {product.image_url ? (
                 <Image
-                  src={imageUrl}
+                  src={computedValues.imageUrl}
                   alt={product.name}
                   fill
                   priority={priority}
@@ -103,22 +135,22 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-              {isOutOfStock && (
+              {computedValues.isOutOfStock && (
                 <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-md shadow-sm">
                   Agotado
                 </span>
               )}
-              {!isOutOfStock && hasDiscount && (
+              {!computedValues.isOutOfStock && computedValues.hasDiscount && (
                 <span className="px-2 py-1 text-xs font-bold text-white bg-red-600 rounded-md shadow-sm">
-                  -{discountPercentage}%
+                  -{computedValues.discountPercentage}%
                 </span>
               )}
-              {!isOutOfStock && product.promoLabel && (
+              {!computedValues.isOutOfStock && product.promoLabel && (
                 <span className="px-2 py-1 text-xs font-bold text-white bg-blue-600 rounded-md shadow-sm uppercase">
                   {product.promoLabel}
                 </span>
               )}
-              {!isOutOfStock && isLowStock && (
+              {!computedValues.isOutOfStock && computedValues.isLowStock && (
                 <span className="px-2 py-1 text-xs font-bold text-white bg-orange-500 rounded-md shadow-sm">
                   Últimas unidades
                 </span>
@@ -128,7 +160,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             {/* Action Buttons Overlay */}
             <div className="absolute top-3 right-3 flex flex-col gap-2 z-10 transition-all duration-300 translate-x-0 opacity-100 lg:translate-x-12 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100">
               {/* Admin Edit Button */}
-              {isAdmin && (
+              {computedValues.isAdmin && (
                 <Link
                   href={`/admin/products/${product.id}`}
                   onClick={(e) => e.stopPropagation()}
@@ -145,7 +177,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
               >
                 <Heart
                   size={18}
-                  className={isFavorite ? 'fill-red-500 text-red-500' : ''}
+                  className={computedValues.isFavorite ? 'fill-red-500 text-red-500' : ''}
                 />
               </button>
               <button
@@ -167,7 +199,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                 {product.brand && (product.subcategory || product.category) && <span className="mx-1">•</span>}
                 {product.subcategory || product.category || '\u00A0'}
               </p>
-              <Link href={productLink}>
+              <Link href={computedValues.productLink}>
                 <h3 className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 h-10 sm:h-12 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight" title={product.name}>
                   {product.name}
                 </h3>
@@ -178,12 +210,12 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
               <div className="flex flex-col">
                 <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Precio</span>
                 <div className="flex flex-col">
-                  {hasDiscount && (
+                  {computedValues.hasDiscount && (
                     <span className="text-[10px] sm:text-xs text-gray-400 line-through decoration-red-500/50">
                       {formatCurrency(Number(product.originalPrice))}
                     </span>
                   )}
-                  <span className={`text-sm sm:text-lg font-bold ${hasDiscount ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                  <span className={`text-sm sm:text-lg font-bold ${computedValues.hasDiscount ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
                     {formatCurrency(Number(product.price))}
                   </span>
                 </div>
@@ -194,29 +226,31 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                 className={`shrink-0 w-8 h-8 sm:w-10 sm:h-10 p-0 rounded-full flex items-center justify-center transition-all duration-300 ${
                   isAdded 
                     ? 'bg-green-600 hover:bg-green-700' 
-                    : isOutOfStock
+                    : computedValues.isOutOfStock
                       ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700 hover:scale-105 shadow-md hover:shadow-blue-500/20'
                 }`}
-                disabled={isAdded || isOutOfStock}
-                title={isOutOfStock ? "Agotado" : "Agregar al carrito"}
+                disabled={isAdded || computedValues.isOutOfStock}
+                title={computedValues.isOutOfStock ? "Agotado" : "Agregar al carrito"}
               >
                 <AnimatePresence mode='wait'>
                   {isAdded ? (
                     <motion.div
                       key="check"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
+                      variants={iconVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
                     >
                       <Check size={16} className="sm:w-[18px] sm:h-[18px]" />
                     </motion.div>
                   ) : (
                     <motion.div
                       key="cart"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
+                      variants={iconVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
                     >
                       <ShoppingCart size={16} className="sm:w-[18px] sm:h-[18px]" />
                     </motion.div>
@@ -231,7 +265,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       <ProductQuickView 
         product={product} 
         isOpen={isQuickViewOpen} 
-        onClose={() => setIsQuickViewOpen(false)} 
+        onClose={handleCloseQuickView} 
       />
     </>
   );

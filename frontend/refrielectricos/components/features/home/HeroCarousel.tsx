@@ -59,6 +59,7 @@ export default function HeroCarousel() {
   useEffect(() => {
     const timer = setInterval(() => paginate(1), 5000);
     return () => clearInterval(timer);
+     
   }, [current]);
 
   const slideVariants = {
