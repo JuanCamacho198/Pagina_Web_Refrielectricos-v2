@@ -28,13 +28,34 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
 // Models
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
-  password  String
+  password  String?  // Nullable for Google OAuth users
   role      Role     @default(USER)
+  
+  // Google OAuth fields
+  googleId         String?       @unique
+  provider         AuthProvider  @default(LOCAL)
+  avatar           String?       // Profile picture URL
+  
+  // Email verification fields
+  emailVerified         Boolean   @default(false)
+  emailVerifyToken      String?   @unique
+  emailVerifyExpires    DateTime?
+  
+  // Password reset fields
+  resetPasswordToken    String?   @unique
+  resetPasswordExpires  DateTime?
+  
+  // Relations
   orders    Order[]
   wishlists Wishlist[]
   addresses Address[]
@@ -49,6 +70,8 @@ model User {
 
   @@index([email])
   @@index([role])
+  @@index([googleId])
+  @@index([provider])
 }
 
 model Notification {

@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Panel de Control', href: '/admin', icon: LayoutDashboard },
   { name: 'Productos', href: '/admin/products', icon: Package },
   { name: 'Pedidos', href: '/admin/orders', icon: ShoppingBag },
   { name: 'Usuarios', href: '/admin/users', icon: Users },
@@ -30,7 +30,7 @@ export default function AdminSidebar() {
             <span className="text-lg font-bold text-white tracking-wide group-hover:text-blue-400 transition-colors">
               REFRI<span className="text-blue-400">ADMIN</span>
             </span>
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Control Panel</span>
+            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Panel de Control</span>
           </div>
         </Link>
       </div>
@@ -38,7 +38,7 @@ export default function AdminSidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
         <div className="px-4 mb-2 text-xs font-mono font-semibold text-slate-500 uppercase tracking-widest">
-          Main Menu
+          Menú Principal
         </div>
         {menuItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -84,7 +84,7 @@ export default function AdminSidebar() {
           </div>
           <div className="flex flex-col items-start">
             <span className="font-semibold">Cerrar Sesión</span>
-            <span className="text-[10px] text-slate-500 group-hover:text-red-400/70">End session</span>
+            <span className="text-[10px] text-slate-500 group-hover:text-red-400/70">Finalizar sesión</span>
           </div>
         </button>
       </div>

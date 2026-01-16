@@ -79,15 +79,15 @@ export default function AdminDashboard() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
-              Overview
+              Resumen
             </span>
-            <span className="text-slate-400 text-xs font-medium">Last updated: Just now</span>
+            <span className="text-slate-400 text-xs font-medium">Última actualización: Ahora mismo</span>
           </div>
           <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
-            Dashboard <span className="text-slate-300 dark:text-slate-700">.</span>
+            Panel de Control <span className="text-slate-300 dark:text-slate-700">.</span>
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg max-w-2xl font-light">
-            Real-time business intelligence and performance metrics.
+            Métricas de rendimiento e inteligencia empresarial en tiempo real.
           </p>
         </div>
         
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
             <Activity className={`h-4 w-4 ${isFetching ? 'text-amber-500' : 'text-emerald-500'} ${!isFetching ? 'animate-pulse' : ''}`} />
             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              {isFetching ? 'Syncing...' : 'Live System Status'}
+              {isFetching ? 'Sincronizando...' : 'Estado del Sistema en Vivo'}
             </span>
           </div>
           
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
           >
             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-            <span className="font-semibold relative z-10">Refresh Data</span>
+            <span className="font-semibold relative z-10">Actualizar Datos</span>
           </button>
         </div>
       </div>
@@ -114,40 +114,40 @@ export default function AdminDashboard() {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <StatsCard 
-          title="Total Revenue" 
+          title="Ingresos Totales" 
           value={`$${formatNumber(stats.revenue)}`} 
           icon={DollarSign} 
           trend="+12.5%"
           trendUp={true}
           colorScheme="emerald"
-          subtitle="Monthly gross income"
+          subtitle="Ingreso bruto mensual"
         />
         <StatsCard 
-          title="Total Orders" 
+          title="Pedidos Totales" 
           value={formatNumber(stats.orders)} 
           icon={ShoppingBag} 
           trend="+8.2%"
           trendUp={true}
           colorScheme="blue"
-          subtitle="Successful transactions"
+          subtitle="Transacciones exitosas"
         />
         <StatsCard 
-          title="Active Products" 
+          title="Productos Activos" 
           value={formatNumber(stats.products)} 
           icon={Package} 
           trend="+2.1%"
           trendUp={true}
           colorScheme="violet"
-          subtitle="In catalog"
+          subtitle="En catálogo"
         />
         <StatsCard 
-          title="Total Users" 
+          title="Total Usuarios" 
           value={formatNumber(stats.users)} 
           icon={Users} 
           trend="+5.7%"
           trendUp={true}
           colorScheme="amber"
-          subtitle="Registered accounts"
+          subtitle="Cuentas registradas"
         />
       </div>
 
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
            </div>
            <div className="relative z-10">
               <div className="flex items-center justify-between mb-6">
-                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Revenue Analytics</h3>
+                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Análisis de Ingresos</h3>
                  <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500">
                     <Download size={18} />
                  </button>
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
            </div>
            <div className="relative z-10">
              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Order Status</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Estado de Pedidos</h3>
                 <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500">
                     <Filter size={18} />
                 </button>

@@ -1,6 +1,7 @@
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BottomNav from '@/components/layout/BottomNav';
+import WhatsAppButton from '@/components/ui/WhatsAppButton';
 
 export default function ShopLayout({
   children,
@@ -15,6 +16,7 @@ export default function ShopLayout({
       </main>
       <Footer />
       <BottomNav />
+      <WhatsAppButton />
     </div>
   );
 }

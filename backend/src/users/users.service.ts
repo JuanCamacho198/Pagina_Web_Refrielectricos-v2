@@ -45,6 +45,12 @@ export class UsersService {
     });
   }
 
+  async findByGoogleId(googleId: string) {
+    return this.prisma.user.findUnique({
+      where: { googleId },
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     const passwordChanged = !!updateUserDto.password;
     if (passwordChanged) {
