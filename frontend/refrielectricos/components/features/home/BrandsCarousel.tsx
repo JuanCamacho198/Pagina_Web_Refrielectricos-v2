@@ -44,6 +44,15 @@ const BRAND_STYLES = `
       animation: scroll-brands 15s linear infinite;
     }
   }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 `;
 
 // Componente de header hoisted (no cambia en re-renders)
@@ -157,18 +166,7 @@ export default function BrandsCarousel() {
         </div>
       </div>
 
-      <style jsx global>
-        {BRAND_STYLES}
-        {`
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-          }
-          .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-        `}
-      </style>
+      <style jsx global>{BRAND_STYLES}</style>
     </section>
   );
 }
