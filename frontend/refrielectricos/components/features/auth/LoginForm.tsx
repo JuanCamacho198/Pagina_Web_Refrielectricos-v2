@@ -144,7 +144,7 @@ export default function LoginForm() {
 
       {providerWarning && (
         <div className="bg-blue-50 border border-blue-400 text-blue-700 px-4 py-3 rounded relative flex items-center gap-2" role="alert">
-          <Info className="h-5 w-5 flex-shrink-0" />
+          <Info className="h-5 w-5 shrink-0" />
           <span className="block sm:inline">{providerWarning}</span>
         </div>
       )}
