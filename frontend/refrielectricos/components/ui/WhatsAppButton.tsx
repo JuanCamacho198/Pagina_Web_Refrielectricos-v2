@@ -1,10 +1,10 @@
 'use client';
 
 import { X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '@/lib/api';
 
-const WHATSAPP_NUMBER = '573001234567'; // Reemplazar con el número real de Refrielectricos
 const DEFAULT_MESSAGE = '¡Hola! Tengo una pregunta sobre sus productos.';
 
 // WhatsApp SVG Logo oficial
@@ -22,14 +22,31 @@ const WhatsAppIcon = ({ size = 28 }: { size?: number }) => (
 
 export default function WhatsAppButton() {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState('573001234567');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get('/settings');
+        if (data?.phoneCountryCode && data?.phoneNumber) {
+          // Remover el + del código de país y concatenar
+          const countryCode = data.phoneCountryCode.replace('+', '');
+          setWhatsappNumber(`${countryCode}${data.phoneNumber}`);
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleClick = () => {
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-3">
+    <div className="fixed bottom-20 sm:bottom-6 right-6 z-30 flex flex-col items-end gap-3">
       <AnimatePresence>
         {showTooltip && (
           <motion.div

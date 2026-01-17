@@ -4,8 +4,30 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Send } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useState, useEffect } from 'react';
+import api from '@/lib/api';
 
 export default function Footer() {
+  const [phoneNumber, setPhoneNumber] = useState('+57 300 123 4567');
+  const [supportEmail, setSupportEmail] = useState('contacto@refrielectricos.com');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get('/settings');
+        if (data?.phoneCountryCode && data?.phoneNumber) {
+          setPhoneNumber(`${data.phoneCountryCode} ${data.phoneNumber}`);
+        }
+        if (data?.supportEmail) {
+          setSupportEmail(data.supportEmail);
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-16 pb-8 transition-colors duration-300 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -75,11 +97,11 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <Phone size={18} className="shrink-0 text-blue-600 dark:text-blue-400" />
-                <span>+57 300 123 4567</span>
+                <span>{phoneNumber}</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <Mail size={18} className="shrink-0 text-blue-600 dark:text-blue-400" />
-                <span>contacto@refrielectricos.com</span>
+                <span>{supportEmail}</span>
               </li>
             </ul>
           </div>

@@ -14,6 +14,7 @@ interface StoreSettings {
   storeName: string;
   supportEmail: string;
   phoneNumber: string;
+  phoneCountryCode: string;
   currency: string;
   maintenanceMode: boolean;
   emailNotifications: boolean;
@@ -51,6 +52,7 @@ export default function AdminSettingsPage() {
     storeName: apiSettings?.storeName || '',
     supportEmail: apiSettings?.supportEmail || '',
     phoneNumber: apiSettings?.phoneNumber || '',
+    phoneCountryCode: apiSettings?.phoneCountryCode || '+57',
     currency: apiSettings?.currency || 'COP',
     maintenanceMode: apiSettings?.maintenanceMode ?? false,
     emailNotifications: apiSettings?.emailNotifications ?? true,
@@ -159,7 +161,7 @@ export default function AdminSettingsPage() {
             <Mail size={20} className="text-blue-600" />
             Contacto y Soporte
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <Input
               label="Email de Soporte"
               name="supportEmail"
@@ -167,12 +169,32 @@ export default function AdminSettingsPage() {
               value={settings.supportEmail}
               onChange={handleChange}
             />
-            <Input
-              label="Teléfono"
-              name="phoneNumber"
-              value={settings.phoneNumber}
-              onChange={handleChange}
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Teléfono WhatsApp
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                <Input
+                  label="Código País"
+                  name="phoneCountryCode"
+                  value={settings.phoneCountryCode}
+                  onChange={handleChange}
+                  placeholder="+57"
+                  className="col-span-1"
+                />
+                <Input
+                  label="Número"
+                  name="phoneNumber"
+                  value={settings.phoneNumber}
+                  onChange={handleChange}
+                  placeholder="3001234567"
+                  className="col-span-2"
+                />
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Este número se usará en el botón de WhatsApp y el footer. Ejemplo: {settings.phoneCountryCode}{settings.phoneNumber}
+              </p>
+            </div>
           </div>
         </Card>
 

@@ -15,6 +15,10 @@ export class UpdateSettingsDto {
 
   @IsOptional()
   @IsString()
+  phoneCountryCode?: string;
+
+  @IsOptional()
+  @IsString()
   currency?: string;
 
   @IsOptional()
