@@ -122,8 +122,8 @@ export default function BrandsCarousel() {
         {/* Contenedor del carrusel con overflow oculto */}
         <div className="relative overflow-hidden">
           {/* Gradientes laterales para efecto de desvanecimiento */}
-          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white dark:from-gray-900 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white dark:from-gray-900 to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-linear-to-r from-white dark:from-gray-900 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-linear-to-l from-white dark:from-gray-900 to-transparent z-10 pointer-events-none" />
 
           {/* Carrusel animado con soporte táctil */}
           <div 
@@ -145,7 +145,7 @@ export default function BrandsCarousel() {
             {DUPLICATED_BRANDS.map((brand, index) => (
               <div
                 key={`${brand.name}-${index}`}
-                className="flex-shrink-0 mx-8 transition-all duration-300 hover:scale-105"
+                className="shrink-0 mx-8 transition-all duration-300 hover:scale-105"
                 style={{ width: '160px' }}
               >
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center justify-center h-24 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
