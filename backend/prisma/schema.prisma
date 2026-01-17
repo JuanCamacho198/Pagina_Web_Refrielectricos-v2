@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -14,7 +8,306 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums
+model User {
+  id                   String         @id @default(cuid())
+  email                String         @unique
+  name                 String?
+  password             String?
+  role                 Role           @default(USER)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  avatar               String?
+  emailVerified        Boolean        @default(false)
+  emailVerifyExpires   DateTime?
+  emailVerifyToken     String?        @unique
+  googleId             String?        @unique
+  provider             AuthProvider   @default(LOCAL)
+  resetPasswordExpires DateTime?
+  resetPasswordToken   String?        @unique
+  addresses            Address[]
+  cart                 Cart?
+  notifications        Notification[]
+  orders               Order[]
+  productViews         ProductView[]
+  questions            Question[]
+  refreshTokens        RefreshToken[]
+  reviews              Review[]
+  wishlists            Wishlist[]
+
+  @@index([email])
+  @@index([role])
+  @@index([googleId])
+  @@index([provider])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO")
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id             String           @id @default(cuid())
+  name           String
+  slug           String           @unique
+  description    String?
+  price          Float
+  stock          Int              @default(0)
+  image_url      String?
+  category       String           @default("General")
+  subcategory    String?
+  brand          String?
+  sku            String?          @unique
+  tags           String[]
+  images_url     String[]
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  originalPrice  Float?
+  promoLabel     String?
+  specifications Json?
+  hasVariants    Boolean          @default(false)
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  variants       ProductVariant[]
+  productViews   ProductView[]
+  questions      Question[]
+  reviews        Review[]
+  wishlistItems  WishlistItem[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([brand])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model ProductVariant {
+  id            String      @id @default(cuid())
+  productId     String
+  name          String
+  slug          String      @unique
+  sku           String?     @unique
+  price         Float
+  originalPrice Float?
+  stock         Int         @default(0)
+  image_url     String?
+  images_url    String[]
+  attributes    Json?
+  isDefault     Boolean     @default(false)
+  isActive      Boolean     @default(true)
+  position      Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductOption {
+  id        String               @id @default(cuid())
+  name      String               @unique
+  createdAt DateTime             @default(now())
+  values    ProductOptionValue[]
+}
+
+model ProductOptionValue {
+  id       String        @id @default(cuid())
+  optionId String
+  value    String
+  position Int           @default(0)
+  option   ProductOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([optionId, value])
+}
+
+model Order {
+  id                     String      @id @default(cuid())
+  userId                 String
+  total                  Float       @default(0)
+  status                 OrderStatus @default(PENDING)
+  shippingName           String?
+  shippingPhone          String?
+  shippingAddress        String?
+  shippingCity           String?
+  shippingState          String?
+  shippingZip            String?
+  shippingCountry        String?
+  shippingNotes          String?
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+  isTestPayment          Boolean     @default(false)
+  paymentApprovalCode    String?
+  paymentDate            DateTime?
+  paymentMethod          String?
+  paymentReference       String?
+  paymentResponseCode    String?
+  paymentResponseMessage String?
+  paymentStatus          String?
+  paymentTransactionId   String?
+  user                   User        @relation(fields: [userId], references: [id])
+  items                  OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([paymentStatus])
+}
+
+model OrderItem {
+  id                String          @id @default(cuid())
+  orderId           String
+  productId         String
+  quantity          Int             @default(1)
+  price             Float
+  variantAttributes Json?
+  variantId         String?
+  variantName       String?
+  variantSku        String?
+  order             Order           @relation(fields: [orderId], references: [id])
+  product           Product         @relation(fields: [productId], references: [id])
+  variant           ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+model Wishlist {
+  id        String         @id @default(cuid())
+  name      String
+  userId    String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id])
+  items     WishlistItem[]
+
+  @@unique([userId, name])
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String
+  productId  String
+  addedAt    DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id])
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId])
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  userId       String
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String?
+  zipCode      String?
+  country      String   @default("Colombia")
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String?    @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User?      @relation(fields: [userId], references: [id])
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String          @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int             @default(1)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  variantId String?
+  cart      Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@unique([cartId, productId, variantId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Float
+  comment   String?
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model Question {
+  id         String   @id @default(cuid())
+  content    String
+  answer     String?
+  userId     String?
+  guestName  String?
+  guestEmail String?
+  productId  String
+  isAnswered Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product    Product  @relation(fields: [productId], references: [id])
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+model ProductView {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  viewedAt  DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model StoreSettings {
+  id                     String   @id @default("store-settings")
+  storeName              String   @default("Refrielectricos G&E")
+  supportEmail           String   @default("contacto@refrielectricos.com")
+  phoneNumber            String   @default("+57 300 123 4567")
+  currency               String   @default("COP")
+  maintenanceMode        Boolean  @default(false)
+  emailNotifications     Boolean  @default(true)
+  freeShippingEnabled    Boolean  @default(true)
+  freeShippingBannerText String   @default("Envío gratis en Curumaní desde $100,000")
+  freeShippingEmoji      String   @default("🚚")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
 enum Role {
   USER
   ADMIN
@@ -32,338 +325,3 @@ enum AuthProvider {
   LOCAL
   GOOGLE
 }
-
-// Models
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  password  String?  // Nullable for Google OAuth users
-  role      Role     @default(USER)
-  
-  // Google OAuth fields
-  googleId         String?       @unique
-  provider         AuthProvider  @default(LOCAL)
-  avatar           String?       // Profile picture URL
-  
-  // Email verification fields
-  emailVerified         Boolean   @default(false)
-  emailVerifyToken      String?   @unique
-  emailVerifyExpires    DateTime?
-  
-  // Password reset fields
-  resetPasswordToken    String?   @unique
-  resetPasswordExpires  DateTime?
-  
-  // Relations
-  orders    Order[]
-  wishlists Wishlist[]
-  addresses Address[]
-  cart      Cart?
-  reviews       Review[]
-  questions     Question[]
-  productViews  ProductView[]
-  notifications Notification[]
-  refreshTokens RefreshToken[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@index([email])
-  @@index([role])
-  @@index([googleId])
-  @@index([provider])
-}
-
-model Notification {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  title     String
-  message   String
-  type      String   @default("INFO") // INFO, ORDER_UPDATE, REVIEW_REMINDER
-  isRead    Boolean  @default(false)
-  link      String?
-  createdAt DateTime @default(now())
-}
-
-model Product {
-  id            String         @id @default(cuid())
-  name          String
-  slug          String         @unique // URL amigable
-  description   String?
-  price         Float          // Default price (used when no variants, or as base price)
-  originalPrice Float?         // Nuevo: Precio original (antes del descuento)
-  promoLabel    String?        // Nuevo: Etiqueta de promoción (ej: "Oferta", "Black Friday")
-  stock         Int            @default(0) // Aggregated stock or used when no variants
-  image_url     String?
-  category      String         @default("General") // Nuevo: Categoría principal
-  subcategory   String?        // Nuevo: Subcategoría
-  brand         String?        // Nuevo: Marca del producto
-  sku           String?        @unique // Nuevo: Código de inventario único (base SKU)
-  tags          String[]       // Nuevo: Etiquetas para búsqueda flexible
-  images_url    String[]       // Nuevo: Galería de imágenes
-  specifications Json?         // Nuevo: Especificaciones del producto [{label, value}]
-  isActive      Boolean        @default(true) // Nuevo: Control de visibilidad
-  hasVariants   Boolean        @default(false) // Flag to indicate if product uses variants
-  
-  // Relations
-  variants      ProductVariant[]
-  orderItems    OrderItem[]
-  wishlistItems WishlistItem[]
-  cartItems     CartItem[]
-  reviews       Review[]
-  questions     Question[]
-  productViews  ProductView[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  @@index([slug])
-  @@index([category])
-  @@index([brand])
-  @@index([isActive])
-  @@index([createdAt])
-}
-
-// Product Variants - each variant has its own price, stock, SKU, and attributes
-model ProductVariant {
-  id            String   @id @default(cuid())
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId     String
-  
-  name          String   // e.g., "1/4 HP", "Rojo - Grande"
-  slug          String   @unique // URL-friendly: "compresor-embraco-1-4hp"
-  sku           String?  @unique // Unique SKU per variant
-  price         Float    // Variant-specific price
-  originalPrice Float?   // Original price for this variant
-  stock         Int      @default(0)
-  image_url     String?  // Main image for this variant
-  images_url    String[] // Gallery for this variant
-  
-  // Flexible attributes stored as JSON: { "potencia": "1/4 HP", "voltaje": "110V" }
-  attributes    Json?
-  
-  isDefault     Boolean  @default(false) // Default variant shown on product page
-  isActive      Boolean  @default(true)
-  position      Int      @default(0) // Sort order
-  
-  // Relations
-  orderItems    OrderItem[]
-  cartItems     CartItem[]
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  @@index([productId])
-}
-
-// Defines what options a product can have (e.g., "Potencia", "Color", "Tamaño")
-model ProductOption {
-  id        String              @id @default(cuid())
-  name      String              @unique // e.g., "Potencia", "Color", "Tamaño"
-  values    ProductOptionValue[]
-  createdAt DateTime            @default(now())
-}
-
-// Predefined values for each option (e.g., "1/4 HP", "1/8 HP" for Potencia)
-model ProductOptionValue {
-  id        String        @id @default(cuid())
-  option    ProductOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  optionId  String
-  value     String        // e.g., "1/4 HP", "Rojo", "Grande"
-  position  Int           @default(0)
-  
-  @@unique([optionId, value])
-}
-
-model Order {
-  id         String      @id @default(cuid())
-  user       User        @relation(fields: [userId], references: [id])
-  userId     String
-  items      OrderItem[]
-  total           Float       @default(0)
-  status          OrderStatus @default(PENDING)
-  
-  // Snapshot de dirección de envío
-  shippingName    String?
-  shippingPhone   String?
-  shippingAddress String?
-  shippingCity    String?
-  shippingState   String?
-  shippingZip     String?
-  shippingCountry String?
-  shippingNotes   String?
-
-  // Payment information (ePayco integration)
-  paymentMethod          String?   // EPAYCO, COD, NEQUI, etc.
-  paymentStatus          String?   // PENDING, COMPLETED, FAILED, REJECTED, etc.
-  paymentReference       String?   // ePayco x_ref_payco
-  paymentApprovalCode    String?   // Bank approval code
-  paymentResponseCode    String?   // ePayco response code (1=approved, 2=rejected, etc.)
-  paymentResponseMessage String?   // Response description
-  paymentTransactionId   String?   // ePayco transaction ID
-  paymentDate            DateTime? // When payment was processed
-  isTestPayment          Boolean   @default(false) // Flag for test transactions
-
-  createdAt       DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-  @@index([paymentStatus])
-}
-
-model OrderItem {
-  id        String  @id @default(cuid())
-  order     Order   @relation(fields: [orderId], references: [id])
-  orderId   String
-  product   Product @relation(fields: [productId], references: [id])
-  productId String
-  variant   ProductVariant? @relation(fields: [variantId], references: [id])
-  variantId String?
-  quantity  Int     @default(1)
-  price     Float
-  
-  // Snapshot of variant attributes at time of purchase
-  variantName   String?
-  variantSku    String?
-  variantAttributes Json?
-}
-
-model Wishlist {
-  id        String         @id @default(cuid())
-  name      String
-  user      User           @relation(fields: [userId], references: [id])
-  userId    String
-  items     WishlistItem[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-
-  @@unique([userId, name])
-}
-
-model WishlistItem {
-  id         String   @id @default(cuid())
-  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
-  wishlistId String
-  product    Product  @relation(fields: [productId], references: [id])
-  productId  String
-  addedAt    DateTime @default(now())
-
-  @@unique([wishlistId, productId])
-}
-
-model Address {
-  id           String   @id @default(cuid())
-  user         User     @relation(fields: [userId], references: [id])
-  userId       String
-  fullName     String
-  phone        String
-  addressLine1 String
-  addressLine2 String?
-  city         String
-  state        String?
-  zipCode      String?
-  country      String   @default("Colombia")
-  isDefault    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
-model Cart {
-  id        String     @id @default(cuid())
-  user      User?      @relation(fields: [userId], references: [id])
-  userId    String?    @unique
-  items     CartItem[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-}
-
-model CartItem {
-  id        String   @id @default(cuid())
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  cartId    String
-  product   Product  @relation(fields: [productId], references: [id])
-  productId  String
-  variant   ProductVariant? @relation(fields: [variantId], references: [id])
-  variantId String?
-  quantity  Int      @default(1)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([cartId, productId, variantId])
-}
-
-
-model Review {
-  id        String   @id @default(cuid())
-  rating    Float
-  comment   String?
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, productId])
-}
-
-model Question {
-  id        String   @id @default(cuid())
-  content   String
-  answer    String?
-  
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    String?
-  
-  guestName  String?
-  guestEmail String?
-
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String
-
-  isAnswered Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model ProductView {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String
-  viewedAt  DateTime @default(now())
-
-  @@unique([userId, productId])
-}
-
-model StoreSettings {
-  id                      String   @id @default("store-settings")
-  storeName               String   @default("Refrielectricos G&E")
-  supportEmail            String   @default("contacto@refrielectricos.com")
-  phoneNumber             String   @default("+57 300 123 4567")
-  currency                String   @default("COP")
-  maintenanceMode         Boolean  @default(false)
-  emailNotifications      Boolean  @default(true)
-  freeShippingEnabled     Boolean  @default(true)
-  freeShippingBannerText  String   @default("Envío gratis en Curumaní desde $100,000")
-  freeShippingEmoji       String   @default("🚚")
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-}
-
-model RefreshToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([expiresAt])
-}
-

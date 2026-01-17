@@ -66,15 +66,15 @@ export default function Home() {
       {/* Hero Section */}
       <HeroCarousel />
 
-      {/* Carrusel de Marcas */}
-      <BrandsCarousel />
-
       {/* Productos Destacados (Carousel) */}
       {loading ? (
         <LoadingSkeleton />
       ) : (
         <>
           <ProductCarousel title="Productos Destacados" products={products.slice(0, 12)} />
+          
+          {/* Carrusel de Marcas */}
+          <BrandsCarousel />
           
           {/* Carrusel de Iluminación */}
           {lightingProducts.length > 0 && (
