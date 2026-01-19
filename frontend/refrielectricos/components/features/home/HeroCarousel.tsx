@@ -18,7 +18,6 @@ const slides = [
     description: "Encuentra compresores, termostatos, gases refrigerantes y más.",
     image: "/images/carrusel2.jpg",
     blurDataURL: BLUR_DATA_URL,
-    color: "bg-blue-600",
     link: "/products?category=Refrigeración"
   },
   {
@@ -28,7 +27,6 @@ const slides = [
     description: "Bombas de vacío, manómetros y herramientas especializadas.",
     image: "/images/carrusel1.jpg",
     blurDataURL: BLUR_DATA_URL,
-    color: "bg-cyan-600",
     link: "/products?category=Herramientas"
   },
   {
@@ -38,7 +36,6 @@ const slides = [
     description: "Aprovecha nuestros descuentos en productos seleccionados.",
     image: "/images/carrusel3.jpg",
     blurDataURL: BLUR_DATA_URL,
-    color: "bg-indigo-600",
     link: "/products?sort=price_asc"
   }
 ];
@@ -111,7 +108,7 @@ export default function HeroCarousel() {
                 paginate(-1);
               }
             }}
-            className={`absolute inset-0 w-full h-full ${slides[current].color} flex items-center`}
+            className={`absolute inset-0 w-full h-full ${slides[current]} flex items-center`}
           >
             <div className="absolute inset-0 z-0">
               <Image
