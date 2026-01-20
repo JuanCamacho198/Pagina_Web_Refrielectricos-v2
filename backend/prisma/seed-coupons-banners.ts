@@ -58,8 +58,11 @@ async function main() {
 
   // Seed Banners
   const banners = await Promise.all([
-    prisma.banner.create({
-      data: {
+    prisma.banner.upsert({
+      where: { slug: 'banner-repuestos-refrigeracion' },
+      update: {},
+      create: {
+        slug: 'banner-repuestos-refrigeracion',
         title: 'Repuestos de Refrigeración',
         subtitle: 'La mejor calidad para tus reparaciones',
         imageUrl: '/images/carrusel2.jpg',
@@ -69,8 +72,11 @@ async function main() {
         position: 1,
       },
     }),
-    prisma.banner.create({
-      data: {
+    prisma.banner.upsert({
+      where: { slug: 'banner-herramientas-profesionales' },
+      update: {},
+      create: {
+        slug: 'banner-herramientas-profesionales',
         title: 'Herramientas Profesionales',
         subtitle: 'Equípate con lo mejor',
         imageUrl: '/images/carrusel1.jpg',
@@ -80,8 +86,11 @@ async function main() {
         position: 2,
       },
     }),
-    prisma.banner.create({
-      data: {
+    prisma.banner.upsert({
+      where: { slug: 'banner-ofertas-especiales' },
+      update: {},
+      create: {
+        slug: 'banner-ofertas-especiales',
         title: 'Ofertas Especiales',
         subtitle: 'Precios increíbles por tiempo limitado',
         imageUrl: '/images/carrusel3.jpg',

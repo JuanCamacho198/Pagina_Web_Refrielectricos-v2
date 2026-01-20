@@ -10,6 +10,10 @@ import {
 
 export class CreateBannerDto {
   @IsString()
+  @IsOptional()
+  slug?: string;
+
+  @IsString()
   @IsNotEmpty()
   title: string;
 

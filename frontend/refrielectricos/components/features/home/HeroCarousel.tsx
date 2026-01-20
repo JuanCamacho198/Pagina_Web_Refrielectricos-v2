@@ -12,37 +12,6 @@ import api from '@/lib/api';
 // Blur placeholders base64 para carga instantánea (10x10px)
 const BLUR_DATA_URL = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAKAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABgUH/8QAIhAAAgEDBAMBAAAAAAAAAAAAAQIDBAURAAYSIRMxQVH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBf/EABkRAAIDAQAAAAAAAAAAAAAAAAECAAMRIf/aAAwDAQACEQMRAD8AqbWsdPcLlULUTSwxxKrfu8ckEfoOsHONa3cdg26noquop6d4p6eB5Y3EjHkQpIyDwIP7p0aNJKBmYkruULWTPZ//2Q==";
 
-// Fallback slides
-const defaultSlides = [
-  {
-    id: 'default-1',
-    title: "Repuestos de Refrigeración",
-    subtitle: "La mejor calidad para tus reparaciones",
-    description: "Encuentra compresores, termostatos, gases refrigerantes y más.",
-    imageUrl: "/images/carrusel2.jpg",
-    link: "/products?category=Refrigeración",
-    buttonText: "Ver Productos"
-  },
-  {
-    id: 'default-2',
-    title: "Herramientas Profesionales",
-    subtitle: "Equípate con lo mejor",
-    description: "Bombas de vacío, manómetros y herramientas especializadas.",
-    imageUrl: "/images/carrusel1.jpg",
-    link: "/products?category=Herramientas",
-    buttonText: "Ver Productos"
-  },
-  {
-    id: 'default-3',
-    title: "Ofertas Especiales",
-    subtitle: "Precios increíbles por tiempo limitado",
-    description: "Aprovecha nuestros descuentos en productos seleccionados.",
-    imageUrl: "/images/carrusel3.jpg",
-    link: "/products?sort=price_asc",
-    buttonText: "Ver Productos"
-  }
-];
-
 interface Banner {
   id: string;
   title: string;
@@ -59,7 +28,7 @@ export default function HeroCarousel() {
   const [direction, setDirection] = useState(0);
 
   // Fetch banners from API
-  const { data: apiBanners, isLoading } = useQuery({
+  const { data: banners, isLoading } = useQuery({
     queryKey: ['home-banners'],
     queryFn: async () => {
       const { data } = await api.get<Banner[]>('/banners', {
@@ -70,8 +39,7 @@ export default function HeroCarousel() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Use API banners or fallback to default
-  const slides = (!isLoading && apiBanners && apiBanners.length > 0) ? apiBanners : defaultSlides;
+  const slides = banners || [];
 
   const paginate = (newDirection: number) => {
     setDirection(newDirection);
@@ -118,12 +86,26 @@ export default function HeroCarousel() {
     return Math.abs(offset) * velocity;
   };
 
-  // Show loading state or empty state
-  if (isLoading || slides.length === 0) {
+  // Show loading state
+  if (isLoading) {
     return (
       <div className="relative w-full max-w-7xl mx-auto">
         <div className="relative h-100 md:h-125 w-full overflow-hidden rounded-2xl shadow-lg bg-gray-900 flex items-center justify-center">
           <p className="text-white text-lg">Cargando banners...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state if no banners
+  if (slides.length === 0) {
+    return (
+      <div className="relative w-full max-w-7xl mx-auto">
+        <div className="relative h-100 md:h-125 w-full overflow-hidden rounded-2xl shadow-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+          <div className="text-center text-white px-4">
+            <h2 className="text-2xl md:text-4xl font-bold mb-2">Bienvenido a Refrielectricos</h2>
+            <p className="text-sm md:text-lg text-blue-100">Tu tienda de confianza en refrigeración</p>
+          </div>
         </div>
       </div>
     );
@@ -202,7 +184,7 @@ export default function HeroCarousel() {
                   transition={{ delay: 0.4 }}
                   className="text-sm md:text-lg text-gray-100 line-clamp-2 md:line-clamp-none"
                 >
-                  {('description' in currentSlide) ? currentSlide.description : (currentSlide.subtitle || '')}
+                  {currentSlide.subtitle || ''}
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
