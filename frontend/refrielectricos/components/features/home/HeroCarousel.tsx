@@ -112,7 +112,7 @@ export default function HeroCarousel() {
 
   return (
     <div className="relative w-full max-w-7xl mx-auto group">
-      <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-2xl shadow-lg bg-gray-900">
+      <div className="relative h-100 md:h-125 w-full overflow-hidden rounded-2xl shadow-lg bg-gray-900">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={current}
