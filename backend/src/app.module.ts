@@ -19,6 +19,8 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { QuestionsModule } from './questions/questions.module';
 import { SettingsModule } from './settings/settings.module';
 import { PaymentsModule } from './payments/payments.module';
+import { CouponsModule } from './coupons/coupons.module';
+import { BannersModule } from './banners/banners.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 
 @Module({
@@ -59,6 +61,8 @@ import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
     QuestionsModule,
     SettingsModule,
     PaymentsModule,
+    CouponsModule,
+    BannersModule,
   ],
   controllers: [AppController],
   providers: [

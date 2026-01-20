@@ -1,48 +1,77 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/ui/Button';
+import api from '@/lib/api';
 
 // Blur placeholders base64 para carga instantánea (10x10px)
 const BLUR_DATA_URL = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAKAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABgUH/8QAIhAAAgEDBAMBAAAAAAAAAAAAAQIDBAURAAYSIRMxQVH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBf/EABkRAAIDAQAAAAAAAAAAAAAAAAECAAMRIf/aAAwDAQACEQMRAD8AqbWsdPcLlULUTSwxxKrfu8ckEfoOsHONa3cdg26noquop6d4p6eB5Y3EjHkQpIyDwIP7p0aNJKBmYkruULWTPZ//2Q==";
 
-const slides = [
+// Fallback slides
+const defaultSlides = [
   {
-    id: 1,
+    id: 'default-1',
     title: "Repuestos de Refrigeración",
     subtitle: "La mejor calidad para tus reparaciones",
     description: "Encuentra compresores, termostatos, gases refrigerantes y más.",
-    image: "/images/carrusel2.jpg",
-    blurDataURL: BLUR_DATA_URL,
-    link: "/products?category=Refrigeración"
+    imageUrl: "/images/carrusel2.jpg",
+    link: "/products?category=Refrigeración",
+    buttonText: "Ver Productos"
   },
   {
-    id: 2,
+    id: 'default-2',
     title: "Herramientas Profesionales",
     subtitle: "Equípate con lo mejor",
     description: "Bombas de vacío, manómetros y herramientas especializadas.",
-    image: "/images/carrusel1.jpg",
-    blurDataURL: BLUR_DATA_URL,
-    link: "/products?category=Herramientas"
+    imageUrl: "/images/carrusel1.jpg",
+    link: "/products?category=Herramientas",
+    buttonText: "Ver Productos"
   },
   {
-    id: 3,
+    id: 'default-3',
     title: "Ofertas Especiales",
     subtitle: "Precios increíbles por tiempo limitado",
     description: "Aprovecha nuestros descuentos en productos seleccionados.",
-    image: "/images/carrusel3.jpg",
-    blurDataURL: BLUR_DATA_URL,
-    link: "/products?sort=price_asc"
+    imageUrl: "/images/carrusel3.jpg",
+    link: "/products?sort=price_asc",
+    buttonText: "Ver Productos"
   }
 ];
+
+interface Banner {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  imageUrl: string;
+  link: string | null;
+  buttonText: string | null;
+  isActive: boolean;
+  position: number;
+}
 
 export default function HeroCarousel() {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(0);
+
+  // Fetch banners from API
+  const { data: apiBanners, isLoading } = useQuery({
+    queryKey: ['home-banners'],
+    queryFn: async () => {
+      const { data } = await api.get<Banner[]>('/banners', {
+        params: { activeOnly: 'true' },
+      });
+      return data;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Use API banners or fallback to default
+  const slides = (!isLoading && apiBanners && apiBanners.length > 0) ? apiBanners : defaultSlides;
 
   const paginate = (newDirection: number) => {
     setDirection(newDirection);
@@ -112,13 +141,13 @@ export default function HeroCarousel() {
           >
             <div className="absolute inset-0 z-0">
               <Image
-                src={slides[current].image}
+                src={slides[current].imageUrl}
                 alt={slides[current].title}
                 fill
                 sizes="100vw"
                 quality={60}
                 placeholder="blur"
-                blurDataURL={slides[current].blurDataURL}
+                blurDataURL={BLUR_DATA_URL}
                 className="object-cover opacity-60 mix-blend-overlay"
                 priority
               />
@@ -151,7 +180,7 @@ export default function HeroCarousel() {
                   transition={{ delay: 0.4 }}
                   className="text-sm md:text-lg text-gray-100 line-clamp-2 md:line-clamp-none"
                 >
-                  {slides[current].description}
+                  {('description' in slides[current]) ? slides[current].description : (slides[current].subtitle || '')}
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -159,11 +188,13 @@ export default function HeroCarousel() {
                   transition={{ delay: 0.5 }}
                   className="pt-2"
                 >
-                  <Link href={slides[current].link}>
-                    <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 border-none text-sm md:text-base px-4 py-2 md:px-6 md:py-3 h-auto shadow-lg shadow-blue-900/20">
-                      Ver Productos
-                    </Button>
-                  </Link>
+                  {slides[current].link && (
+                    <Link href={slides[current].link!}>
+                      <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 border-none text-sm md:text-base px-4 py-2 md:px-6 md:py-3 h-auto shadow-lg shadow-blue-900/20">
+                        {slides[current].buttonText || 'Ver Productos'}
+                      </Button>
+                    </Link>
+                  )}
                 </motion.div>
               </div>
             </div>

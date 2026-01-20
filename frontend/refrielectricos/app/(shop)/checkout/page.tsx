@@ -9,6 +9,7 @@ import { useCreateOrder } from '@/hooks/useOrders';
 import Button from '@/components/ui/Button';
 import EpaycoButton from '@/components/features/checkout/EpaycoButton';
 import AddressForm from '@/components/features/profile/addresses/AddressForm';
+import { CouponInput } from '@/components/features/checkout/CouponInput';
 import { MapPin, CreditCard, Loader2, Plus, CheckCircle, Banknote, Wallet } from 'lucide-react';
 import Image from 'next/image';
 import { formatCurrency } from '@/lib/utils';
@@ -28,6 +29,13 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'EPAYCO'>('EPAYCO');
   const hasInitializedAddress = useRef(false);
+
+  // Coupon state
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountAmount: number;
+    finalTotal: number;
+  } | null>(null);
 
   useEffect(() => {
     if (items.length === 0 && !isSuccess) {
@@ -71,6 +79,7 @@ export default function CheckoutPage() {
         addressId: selectedAddressId,
         notes: notes,
         status: 'PENDING' as 'PENDING' | 'PAID',
+        couponCode: appliedCoupon?.code,
         items: items.map(item => ({
           productId: item.id,
           quantity: item.quantity
@@ -309,6 +318,15 @@ export default function CheckoutPage() {
               ))}
             </ul>
 
+            {/* Coupon Input */}
+            <div className="mb-6">
+              <CouponInput
+                cartTotal={totalPrice}
+                onCouponApplied={(data) => setAppliedCoupon(data)}
+                onCouponRemoved={() => setAppliedCoupon(null)}
+              />
+            </div>
+
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                 <span>Subtotal</span>
@@ -318,9 +336,17 @@ export default function CheckoutPage() {
                 <span>Envío</span>
                 <span>{formatCurrency(0)} (Gratis)</span>
               </div>
+              {appliedCoupon && (
+                <div className="flex justify-between text-sm text-green-600 dark:text-green-400 font-medium">
+                  <span>Descuento ({appliedCoupon.code})</span>
+                  <span>-{formatCurrency(appliedCoupon.discountAmount)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-base font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-700 mt-2">
                 <span>Total a pagar</span>
-                <span className="text-blue-600 dark:text-blue-400">{formatCurrency(totalPrice)}</span>
+                <span className="text-blue-600 dark:text-blue-400">
+                  {formatCurrency(appliedCoupon?.finalTotal ?? totalPrice)}
+                </span>
               </div>
             </div>
 
@@ -338,7 +364,8 @@ export default function CheckoutPage() {
                   addressId={selectedAddressId || ''}
                   items={items.map(item => ({ id: item.id, quantity: item.quantity }))}
                   notes={notes}
-                  totalPrice={totalPrice}
+                  totalPrice={appliedCoupon?.finalTotal ?? totalPrice}
+                  couponCode={appliedCoupon?.code}
                   disabled={!user || !selectedAddressId || items.length === 0}
                   onError={handleEpaycoError}
                   onOrderCreated={handleEpaycoOrderCreated}

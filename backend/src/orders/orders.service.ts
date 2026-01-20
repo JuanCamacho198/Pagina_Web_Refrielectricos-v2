@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { CouponsService } from '../coupons/coupons.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import type { Product, Order } from '../../generated/prisma/client';
@@ -11,10 +11,12 @@ export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly couponsService: CouponsService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<any> {
-    const { userId, items, status, addressId, notes } = createOrderDto;
+    const { userId, items, status, addressId, notes, couponCode } =
+      createOrderDto;
 
     // Verificar que el usuario existe
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
@@ -44,8 +46,8 @@ export class OrdersService {
     });
     const productsMap = new Map(products.map((p: Product) => [p.id, p]));
 
-    // Preparar los datos de los items y calcular total
-    let total = 0;
+    // Preparar los datos de los items y calcular subtotal
+    let subtotal = 0;
     const orderItemsData: {
       productId: string;
       quantity: number;
@@ -66,7 +68,7 @@ export class OrdersService {
 
       // Aquí podríamos verificar stock y lanzar error si no hay suficiente
       const itemTotal = product.price * item.quantity;
-      total += itemTotal;
+      subtotal += itemTotal;
 
       orderItemsData.push({
         productId: item.productId,
@@ -75,13 +77,33 @@ export class OrdersService {
       });
     }
 
+    // Validar y aplicar cupón si se proporciona
+    let total = subtotal;
+    let discountAmount = 0;
+    let couponId: string | null = null;
+
+    if (couponCode) {
+      const validation = await this.couponsService.validateCoupon({
+        code: couponCode,
+        cartTotal: subtotal,
+      });
+
+      discountAmount = validation.discountAmount;
+      total = validation.finalTotal;
+      couponId = validation.couponId;
+    }
+
     // Crear la orden en una transacción para mantener consistencia
     const createdOrder = await this.prisma.$transaction(async (prisma: any) => {
       const order = await prisma.order.create({
         data: {
           userId,
           status,
+          subtotal,
+          discountAmount,
           total,
+          couponId: couponId || undefined,
+          couponCode: couponCode || undefined,
           shippingName: address.fullName,
           shippingPhone: address.phone,
           shippingAddress:
@@ -108,6 +130,15 @@ export class OrdersService {
 
       return order;
     });
+
+    // Registrar uso del cupón si se aplicó
+    if (couponId) {
+      await this.couponsService.applyCoupon(
+        couponId,
+        userId,
+        createdOrder.id as string,
+      );
+    }
 
     return createdOrder as Order;
   }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call */
 import {
   Injectable,
   BadRequestException,
@@ -7,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { CouponsService } from '../coupons/coupons.service';
 import { CreatePaymentSessionDto } from './dto/create-payment-session.dto';
 import { EpaycoConfirmationDto } from './dto/epayco-confirmation.dto';
 import * as crypto from 'crypto';
@@ -40,6 +40,7 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly couponsService: CouponsService,
   ) {
     // Load ePayco configuration from environment variables
     this.epaycoPublicKey = this.config.get<string>('EPAYCO_PUBLIC_KEY', '');
@@ -70,7 +71,7 @@ export class PaymentsService {
     orderId: string;
     epaycoData: Record<string, string>;
   }> {
-    const { userId, addressId, items, notes } = dto;
+    const { userId, addressId, items, notes, couponCode } = dto;
 
     // 1. Validate user exists
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
@@ -100,8 +101,8 @@ export class PaymentsService {
     });
     const productsMap = new Map(products.map((p: Product) => [p.id, p]));
 
-    // 5. Calculate total and prepare order items
-    let total = 0;
+    // 5. Calculate subtotal and prepare order items
+    let subtotal = 0;
     const orderItemsData: {
       productId: string;
       quantity: number;
@@ -127,7 +128,7 @@ export class PaymentsService {
       }
 
       const itemTotal = product.price * item.quantity;
-      total += itemTotal;
+      subtotal += itemTotal;
 
       orderItemsData.push({
         productId: item.productId,
@@ -136,13 +137,33 @@ export class PaymentsService {
       });
     }
 
+    // 5.5. Validate and apply coupon if provided
+    let total = subtotal;
+    let discountAmount = 0;
+    let couponId: string | null = null;
+
+    if (couponCode) {
+      const validation = await this.couponsService.validateCoupon({
+        code: couponCode,
+        cartTotal: subtotal,
+      });
+
+      discountAmount = validation.discountAmount;
+      total = validation.finalTotal;
+      couponId = validation.couponId;
+    }
+
     // 6. Create PENDING order in a transaction
     const order = await this.prisma.$transaction(async (prisma: any) => {
       const createdOrder = await prisma.order.create({
         data: {
           userId,
           status: 'PENDING' as OrderStatus,
+          subtotal,
+          discountAmount,
           total,
+          couponId: couponId || undefined,
+          couponCode: couponCode || undefined,
           // Shipping address snapshot
           shippingName: address.fullName,
           shippingPhone: address.phone,
@@ -173,6 +194,11 @@ export class PaymentsService {
 
       return createdOrder;
     });
+
+    // Register coupon usage if a coupon was applied
+    if (couponId) {
+      await this.couponsService.applyCoupon(couponId, userId, order.id);
+    }
 
     this.logger.log(
       `Created PENDING order ${order.id} for user ${userId}, total: ${total}`,

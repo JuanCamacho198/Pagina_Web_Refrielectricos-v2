@@ -39,4 +39,9 @@ export class CreatePaymentSessionDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({ description: 'Coupon code to apply to the order' })
+  @IsOptional()
+  @IsString()
+  couponCode?: string;
 }

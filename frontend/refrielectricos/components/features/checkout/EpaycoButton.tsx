@@ -16,6 +16,7 @@ interface EpaycoButtonProps {
   items: CartItem[];
   notes?: string;
   totalPrice: number;
+  couponCode?: string;
   disabled?: boolean;
   onError?: (error: string) => void;
   onOrderCreated?: (orderId: string) => void;
@@ -49,6 +50,7 @@ export default function EpaycoButton({
   items,
   notes,
   totalPrice,
+  couponCode,
   disabled = false,
   onError,
   onOrderCreated,
@@ -98,6 +100,7 @@ export default function EpaycoButton({
           quantity: item.quantity,
         })),
         notes,
+        couponCode,
       });
 
       const { success, orderId, epaycoData } = response.data;
@@ -162,7 +165,7 @@ export default function EpaycoButton({
       onError?.(errorMessage);
       setIsLoading(false);
     }
-  }, [userId, addressId, items, notes, onError, onOrderCreated]);
+  }, [userId, addressId, items, notes, couponCode, onError, onOrderCreated]);
 
   return (
     <Button

@@ -35,6 +35,10 @@ export class CreateOrderDto {
   @IsOptional()
   notes?: string;
 
+  @IsString()
+  @IsOptional()
+  couponCode?: string;
+
   @IsEnum(OrderStatus)
   @IsOptional()
   status?: OrderStatus;
