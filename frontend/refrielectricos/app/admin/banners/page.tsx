@@ -40,6 +40,7 @@ export default function BannersPage() {
     mutationFn: (id: string) => api.delete(`/banners/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banners-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['home-banners'] });
       addToast('Banner eliminado correctamente', 'success');
     },
     onError: () => {
@@ -52,6 +53,7 @@ export default function BannersPage() {
       api.patch(`/banners/${id}`, { isActive }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banners-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['home-banners'] });
       addToast('Estado actualizado correctamente', 'success');
     },
   });

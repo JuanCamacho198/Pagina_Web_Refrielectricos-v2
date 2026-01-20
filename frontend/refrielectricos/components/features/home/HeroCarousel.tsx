@@ -82,11 +82,19 @@ export default function HeroCarousel() {
     }
   };
 
+  // Reset current index if it exceeds slides length
   useEffect(() => {
+    if (current >= slides.length && slides.length > 0) {
+      setCurrent(0);
+    }
+  }, [slides.length, current]);
+
+  useEffect(() => {
+    if (slides.length === 0) return;
     const timer = setInterval(() => paginate(1), 5000);
     return () => clearInterval(timer);
      
-  }, [current]);
+  }, [current, slides.length]);
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -109,6 +117,20 @@ export default function HeroCarousel() {
   const swipePower = (offset: number, velocity: number) => {
     return Math.abs(offset) * velocity;
   };
+
+  // Show loading state or empty state
+  if (isLoading || slides.length === 0) {
+    return (
+      <div className="relative w-full max-w-7xl mx-auto">
+        <div className="relative h-100 md:h-125 w-full overflow-hidden rounded-2xl shadow-lg bg-gray-900 flex items-center justify-center">
+          <p className="text-white text-lg">Cargando banners...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const currentSlide = slides[current];
+  if (!currentSlide) return null;
 
   return (
     <div className="relative w-full max-w-7xl mx-auto group">
@@ -137,12 +159,12 @@ export default function HeroCarousel() {
                 paginate(-1);
               }
             }}
-            className={`absolute inset-0 w-full h-full ${slides[current]} flex items-center`}
+            className="absolute inset-0 w-full h-full flex items-center"
           >
             <div className="absolute inset-0 z-0">
               <Image
-                src={slides[current].imageUrl}
-                alt={slides[current].title}
+                src={currentSlide.imageUrl}
+                alt={currentSlide.title}
                 fill
                 sizes="100vw"
                 quality={60}
@@ -164,7 +186,7 @@ export default function HeroCarousel() {
                   transition={{ delay: 0.2 }}
                   className="inline-block px-2 py-0.5 md:px-3 md:py-1 bg-white/20 backdrop-blur-sm rounded-full text-[10px] md:text-sm font-medium border border-white/30"
                 >
-                  {slides[current].subtitle}
+                  {currentSlide.subtitle}
                 </motion.span>
                 <motion.h2 
                   initial={{ opacity: 0, y: 20 }}
@@ -172,7 +194,7 @@ export default function HeroCarousel() {
                   transition={{ delay: 0.3 }}
                   className="text-xl md:text-4xl font-bold leading-tight"
                 >
-                  {slides[current].title}
+                  {currentSlide.title}
                 </motion.h2>
                 <motion.p 
                   initial={{ opacity: 0, y: 20 }}
@@ -180,7 +202,7 @@ export default function HeroCarousel() {
                   transition={{ delay: 0.4 }}
                   className="text-sm md:text-lg text-gray-100 line-clamp-2 md:line-clamp-none"
                 >
-                  {('description' in slides[current]) ? slides[current].description : (slides[current].subtitle || '')}
+                  {('description' in currentSlide) ? currentSlide.description : (currentSlide.subtitle || '')}
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -188,10 +210,10 @@ export default function HeroCarousel() {
                   transition={{ delay: 0.5 }}
                   className="pt-2"
                 >
-                  {slides[current].link && (
-                    <Link href={slides[current].link!}>
+                  {currentSlide.link && (
+                    <Link href={currentSlide.link!}>
                       <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 border-none text-sm md:text-base px-4 py-2 md:px-6 md:py-3 h-auto shadow-lg shadow-blue-900/20">
-                        {slides[current].buttonText || 'Ver Productos'}
+                        {currentSlide.buttonText || 'Ver Productos'}
                       </Button>
                     </Link>
                   )}

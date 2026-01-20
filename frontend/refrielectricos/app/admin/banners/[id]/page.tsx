@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Upload } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter, useParams } from 'next/navigation';
+import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -23,10 +23,25 @@ interface BannerFormData {
   endsAt: string;
 }
 
-export default function NewBannerPage() {
+interface Banner {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  imageUrl: string;
+  link: string | null;
+  buttonText: string | null;
+  isActive: boolean;
+  position: number;
+  startsAt: string | null;
+  endsAt: string | null;
+}
+
+export default function EditBannerPage() {
   const router = useRouter();
+  const params = useParams();
   const { addToast } = useToast();
   const queryClient = useQueryClient();
+  const bannerId = params.id as string;
 
   const [formData, setFormData] = useState<BannerFormData>({
     title: '',
@@ -42,16 +57,44 @@ export default function NewBannerPage() {
 
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  const createMutation = useMutation({
-    mutationFn: (data: Partial<BannerFormData>) => api.post('/banners', data),
+  // Fetch existing banner data
+  const { data: banner, isLoading } = useQuery({
+    queryKey: ['banner', bannerId],
+    queryFn: async () => {
+      const { data } = await api.get<Banner>(`/banners/${bannerId}`);
+      return data;
+    },
+    enabled: !!bannerId,
+  });
+
+  // Populate form when banner data is loaded
+  useEffect(() => {
+    if (banner) {
+      setFormData({
+        title: banner.title,
+        subtitle: banner.subtitle || '',
+        imageUrl: banner.imageUrl,
+        link: banner.link || '',
+        buttonText: banner.buttonText || '',
+        isActive: banner.isActive,
+        position: banner.position,
+        startsAt: banner.startsAt ? new Date(banner.startsAt).toISOString().slice(0, 16) : '',
+        endsAt: banner.endsAt ? new Date(banner.endsAt).toISOString().slice(0, 16) : '',
+      });
+    }
+  }, [banner]);
+
+  const updateMutation = useMutation({
+    mutationFn: (data: Partial<BannerFormData>) => api.patch(`/banners/${bannerId}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banners-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['banner', bannerId] });
       queryClient.invalidateQueries({ queryKey: ['home-banners'] });
-      addToast('Banner creado correctamente', 'success');
+      addToast('Banner actualizado correctamente', 'success');
       router.push('/admin/banners');
     },
     onError: (error: any) => {
-      addToast(error.response?.data?.message || 'Error al crear el banner', 'error');
+      addToast(error.response?.data?.message || 'Error al actualizar el banner', 'error');
     },
   });
 
@@ -71,7 +114,7 @@ export default function NewBannerPage() {
     if (formData.startsAt) payload.startsAt = new Date(formData.startsAt).toISOString();
     if (formData.endsAt) payload.endsAt = new Date(formData.endsAt).toISOString();
 
-    createMutation.mutate(payload);
+    updateMutation.mutate(payload);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -105,6 +148,22 @@ export default function NewBannerPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-500">Cargando banner...</p>
+      </div>
+    );
+  }
+
+  if (!banner) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-500">Banner no encontrado</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
@@ -114,9 +173,9 @@ export default function NewBannerPage() {
           </button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Crear Banner</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Editar Banner</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Configura un nuevo banner para el carrusel principal
+            Actualiza la información del banner
           </p>
         </div>
       </div>
@@ -157,7 +216,7 @@ export default function NewBannerPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Subir Imagen
+                Subir Nueva Imagen
               </label>
               <input
                 type="file"
@@ -181,7 +240,7 @@ export default function NewBannerPage() {
             )}
 
             <Input
-              label="URL de la Imagen (o sube una arriba)"
+              label="URL de la Imagen"
               name="imageUrl"
               value={formData.imageUrl}
               onChange={handleChange}
@@ -291,13 +350,13 @@ export default function NewBannerPage() {
               Cancelar
             </Button>
           </Link>
-          <Button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending ? (
+          <Button type="submit" disabled={updateMutation.isPending}>
+            {updateMutation.isPending ? (
               <>Guardando...</>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Crear Banner
+                Guardar Cambios
               </>
             )}
           </Button>
