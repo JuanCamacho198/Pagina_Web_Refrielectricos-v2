@@ -68,3 +68,18 @@ export const useDeleteOrder = () => {
     },
   });
 };
+
+export const useBulkDeleteOrders = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orderIds: string[]) => {
+      const promises = orderIds.map(id => api.delete(`/orders/${id}`));
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+  });
+};

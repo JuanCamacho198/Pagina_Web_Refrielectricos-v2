@@ -16,6 +16,12 @@ interface ToastContextType {
   toasts: Toast[];
   addToast: (message: string, type?: ToastType) => void;
   removeToast: (id: string) => void;
+  success: (message: string) => void;
+  error: (message: string | unknown, title?: string) => void;
+  info: (message: string) => void;
+  warning: (message: string) => void;
+  loading: (message: string) => string;
+  dismiss: (id: string) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -33,14 +39,70 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     
     setToasts((prev) => [...prev, newToast]);
 
-    // Auto remove after 3 seconds
-    setTimeout(() => {
-      removeToast(id);
-    }, 3000);
+    // Auto remove after 3 seconds unless it's a loading toast (which has no timeout)
+    if (type !== 'info') { // Assuming 'info' here is just a placeholder, but actually we should handle loading separately
+       setTimeout(() => {
+        removeToast(id);
+      }, 3000);
+    }
+  }, [removeToast]);
+
+  const success = useCallback((message: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    const newToast = { id, message, type: 'success' as ToastType };
+    setToasts((prev) => [...prev, newToast]);
+    setTimeout(() => removeToast(id), 3000);
+  }, [removeToast]);
+
+  const error = useCallback((message: string | unknown, title?: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    let errorMsg = typeof message === 'string' ? message : 'Ha ocurrido un error';
+    
+    if (title) errorMsg = `${title}: ${errorMsg}`;
+
+    const newToast = { id, message: errorMsg, type: 'error' as ToastType };
+    setToasts((prev) => [...prev, newToast]);
+    setTimeout(() => removeToast(id), 5000);
+  }, [removeToast]);
+
+  const info = useCallback((message: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    const newToast = { id, message, type: 'info' as ToastType };
+    setToasts((prev) => [...prev, newToast]);
+    setTimeout(() => removeToast(id), 3000);
+  }, [removeToast]);
+
+  const warning = useCallback((message: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    const newToast = { id, message, type: 'warning' as ToastType };
+    setToasts((prev) => [...prev, newToast]);
+    setTimeout(() => removeToast(id), 4000);
+  }, [removeToast]);
+
+  const loading = useCallback((message: string) => {
+    const id = Math.random().toString(36).substring(2, 9);
+    // We'll treat loading as info for now but without timeout
+    const newToast = { id, message, type: 'info' as ToastType }; 
+    setToasts((prev) => [...prev, newToast]);
+    return id;
+  }, []);
+
+  const dismiss = useCallback((id: string) => {
+    removeToast(id);
   }, [removeToast]);
 
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+    <ToastContext.Provider value={{ 
+      toasts, 
+      addToast, 
+      removeToast,
+      success,
+      error,
+      info,
+      warning,
+      loading,
+      dismiss
+    }}>
       {children}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </ToastContext.Provider>

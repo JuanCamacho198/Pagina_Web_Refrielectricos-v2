@@ -10,7 +10,8 @@ import { useToast } from '@/context/ToastContext';
 import { Skeleton } from '@/components/ui/Skeleton';
 import Button from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
-import { useDeleteOrder } from '@/hooks/useOrders';
+import { useDeleteOrder, useBulkDeleteOrders } from '@/hooks/useOrders';
+import { BulkActionsBar } from '@/components/admin/BulkActionsBar';
 
 type SortKey = 'id' | 'createdAt' | 'total' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -25,6 +26,8 @@ export default function AdminOrdersPage() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'ADMIN';
   const deleteOrderMutation = useDeleteOrder();
+  const bulkDeleteMutation = useBulkDeleteOrders();
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -65,6 +68,35 @@ export default function AdminOrdersPage() {
     } catch (error) {
       console.error('Error deleting order:', error);
       addToast('Error al eliminar el pedido', 'error');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`¿Estás seguro de que deseas eliminar ${selectedOrders.length} pedidos? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      await bulkDeleteMutation.mutateAsync(selectedOrders);
+      setSelectedOrders([]);
+      addToast(`${selectedOrders.length} pedidos eliminados correctamente`, 'success');
+    } catch (error) {
+      console.error('Error deleting orders:', error);
+      addToast('Error al eliminar los pedidos', 'error');
+    }
+  };
+
+  const toggleSelectOrder = (orderId: string) => {
+    setSelectedOrders(prev => 
+      prev.includes(orderId) ? prev.filter(id => id !== orderId) : [...prev, orderId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedOrders.length === paginatedOrders.length) {
+      setSelectedOrders([]);
+    } else {
+      setSelectedOrders(paginatedOrders.map(o => o.id));
     }
   };
 
@@ -197,6 +229,14 @@ const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
+                <th className="px-6 py-3 w-4">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={paginatedOrders.length > 0 && selectedOrders.length === paginatedOrders.length}
+                    onChange={toggleSelectAll}
+                  />
+                </th>
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                   onClick={() => handleSort('id')}
@@ -240,6 +280,14 @@ const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {paginatedOrders.map((order) => (
               <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    checked={selectedOrders.includes(order.id)}
+                    onChange={() => toggleSelectOrder(order.id)}
+                  />
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                   #{order.id.slice(-6).toUpperCase()}
                 </td>
@@ -351,6 +399,20 @@ const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
           </div>
         )}
       </div>
+
+      <BulkActionsBar
+        selectedCount={selectedOrders.length}
+        onClearSelection={() => setSelectedOrders([])}
+        actions={[
+          {
+            label: 'Eliminar seleccionados',
+            icon: <Trash2 size={16} />,
+            onClick: handleBulkDelete,
+            variant: 'danger',
+            loading: bulkDeleteMutation.isPending
+          }
+        ]}
+      />
     </div>
   );
 }

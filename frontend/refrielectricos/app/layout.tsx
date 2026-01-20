@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/Toaster";
+import { ToastProvider } from "@/context/ToastContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import GoogleAuthProvider from "@/components/providers/GoogleAuthProvider";
@@ -71,8 +71,9 @@ export default function RootLayout({
         >
           <GoogleAuthProvider>
             <QueryProvider>
-              {children}
-              <Toaster />
+              <ToastProvider>
+                {children}
+              </ToastProvider>
             </QueryProvider>
           </GoogleAuthProvider>
         </ThemeProvider>

@@ -6,7 +6,7 @@ import { Plus, Edit, Trash2, Search, ChevronUp, ChevronDown, ChevronLeft, Chevro
 import Button from '@/components/ui/Button';
 import Image from 'next/image';
 import { useAdminProducts, useDeleteProduct } from '@/hooks/useProducts';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/context/ToastContext';
 import { BulkActionsBar } from '@/components/admin/BulkActionsBar';
 
 type SortKey = 'name' | 'price' | 'stock' | 'isActive';

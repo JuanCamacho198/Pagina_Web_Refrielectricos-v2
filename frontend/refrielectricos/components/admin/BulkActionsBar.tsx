@@ -45,10 +45,10 @@ export function BulkActionsBar({ selectedCount, onClearSelection, actions }: Bul
             <Button
               key={index}
               onClick={action.onClick}
-              variant={action.variant === 'danger' ? 'destructive' : 'default'}
+              variant={action.variant === 'danger' ? 'primary' : 'primary'}
               size="sm"
               disabled={action.loading}
-              className={action.variant === 'warning' ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
+              className={`${action.variant === 'warning' ? 'bg-yellow-600 hover:bg-yellow-700' : ''} ${action.variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : ''}`}
             >
               {action.loading ? (
                 <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />

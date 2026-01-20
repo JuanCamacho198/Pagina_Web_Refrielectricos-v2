@@ -69,14 +69,18 @@ async function bootstrap() {
   );
 
   // 2. CONFIGURACIÓN DE CORS
+  const allowedOrigins = [
+    'https://frontend-production-4178.up.railway.app',
+    'https://paginawebrefrielectricos-v2-production.up.railway.app', // Self
+    process.env.FRONTEND_URL,
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:4000',
+    'http://localhost:4001',
+  ].filter((url): url is string => !!url);
+
   app.enableCors({
-    origin: [
-      'https://frontend-production-4178.up.railway.app',
-      process.env.FRONTEND_URL,
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:4000',
-    ].filter((url): url is string => !!url),
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type,Authorization,Accept',
