@@ -368,6 +368,28 @@ model Banner {
   @@index([position])
 }
 
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  userName    String?
+  userEmail   String?
+  action      String
+  entity      String
+  entityId    String?
+  changes     Json?
+  oldValues   Json?
+  newValues   Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@index([entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
 enum Role {
   USER
   ADMIN

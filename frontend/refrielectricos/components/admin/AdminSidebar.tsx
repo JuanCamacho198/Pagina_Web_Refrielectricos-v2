@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, Zap, Ticket, Image } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, Zap, Ticket, Image, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +13,7 @@ const menuItems = [
   { name: 'Cupones', href: '/admin/coupons', icon: Ticket },
   { name: 'Banners', href: '/admin/banners', icon: Image },
   { name: 'Usuarios', href: '/admin/users', icon: Users },
+  { name: 'Auditoría', href: '/admin/audit-logs', icon: Shield },
   { name: 'Configuración', href: '/admin/settings', icon: Settings },
 ];
 

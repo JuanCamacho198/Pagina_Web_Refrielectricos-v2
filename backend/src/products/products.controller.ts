@@ -22,17 +22,24 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
+import { AuditLogsService } from '../modules/audit-logs/audit-logs.service';
 
 interface RequestWithUser {
   user: {
     userId: string;
+    id?: string;
+    name?: string;
+    email?: string;
   };
 }
 
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly auditLogsService: AuditLogsService,
+  ) {}
 
   @Post(':id/view')
   @ApiBearerAuth()
@@ -45,13 +52,32 @@ export class ProductsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  async create(@Body() createProductDto: CreateProductDto) {
+  async create(@Body() createProductDto: CreateProductDto, @Request() req) {
     console.log(
       'ProductsController: Creating product with data:',
       createProductDto,
     );
     try {
-      return await this.productsService.create(createProductDto);
+      const product = await this.productsService.create(createProductDto);
+
+      // Log the audit
+      await this.auditLogsService.create({
+        action: 'CREATE',
+        entity: 'Product',
+        entityId: product.id,
+        newValues: {
+          name: product.name,
+          price: product.price,
+          sku: product.sku,
+        },
+        userId: req.user?.id,
+        userName: req.user?.name,
+        userEmail: req.user?.email,
+        ipAddress: req.ip || req.connection?.remoteAddress,
+        userAgent: req.headers['user-agent'],
+      });
+
+      return product;
     } catch (error) {
       console.error('Error creating product:', error);
       const message =
@@ -136,9 +162,33 @@ export class ProductsController {
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
+    @Request() req,
   ) {
     try {
-      return await this.productsService.update(id, updateProductDto);
+      // Get old product values for audit
+      const oldProduct = await this.productsService.findOne(id);
+
+      const updatedProduct = await this.productsService.update(
+        id,
+        updateProductDto,
+      );
+
+      // Log changes
+      const changes: Record<string, any> = {};
+      Object.keys(updateProductDto).forEach((key) => {
+        if (oldProduct[key] !== updatedProduct[key]) {
+          changes[key] = {
+            old: oldProduct[key],
+            new: updatedProduct[key],
+          };
+        }
+      });
+
+      if (Object.keys(changes).length > 0) {
+        await this.auditLogsService.log('UPDATE', 'Product', id, changes, req);
+      }
+
+      return updatedProduct;
     } catch (error) {
       console.error(`Error updating product ${id}:`, error);
       throw error;
@@ -149,7 +199,24 @@ export class ProductsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(id);
+  async remove(@Param('id') id: string, @Request() req) {
+    const product = await this.productsService.findOne(id);
+
+    const result = await this.productsService.remove(id);
+
+    // Log deletion
+    await this.auditLogsService.create({
+      action: 'DELETE',
+      entity: 'Product',
+      entityId: id,
+      oldValues: { name: product.name, sku: product.sku },
+      userId: req.user?.id,
+      userName: req.user?.name,
+      userEmail: req.user?.email,
+      ipAddress: req.ip || req.connection?.remoteAddress,
+      userAgent: req.headers['user-agent'],
+    });
+
+    return result;
   }
 }

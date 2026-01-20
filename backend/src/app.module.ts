@@ -21,6 +21,7 @@ import { SettingsModule } from './settings/settings.module';
 import { PaymentsModule } from './payments/payments.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { BannersModule } from './banners/banners.module';
+import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 
 @Module({
@@ -63,6 +64,7 @@ import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
     PaymentsModule,
     CouponsModule,
     BannersModule,
+    AuditLogsModule,
   ],
   controllers: [AppController],
   providers: [

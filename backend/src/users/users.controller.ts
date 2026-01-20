@@ -19,12 +19,16 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../../generated/prisma/enums';
 import { AuthService } from '../auth/auth.service';
+import { AuditLogsService } from '../modules/audit-logs/audit-logs.service';
+import { Request as ExpressRequest } from 'express';
 
-interface RequestWithUser {
+interface RequestWithUser extends ExpressRequest {
   user: {
     userId: string;
     email: string;
     role: string;
+    id?: string;
+    name?: string;
   };
 }
 
@@ -34,6 +38,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   @Post()
@@ -83,8 +88,31 @@ export class UsersController {
       throw new ForbiddenException('No puedes editar este usuario');
     }
 
+    // Get old values for audit
+    const oldUser = await this.usersService.findOne(id);
+
     const passwordChanged = !!updateUserDto.password;
     const updatedUser = await this.usersService.update(id, updateUserDto);
+
+    // Log changes (especially role changes)
+    const changes: Record<string, any> = {};
+    if (updateUserDto.role && oldUser.role !== updateUserDto.role) {
+      changes.role = { old: oldUser.role, new: updateUserDto.role };
+
+      await this.auditLogsService.create({
+        action: 'ROLE_CHANGE',
+        entity: 'User',
+        entityId: id,
+        changes,
+        oldValues: { role: oldUser.role, email: oldUser.email },
+        newValues: { role: updateUserDto.role, email: oldUser.email },
+        userId: user.id || user.userId,
+        userName: user.name,
+        userEmail: user.email,
+        ipAddress: req.ip || req.connection?.remoteAddress,
+        userAgent: req.headers['user-agent'],
+      });
+    }
 
     // Revoke all refresh tokens if password was changed
     if (passwordChanged) {
@@ -98,7 +126,22 @@ export class UsersController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @Request() req: RequestWithUser) {
+    const user = await this.usersService.findOne(id);
+
+    // Log deletion
+    await this.auditLogsService.create({
+      action: 'DELETE',
+      entity: 'User',
+      entityId: id,
+      oldValues: { name: user.name, email: user.email, role: user.role },
+      userId: req.user.id || req.user.userId,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      ipAddress: req.ip || req.connection?.remoteAddress,
+      userAgent: req.headers['user-agent'],
+    });
+
     // Revoke refresh tokens before deletion
     await this.authService.revokeRefreshTokens(id);
     return this.usersService.remove(id);
