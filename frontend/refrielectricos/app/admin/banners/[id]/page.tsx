@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
+import ImageUploadWithCrop from '@/components/ui/ImageUploadWithCrop';
 import { useToast } from '@/context/ToastContext';
 import api from '@/lib/api';
 
@@ -54,8 +55,6 @@ export default function EditBannerPage() {
     startsAt: '',
     endsAt: '',
   });
-
-  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Fetch existing banner data
   const { data: banner, isLoading } = useQuery({
@@ -127,25 +126,8 @@ export default function EditBannerPage() {
     }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingImage(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const { data } = await api.post('/files/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setFormData((prev) => ({ ...prev, imageUrl: data.url }));
-      addToast('Imagen subida correctamente', 'success');
-    } catch (error) {
-      addToast('Error al subir la imagen', 'error');
-    } finally {
-      setUploadingImage(false);
-    }
+  const handleImageChange = (url: string) => {
+    setFormData((prev) => ({ ...prev, imageUrl: url }));
   };
 
   if (isLoading) {
@@ -216,35 +198,21 @@ export default function EditBannerPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Subir Nueva Imagen
+                Imagen del Banner (Recomendado: 1920x600px)
               </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <ImageUploadWithCrop
+                value={formData.imageUrl}
+                onChange={handleImageChange}
+                showCropButton={true}
+                aspectRatio={16 / 9}
               />
-              {uploadingImage && (
-                <p className="text-sm text-gray-500 mt-2">Subiendo imagen...</p>
-              )}
             </div>
 
-            {formData.imageUrl && (
-              <div className="relative h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                <img
-                  src={formData.imageUrl}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
             <Input
-              label="URL de la Imagen"
+              label="O ingresa una URL directamente"
               name="imageUrl"
               value={formData.imageUrl}
               onChange={handleChange}
-              required
               placeholder="https://ejemplo.com/imagen.jpg"
             />
           </div>

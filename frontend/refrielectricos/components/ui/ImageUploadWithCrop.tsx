@@ -13,13 +13,15 @@ interface ImageUploadWithCropProps {
   onChange: (url: string) => void;
   disabled?: boolean;
   showCropButton?: boolean;
+  aspectRatio?: number;
 }
 
 export default function ImageUploadWithCrop({ 
   value, 
   onChange, 
   disabled,
-  showCropButton = true 
+  showCropButton = true,
+  aspectRatio = 1
 }: ImageUploadWithCropProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [showCropEditor, setShowCropEditor] = useState(false);
@@ -131,7 +133,10 @@ export default function ImageUploadWithCrop({
       <div className="space-y-4 w-full">
         <div className="flex items-start gap-4">
           {value ? (
-            <div className="relative w-[200px] h-[200px] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 group">
+            <div 
+              className="relative w-full max-w-md rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 group"
+              style={{ aspectRatio: aspectRatio }}
+            >
               {/* Action buttons */}
               <div className="absolute top-2 right-2 z-10 flex gap-1">
                 {showCropButton && (
@@ -157,7 +162,7 @@ export default function ImageUploadWithCrop({
               </div>
               <Image
                 src={value}
-                alt="Product Image"
+                alt="Preview Image"
                 fill
                 className="object-cover"
               />
@@ -168,11 +173,12 @@ export default function ImageUploadWithCrop({
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`w-[200px] h-[200px] rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
+              className={`w-full max-w-md rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
                 isDragging 
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' 
                   : 'border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
               }`}
+              style={{ aspectRatio: aspectRatio, minHeight: '150px' }}
             >
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-full text-blue-600 dark:text-blue-400">
                 {isUploading ? <Loader2 className="animate-spin" size={24} /> : <Upload size={24} />}
@@ -205,7 +211,7 @@ export default function ImageUploadWithCrop({
           imageUrl={tempImageUrl}
           onSave={handleCropSave}
           onCancel={handleCropCancel}
-          aspectRatio={1}
+          aspectRatio={aspectRatio}
         />
       )}
     </>
