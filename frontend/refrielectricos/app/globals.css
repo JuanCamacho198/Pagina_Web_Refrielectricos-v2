@@ -19,3 +19,19 @@ body {
   color: var(--foreground);
   font-family: var(--font-roboto), Arial, Helvetica, sans-serif;
 }
+
+/* Animations for Bulk Actions Bar */
+@keyframes slide-up {
+  from {
+    transform: translate(-50%, 100px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}

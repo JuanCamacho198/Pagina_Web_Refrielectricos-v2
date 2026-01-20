@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, ToggleLeft, ToggleRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Image from 'next/image';
 import { useAdminProducts, useDeleteProduct } from '@/hooks/useProducts';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/hooks/useToast';
+import { BulkActionsBar } from '@/components/admin/BulkActionsBar';
 
 type SortKey = 'name' | 'price' | 'stock' | 'isActive';
 type SortDirection = 'asc' | 'desc';
@@ -19,8 +20,10 @@ interface SortConfig {
 export default function AdminProductsPage() {
   const { data: products = [], isLoading } = useAdminProducts();
   const deleteProductMutation = useDeleteProduct();
-  const { addToast } = useToast();
+  const toast = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Sorting & Pagination State
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'name', direction: 'asc' });
@@ -33,16 +36,61 @@ export default function AdminProductsPage() {
     try {
       const result = await deleteProductMutation.mutateAsync(id);
       if (result?.status === 'archived') {
-        addToast(
-          'El producto tiene pedidos asociados, por lo que se desactivó en lugar de eliminarse.',
-          'info',
+        toast.info(
+          'El producto tiene pedidos asociados, por lo que se desactivó en lugar de eliminarse.'
         );
       } else {
-        addToast('Producto eliminado correctamente', 'success');
+        toast.success('Producto eliminado correctamente');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      addToast('Error al eliminar el producto', 'error');
+      toast.error(error, 'Error al eliminar el producto');
+    }
+  };
+
+  // Bulk Actions
+  const handleSelectAll = () => {
+    if (selectedIds.length === paginatedProducts.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(paginatedProducts.map(p => p.id));
+    }
+  };
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`¿Eliminar ${selectedIds.length} productos seleccionados?`)) return;
+
+    setIsDeleting(true);
+    const loadingToast = toast.loading(`Eliminando ${selectedIds.length} productos...`);
+
+    try {
+      const results = await Promise.allSettled(
+        selectedIds.map(id => deleteProductMutation.mutateAsync(id))
+      );
+
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+
+      toast.dismiss(loadingToast);
+
+      if (failed === 0) {
+        toast.success(`${succeeded} productos eliminados correctamente`);
+      } else {
+        toast.warning(`${succeeded} eliminados, ${failed} fallaron`);
+      }
+
+      setSelectedIds([]);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error(error, 'Error en eliminación masiva');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -114,6 +162,14 @@ export default function AdminProductsPage() {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
+                <th className="px-6 py-3 text-center w-12">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.length === paginatedProducts.length && paginatedProducts.length > 0}
+                    onChange={handleSelectAll}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </th>
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors select-none"
                   onClick={() => handleSort('name')}
@@ -156,6 +212,14 @@ export default function AdminProductsPage() {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {paginatedProducts.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <td className="px-6 py-4 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(product.id)}
+                      onChange={() => handleToggleSelect(product.id)}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 shrink-0 relative rounded-md overflow-hidden border border-gray-200 dark:border-gray-700 bg-white">
@@ -271,6 +335,21 @@ export default function AdminProductsPage() {
           </div>
         )}
       </div>
+
+      {/* Bulk Actions Bar */}
+      <BulkActionsBar
+        selectedCount={selectedIds.length}
+        onClearSelection={() => setSelectedIds([])}
+        actions={[
+          {
+            label: 'Eliminar seleccionados',
+            icon: <Trash2 size={16} className="mr-2" />,
+            onClick: handleBulkDelete,
+            variant: 'danger',
+            loading: isDeleting,
+          },
+        ]}
+      />
     </div>
   );
 }
