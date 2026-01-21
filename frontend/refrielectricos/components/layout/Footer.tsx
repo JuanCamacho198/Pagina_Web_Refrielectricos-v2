@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Send, Music2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
@@ -11,6 +11,10 @@ export default function Footer() {
   const [phoneNumber, setPhoneNumber] = useState('+57 300 123 4567');
   const [supportEmail, setSupportEmail] = useState('contacto@refrielectricos.com');
   const [address, setAddress] = useState('Calle 123 # 45 - 67, Bogotá, Colombia');
+  const [facebookUrl, setFacebookUrl] = useState('');
+  const [instagramUrl, setInstagramUrl] = useState('');
+  const [tiktokUrl, setTiktokUrl] = useState('');
+  const [twitterUrl, setTwitterUrl] = useState('');
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -24,6 +28,18 @@ export default function Footer() {
         }
         if (data?.address) {
           setAddress(data.address);
+        }
+        if (data?.facebookUrl) {
+          setFacebookUrl(data.facebookUrl);
+        }
+        if (data?.instagramUrl) {
+          setInstagramUrl(data.instagramUrl);
+        }
+        if (data?.tiktokUrl) {
+          setTiktokUrl(data.tiktokUrl);
+        }
+        if (data?.twitterUrl) {
+          setTwitterUrl(data.twitterUrl);
         }
       } catch (error) {
         console.error('Error fetching settings:', error);
@@ -52,15 +68,50 @@ export default function Footer() {
               Tu aliado experto en repuestos de refrigeración y electricidad. Calidad garantizada y el mejor servicio para tus proyectos.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                <Facebook size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors">
-                <Instagram size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                <Twitter size={20} />
-              </a>
+              {facebookUrl && (
+                <a 
+                  href={facebookUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={20} />
+                </a>
+              )}
+              {instagramUrl && (
+                <a 
+                  href={instagramUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={20} />
+                </a>
+              )}
+              {twitterUrl && (
+                <a 
+                  href={twitterUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                  aria-label="Twitter"
+                >
+                  <Twitter size={20} />
+                </a>
+              )}
+              {tiktokUrl && (
+                <a 
+                  href={tiktokUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  aria-label="TikTok"
+                >
+                  <Music2 size={20} />
+                </a>
+              )}
             </div>
           </div>
 
