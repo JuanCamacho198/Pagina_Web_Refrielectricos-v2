@@ -40,4 +40,28 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   freeShippingEmoji?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  customBannerEnabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  customBannerText?: string;
+
+  @IsOptional()
+  @IsString()
+  customBannerLink?: string;
+
+  @IsOptional()
+  @IsString()
+  customBannerBgColor?: string;
+
+  @IsOptional()
+  @IsString()
+  customBannerTextColor?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  customBannerIsAnimated?: boolean;
 }
