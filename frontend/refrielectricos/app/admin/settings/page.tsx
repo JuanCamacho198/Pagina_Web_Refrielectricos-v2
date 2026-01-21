@@ -28,6 +28,10 @@ interface StoreSettings {
   customBannerBgColor: string;
   customBannerTextColor: string;
   customBannerIsAnimated: boolean;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  tiktokUrl?: string;
+  twitterUrl?: string;
 }
 
 const EMOJI_OPTIONS = [
@@ -73,6 +77,10 @@ export default function AdminSettingsPage() {
     customBannerBgColor: apiSettings?.customBannerBgColor || '#EF4444',
     customBannerTextColor: apiSettings?.customBannerTextColor || '#FFFFFF',
     customBannerIsAnimated: apiSettings?.customBannerIsAnimated ?? true,
+    facebookUrl: apiSettings?.facebookUrl || '',
+    instagramUrl: apiSettings?.instagramUrl || '',
+    tiktokUrl: apiSettings?.tiktokUrl || '',
+    twitterUrl: apiSettings?.twitterUrl || '',
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -458,6 +466,44 @@ export default function AdminSettingsPage() {
                 )}
               </div>
             </div>
+          </div>
+        </Card>
+
+        {/* Social Media Links */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+            <Globe size={20} className="text-blue-600" />
+            Redes Sociales
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Facebook URL"
+              name="facebookUrl"
+              value={settings.facebookUrl || ''}
+              onChange={handleChange}
+              placeholder="https://facebook.com/tuempresa"
+            />
+            <Input
+              label="Instagram URL"
+              name="instagramUrl"
+              value={settings.instagramUrl || ''}
+              onChange={handleChange}
+              placeholder="https://instagram.com/tuempresa"
+            />
+            <Input
+              label="TikTok URL"
+              name="tiktokUrl"
+              value={settings.tiktokUrl || ''}
+              onChange={handleChange}
+              placeholder="https://tiktok.com/@tuempresa"
+            />
+            <Input
+              label="Twitter/X URL"
+              name="twitterUrl"
+              value={settings.twitterUrl || ''}
+              onChange={handleChange}
+              placeholder="https://twitter.com/tuempresa"
+            />
           </div>
         </Card>
 

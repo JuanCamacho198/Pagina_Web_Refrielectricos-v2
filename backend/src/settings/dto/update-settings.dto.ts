@@ -64,4 +64,20 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsBoolean()
   customBannerIsAnimated?: boolean;
+
+  @IsOptional()
+  @IsString()
+  facebookUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  instagramUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  tiktokUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  twitterUrl?: string;
 }

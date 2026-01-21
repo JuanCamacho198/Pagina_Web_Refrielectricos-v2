@@ -308,6 +308,12 @@ model StoreSettings {
   customBannerTextColor  String   @default("#FFFFFF") // White default
   customBannerIsAnimated Boolean  @default(true) // For scrolling effect
   
+  // Social Media Links
+  facebookUrl            String?
+  instagramUrl           String?
+  tiktokUrl              String?
+  twitterUrl             String?
+  
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 }
