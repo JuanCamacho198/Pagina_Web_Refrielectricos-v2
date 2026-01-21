@@ -292,6 +292,7 @@ model StoreSettings {
   supportEmail           String   @default("contacto@refrielectricos.com")
   phoneNumber            String   @default("3001234567")
   phoneCountryCode       String   @default("+57")
+  address                String?
   currency               String   @default("COP")
   maintenanceMode        Boolean  @default(false)
   emailNotifications     Boolean  @default(true)

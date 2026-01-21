@@ -1,10 +1,36 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Mail, MapPin, Phone, Clock, Send } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import api from '@/lib/api';
 
 export default function ContactPage() {
+  const [phoneNumber, setPhoneNumber] = useState('+57 (601) 123-4567');
+  const [supportEmail, setSupportEmail] = useState('info@refrielectricos.com');
+  const [address, setAddress] = useState('Calle 8 # 16-70, Barrio San Jose, Curumani, Cesar');
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get('/settings');
+        if (data?.phoneCountryCode && data?.phoneNumber) {
+          setPhoneNumber(`${data.phoneCountryCode} ${data.phoneNumber}`);
+        }
+        if (data?.supportEmail) {
+          setSupportEmail(data.supportEmail);
+        }
+        if (data?.address) {
+          setAddress(data.address);
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Aquí iría la lógica de envío del formulario
@@ -33,10 +59,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white">Dirección</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mt-1">
-                    Calle 8 # 16-70<br />
-                    Barrio San Jose<br />
-                    Curumani, Cesar
+                  <p className="text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-line">
+                    {address}
                   </p>
                 </div>
               </div>
@@ -48,8 +72,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white">Teléfono</h3>
                   <p className="text-gray-600 dark:text-gray-300 mt-1">
-                    +57 (601) 123-4567<br />
-                    +57 300 123-4567
+                    {phoneNumber}
                   </p>
                 </div>
               </div>
@@ -61,8 +84,7 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white">Email</h3>
                   <p className="text-gray-600 dark:text-gray-300 mt-1">
-                    info@refrielectricos.com<br />
-                    soporte@refrielectricos.com
+                    {supportEmail}
                   </p>
                 </div>
               </div>

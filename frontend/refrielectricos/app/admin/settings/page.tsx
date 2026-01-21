@@ -15,6 +15,7 @@ interface StoreSettings {
   supportEmail: string;
   phoneNumber: string;
   phoneCountryCode: string;
+  address?: string;
   currency: string;
   maintenanceMode: boolean;
   emailNotifications: boolean;
@@ -53,6 +54,7 @@ export default function AdminSettingsPage() {
     supportEmail: apiSettings?.supportEmail || '',
     phoneNumber: apiSettings?.phoneNumber || '',
     phoneCountryCode: apiSettings?.phoneCountryCode || '+57',
+    address: apiSettings?.address || '',
     currency: apiSettings?.currency || 'COP',
     maintenanceMode: apiSettings?.maintenanceMode ?? false,
     emailNotifications: apiSettings?.emailNotifications ?? true,
@@ -71,11 +73,33 @@ export default function AdminSettingsPage() {
     }));
   };
 
-  const handleToggle = (fieldName: keyof StoreSettings) => {
+  const handleToggle = async (fieldName: keyof StoreSettings) => {
+    const newValue = !settings[fieldName];
+    
+    // Update local state optimistically
     queryClient.setQueryData(['store-settings'], (old: StoreSettings | undefined) => ({
       ...old || settings,
-      [fieldName]: !(old || settings)[fieldName],
+      [fieldName]: newValue,
     }));
+
+    // Save to backend immediately
+    try {
+      await api.patch('/settings', {
+        ...settings,
+        [fieldName]: newValue,
+      });
+      addToast('Configuración actualizada', 'success');
+      // Refetch to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ['store-settings'] });
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      addToast('Error al actualizar la configuración', 'error');
+      // Revert on error
+      queryClient.setQueryData(['store-settings'], (old: StoreSettings | undefined) => ({
+        ...old || settings,
+        [fieldName]: !newValue,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -193,6 +217,22 @@ export default function AdminSettingsPage() {
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                 Este número se usará en el botón de WhatsApp y el footer. Ejemplo: {settings.phoneCountryCode}{settings.phoneNumber}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Dirección Física
+              </label>
+              <textarea
+                name="address"
+                value={settings.address || ''}
+                onChange={handleChange}
+                rows={2}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                placeholder="Ej: Calle 14 #15-68, Curumaní, Cesar, Colombia"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Esta dirección aparecerá en el footer y la página de contacto.
               </p>
             </div>
           </div>

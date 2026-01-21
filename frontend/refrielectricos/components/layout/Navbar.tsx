@@ -112,7 +112,17 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`sticky top-0 z-50 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/30 dark:border-gray-700/30 transition-all duration-300 shadow-sm ${
+      {/* Free Shipping Banner */}
+      {isFetched && storeSettings?.freeShippingEnabled && (
+        <div className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-2 px-4 text-center text-sm font-medium shadow-sm">
+          <span className="inline-flex items-center gap-2">
+            {storeSettings.freeShippingEmoji && <span>{storeSettings.freeShippingEmoji}</span>}
+            <span>{storeSettings.freeShippingText || 'Envío gratis en compras superiores a $100.000'}</span>
+          </span>
+        </div>
+      )}
+      
+      <nav className={`${isFetched && storeSettings?.freeShippingEnabled ? '' : 'sticky top-0'} z-50 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/30 dark:border-gray-700/30 transition-all duration-300 shadow-sm ${
         isScrolled ? 'py-2' : 'py-3'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -151,7 +161,7 @@ export default function Navbar() {
             </Link>
 
             {/* Search Bar (Centered) */}
-            <div className="flex-1 justify-center max-w-2xl mx-auto hidden md:block">
+            <div className="flex-1 justify-center max-w-md mx-auto hidden md:block">
               <SearchBox />
             </div>
 

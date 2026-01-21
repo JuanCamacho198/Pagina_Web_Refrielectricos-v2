@@ -10,6 +10,7 @@ import api from '@/lib/api';
 export default function Footer() {
   const [phoneNumber, setPhoneNumber] = useState('+57 300 123 4567');
   const [supportEmail, setSupportEmail] = useState('contacto@refrielectricos.com');
+  const [address, setAddress] = useState('Calle 123 # 45 - 67, Bogotá, Colombia');
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -20,6 +21,9 @@ export default function Footer() {
         }
         if (data?.supportEmail) {
           setSupportEmail(data.supportEmail);
+        }
+        if (data?.address) {
+          setAddress(data.address);
         }
       } catch (error) {
         console.error('Error fetching settings:', error);
@@ -93,7 +97,7 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <MapPin size={18} className="shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
-                <span>Calle 123 # 45 - 67<br />Bogotá, Colombia</span>
+                <span>{address}</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <Phone size={18} className="shrink-0 text-blue-600 dark:text-blue-400" />

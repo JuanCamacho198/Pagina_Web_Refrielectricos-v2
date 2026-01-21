@@ -101,7 +101,7 @@ export default function HeroCarousel() {
   if (slides.length === 0) {
     return (
       <div className="relative w-full max-w-7xl mx-auto">
-        <div className="relative h-100 md:h-125 w-full overflow-hidden rounded-2xl shadow-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+        <div className="relative h-100 md:h-125 w-full overflow-hidden rounded-2xl shadow-lg bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center">
           <div className="text-center text-white px-4">
             <h2 className="text-2xl md:text-4xl font-bold mb-2">Bienvenido a Refrielectricos</h2>
             <p className="text-sm md:text-lg text-blue-100">Tu tienda de confianza en refrigeración</p>
