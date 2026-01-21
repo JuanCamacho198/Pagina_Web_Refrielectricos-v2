@@ -58,6 +58,40 @@ export default function Navbar() {
     staleTime: 1000 * 60 * 60,
   });
 
+  // Custom Banner Component
+  const CustomBanner = () => {
+    if (!isFetched || !storeSettings?.customBannerEnabled) return null;
+
+    return (
+      <div 
+        className="w-full py-2 px-4 text-center text-sm font-bold shadow-sm relative overflow-hidden z-50"
+        style={{ 
+          backgroundColor: storeSettings.customBannerBgColor || '#EF4444', 
+          color: storeSettings.customBannerTextColor || '#FFFFFF' 
+        }}
+      >
+        {storeSettings.customBannerIsAnimated ? (
+          <div className="animate-marquee whitespace-nowrap inline-block">
+            <span className="mx-4">{storeSettings.customBannerText}</span>
+            <span className="mx-4">{storeSettings.customBannerText}</span>
+            <span className="mx-4">{storeSettings.customBannerText}</span>
+            <span className="mx-4">{storeSettings.customBannerText}</span>
+          </div>
+        ) : (
+          <div className="container mx-auto">
+            {storeSettings.customBannerLink ? (
+              <Link href={storeSettings.customBannerLink} className="hover:underline">
+                {storeSettings.customBannerText}
+              </Link>
+            ) : (
+              storeSettings.customBannerText
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Stable scroll logic with hysteresis + lock to prevent rapid toggle glitches.
   // The lock helps when navbar height transitions slightly nudge scrollY near the threshold.
   const handleScroll = useCallback(() => {
@@ -112,17 +146,9 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Free Shipping Banner */}
-      {isFetched && storeSettings?.freeShippingEnabled && (
-        <div className="sticky top-0 z-50 bg-linear-to-r from-blue-600 to-blue-500 text-white py-2 px-4 text-center text-sm font-medium shadow-sm">
-          <span className="inline-flex items-center gap-2">
-            {storeSettings.freeShippingEmoji && <span>{storeSettings.freeShippingEmoji}</span>}
-            <span>{storeSettings.freeShippingText || 'Envío gratis en compras superiores a $100.000'}</span>
-          </span>
-        </div>
-      )}
+      <CustomBanner />
       
-      <nav className={`${isFetched && storeSettings?.freeShippingEnabled ? '' : 'sticky top-0'} z-50 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/30 dark:border-gray-700/30 transition-all duration-300 shadow-sm ${
+      <nav className={`${isFetched && storeSettings?.customBannerEnabled ? '' : 'sticky top-0'} z-50 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/30 dark:border-gray-700/30 transition-all duration-300 shadow-sm ${
         isScrolled ? 'py-2' : 'py-3'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -164,6 +190,16 @@ export default function Navbar() {
             <div className="flex-1 justify-center max-w-md mx-auto hidden md:block">
               <SearchBox />
             </div>
+
+            {/* Free Shipping Mini-Banner (Right of Search) */}
+            {isFetched && storeSettings?.freeShippingEnabled && (
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium border border-blue-100 dark:border-blue-800 animate-in fade-in zoom-in duration-300">
+                <span className="text-base">{storeSettings.freeShippingEmoji || '🚚'}</span>
+                <span className="whitespace-nowrap max-w-[200px] truncate">
+                  {storeSettings.freeShippingText || 'Envío gratis > $100k'}
+                </span>
+              </div>
+            )}
 
             {/* Theme Toggle - Far Right */}
             <div className="hidden md:flex items-center ml-auto">

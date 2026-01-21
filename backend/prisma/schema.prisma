@@ -299,6 +299,15 @@ model StoreSettings {
   freeShippingEnabled    Boolean  @default(true)
   freeShippingBannerText String   @default("Envío gratis en Curumaní desde $100,000")
   freeShippingEmoji      String   @default("🚚")
+  
+  // Custom Banner Fields
+  customBannerEnabled    Boolean  @default(false)
+  customBannerText       String   @default("🎄 ¡Feliz Navidad! Aprovecha nuestras ofertas especiales 🎄")
+  customBannerLink       String?
+  customBannerBgColor    String   @default("#EF4444") // Red default
+  customBannerTextColor  String   @default("#FFFFFF") // White default
+  customBannerIsAnimated Boolean  @default(true) // For scrolling effect
+  
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 }

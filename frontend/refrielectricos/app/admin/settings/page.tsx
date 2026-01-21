@@ -22,6 +22,12 @@ interface StoreSettings {
   freeShippingEnabled: boolean;
   freeShippingBannerText: string;
   freeShippingEmoji: string;
+  customBannerEnabled: boolean;
+  customBannerText: string;
+  customBannerLink: string;
+  customBannerBgColor: string;
+  customBannerTextColor: string;
+  customBannerIsAnimated: boolean;
 }
 
 const EMOJI_OPTIONS = [
@@ -61,6 +67,12 @@ export default function AdminSettingsPage() {
     freeShippingEnabled: apiSettings?.freeShippingEnabled ?? true,
     freeShippingBannerText: apiSettings?.freeShippingBannerText || 'Envío gratis en Curumaní desde $100,000',
     freeShippingEmoji: apiSettings?.freeShippingEmoji || '🚚',
+    customBannerEnabled: apiSettings?.customBannerEnabled ?? false,
+    customBannerText: apiSettings?.customBannerText || '🎄 ¡Feliz Navidad! Aprovecha nuestras ofertas especiales 🎄',
+    customBannerLink: apiSettings?.customBannerLink || '',
+    customBannerBgColor: apiSettings?.customBannerBgColor || '#EF4444',
+    customBannerTextColor: apiSettings?.customBannerTextColor || '#FFFFFF',
+    customBannerIsAnimated: apiSettings?.customBannerIsAnimated ?? true,
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -309,6 +321,141 @@ export default function AdminSettingsPage() {
               <div className="flex items-center gap-1.5 text-green-700 dark:text-green-400 text-sm font-medium">
                 <span className="text-base">{settings.freeShippingEmoji}</span>
                 <span>{settings.freeShippingBannerText}</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Custom Animated Banner Settings */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+            <Globe size={20} className="text-blue-600" />
+            Banner Personalizado (Navideño/Promocional)
+          </h2>
+          <div className="space-y-4">
+            {/* Toggle for Custom Banner */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Habilitar Banner Personalizado</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Mostrar segundo banner con animación opcional</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleToggle('customBannerEnabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  settings.customBannerEnabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+                }`}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                    settings.customBannerEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Toggle for Animation */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Animación de Desplazamiento</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">El texto se moverá de derecha a izquierda</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleToggle('customBannerIsAnimated')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  settings.customBannerIsAnimated ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+                }`}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                    settings.customBannerIsAnimated ? 'translate-x-5' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Banner Text */}
+            <Input
+              label="Texto del Banner"
+              name="customBannerText"
+              value={settings.customBannerText}
+              onChange={handleChange}
+              placeholder="¡Ofertas de Navidad!"
+            />
+
+            {/* Banner Link (Optional) */}
+            <Input
+              label="Enlace (Opcional)"
+              name="customBannerLink"
+              value={settings.customBannerLink || ''}
+              onChange={handleChange}
+              placeholder="/products?category=navidad"
+            />
+
+            {/* Colors */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Color de Fondo
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    name="customBannerBgColor"
+                    value={settings.customBannerBgColor}
+                    onChange={handleChange}
+                    className="h-10 w-10 rounded border border-gray-300 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    name="customBannerBgColor"
+                    value={settings.customBannerBgColor}
+                    onChange={handleChange}
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Color del Texto
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    name="customBannerTextColor"
+                    value={settings.customBannerTextColor}
+                    onChange={handleChange}
+                    className="h-10 w-10 rounded border border-gray-300 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    name="customBannerTextColor"
+                    value={settings.customBannerTextColor}
+                    onChange={handleChange}
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Live Preview */}
+            <div className="mt-4">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Vista previa en tiempo real:</p>
+              <div 
+                className="w-full py-2 px-4 text-center text-sm font-medium rounded-lg shadow-sm overflow-hidden relative"
+                style={{ 
+                  backgroundColor: settings.customBannerBgColor, 
+                  color: settings.customBannerTextColor 
+                }}
+              >
+                {settings.customBannerIsAnimated ? (
+                   <div className="animate-marquee whitespace-nowrap">
+                     {settings.customBannerText}
+                   </div>
+                ) : (
+                  settings.customBannerText
+                )}
               </div>
             </div>
           </div>
