@@ -114,7 +114,7 @@ export default function Navbar() {
     <>
       {/* Free Shipping Banner */}
       {isFetched && storeSettings?.freeShippingEnabled && (
-        <div className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-500 text-white py-2 px-4 text-center text-sm font-medium shadow-sm">
+        <div className="sticky top-0 z-50 bg-linear-to-r from-blue-600 to-blue-500 text-white py-2 px-4 text-center text-sm font-medium shadow-sm">
           <span className="inline-flex items-center gap-2">
             {storeSettings.freeShippingEmoji && <span>{storeSettings.freeShippingEmoji}</span>}
             <span>{storeSettings.freeShippingText || 'Envío gratis en compras superiores a $100.000'}</span>
