@@ -74,7 +74,7 @@ export default function AboutPage() {
   return (
     <div className="bg-white dark:bg-gray-900 transition-colors">
       {/* Hero Section with Gradient */}
-      <section className="relative py-24 md:py-32 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 dark:from-blue-900 dark:via-blue-800 dark:to-gray-900 overflow-hidden">
+      <section className="relative py-24 md:py-32 bg-linear-to-br from-blue-600 via-blue-700 to-blue-900 dark:from-blue-900 dark:via-blue-800 dark:to-gray-900 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl" />
@@ -89,7 +89,7 @@ export default function AboutPage() {
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
             Tu Aliado Experto en <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-white">
+            <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-200 to-white">
               Refrigeración y Electricidad
             </span>
           </h1>
@@ -132,7 +132,7 @@ export default function AboutPage() {
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 p-8 rounded-3xl border border-blue-100 dark:border-blue-800 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="bg-linear-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 p-8 rounded-3xl border border-blue-100 dark:border-blue-800 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-12 h-12 bg-blue-600 dark:bg-blue-500 rounded-xl flex items-center justify-center text-white shrink-0">
                   <Target size={24} />
@@ -146,7 +146,7 @@ export default function AboutPage() {
               </p>
             </div>
             
-            <div className="bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 p-8 rounded-3xl border border-green-100 dark:border-green-800 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="bg-linear-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 p-8 rounded-3xl border border-green-100 dark:border-green-800 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-12 h-12 bg-green-600 dark:bg-green-500 rounded-xl flex items-center justify-center text-white shrink-0">
                   <TrendingUp size={24} />
@@ -162,7 +162,7 @@ export default function AboutPage() {
           </div>
 
           <div className="relative lg:h-[600px] h-[400px]">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 bg-linear-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 rounded-3xl overflow-hidden shadow-2xl">
               {/* Placeholder for team/office image */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 p-8">
                 <Users size={80} className="mb-4" />
@@ -180,7 +180,7 @@ export default function AboutPage() {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900">
+      <section className="py-20 bg-linear-to-b from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-block mb-4 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
@@ -220,7 +220,7 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-900 dark:to-blue-950">
+      <section className="py-20 bg-linear-to-r from-blue-600 to-blue-800 dark:from-blue-900 dark:to-blue-950">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             ¿Listo para trabajar con nosotros?
