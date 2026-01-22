@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrders } from '@/hooks/useOrders';
-import { Loader2, MapPin, CreditCard, LogOut, Edit2, CheckCircle, Clock, RefreshCw, Plus, Lock } from 'lucide-react';
+import { Loader2, MapPin, CreditCard, LogOut, Edit2, CheckCircle, Clock, RefreshCw, Plus, Lock, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -20,6 +20,7 @@ export default function ProfilePage() {
 
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isAddressesOpen, setIsAddressesOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   
   // Edit Profile State
   const [profile, setProfile] = useState({
@@ -28,6 +29,18 @@ export default function ProfilePage() {
     phone: '',
   });
   const [saving, setSaving] = useState(false);
+
+  // Change Password State
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
     // Solo redirigir cuando ya terminó de cargar y no está autenticado
@@ -64,6 +77,45 @@ export default function ProfilePage() {
       setSaving(false);
     }
   };
+
+  const handleChangePassword = async () => {
+    setPasswordError('');
+
+    // Validations
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      setPasswordError('Todos los campos son obligatorios');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden');
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      await api.post('/users/change-password', {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      
+      setIsChangePasswordOpen(false);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      addToast('Contraseña actualizada correctamente', 'success');
+    } catch (error: any) {
+      const message = error?.response?.data?.message || 'Error al cambiar la contraseña';
+      setPasswordError(message);
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const isOAuthUser = user?.provider === 'GOOGLE';
 
   // Mostrar loading mientras se hidrata el estado
   if (isLoading || !user) {
@@ -208,10 +260,21 @@ export default function ProfilePage() {
             {/* Seguridad */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-bold text-blue-900 dark:text-blue-400 mb-4">Seguridad</h2>
-              <Button variant="ghost" className="w-full justify-start text-blue-900 dark:text-blue-400">
-                <Lock className="mr-2 h-5 w-5" />
-                Cambiar Contraseña
-              </Button>
+              {isOAuthUser ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  <Lock className="h-4 w-4" />
+                  Tu cuenta está vinculada con Google
+                </p>
+              ) : (
+                <Button 
+                  onClick={() => setIsChangePasswordOpen(true)}
+                  variant="ghost" 
+                  className="w-full justify-start text-blue-900 dark:text-blue-400"
+                >
+                  <Lock className="mr-2 h-5 w-5" />
+                  Cambiar Contraseña
+                </Button>
+              )}
               
               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
                 <Button 
@@ -288,6 +351,111 @@ export default function ProfilePage() {
         className="max-w-4xl"
       >
         <AddressesList enabled={isAddressesOpen} />
+      </Modal>
+
+      <Modal
+        isOpen={isChangePasswordOpen}
+        onClose={() => {
+          setIsChangePasswordOpen(false);
+          setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+          setPasswordError('');
+        }}
+        title="Cambiar Contraseña"
+      >
+        <div className="space-y-4">
+          {passwordError && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+              {passwordError}
+            </div>
+          )}
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Contraseña Actual
+            </label>
+            <div className="relative">
+              <input
+                type={showCurrentPassword ? 'text' : 'password'}
+                value={passwordForm.currentPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                className="w-full p-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Ingresa tu contraseña actual"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Nueva Contraseña
+            </label>
+            <div className="relative">
+              <input
+                type={showNewPassword ? 'text' : 'password'}
+                value={passwordForm.newPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                className="w-full p-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Mínimo 6 caracteres"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Confirmar Nueva Contraseña
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={passwordForm.confirmPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                className="w-full p-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Repite la nueva contraseña"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button 
+              onClick={() => {
+                setIsChangePasswordOpen(false);
+                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                setPasswordError('');
+              }}
+              variant="ghost"
+              disabled={changingPassword}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleChangePassword}
+              variant="secondary"
+              isLoading={changingPassword}
+            >
+              Cambiar Contraseña
+            </Button>
+          </div>
+        </div>
       </Modal>
 
     </div>

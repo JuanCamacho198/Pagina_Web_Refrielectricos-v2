@@ -68,6 +68,8 @@ export class ProductsService {
       brand?: string;
       minPrice?: number;
       maxPrice?: number;
+      sortBy?: 'createdAt' | 'price' | 'name';
+      sortOrder?: 'asc' | 'desc';
       isAdmin?: boolean; // If true, show all products including inactive
     },
   ) {
@@ -106,12 +108,30 @@ export class ProductsService {
       if (filters.maxPrice) where.price.lte = filters.maxPrice;
     }
 
+    // Build orderBy clause
+    const sortBy = filters?.sortBy || 'createdAt';
+    const sortOrder = filters?.sortOrder || 'desc';
+
+    let orderBy: Prisma.ProductOrderByWithRelationInput;
+    switch (sortBy) {
+      case 'price':
+        orderBy = { price: sortOrder };
+        break;
+      case 'name':
+        orderBy = { name: sortOrder };
+        break;
+      case 'createdAt':
+      default:
+        orderBy = { createdAt: sortOrder };
+        break;
+    }
+
     const [data, total] = await Promise.all([
       this.prisma.product.findMany({
         skip,
         take: limit,
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
       }),
       this.prisma.product.count({ where }),
     ]);

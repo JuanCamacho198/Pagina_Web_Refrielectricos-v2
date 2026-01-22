@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import ProductCard from '@/components/features/products/ProductCard';
 import ProductFiltersContainer from '@/components/features/products/ProductFiltersContainer';
 import MobileFilters from '@/components/features/products/MobileFilters';
+import ProductSort from '@/components/features/products/ProductSort';
 import Pagination from '@/components/ui/Pagination';
 import Button from '@/components/ui/Button';
 import { Product } from '@/types/product';
@@ -62,6 +63,8 @@ async function getProducts(searchParams: { [key: string]: string | string[] | un
   if (searchParams.brand) params.append('brand', searchParams.brand as string);
   if (searchParams.minPrice) params.append('minPrice', searchParams.minPrice as string);
   if (searchParams.maxPrice) params.append('maxPrice', searchParams.maxPrice as string);
+  if (searchParams.sortBy) params.append('sortBy', searchParams.sortBy as string);
+  if (searchParams.sortOrder) params.append('sortOrder', searchParams.sortOrder as string);
   params.append('page', (searchParams.page || '1') as string);
   params.append('limit', '12');
 
@@ -114,7 +117,8 @@ export default async function ProductsPage({
           <p className="mt-2 text-gray-600 dark:text-gray-400">Explora nuestra variedad de repuestos y equipos.</p>
         </div>
         
-        <div className="w-full md:w-auto flex gap-2 justify-end">
+        <div className="w-full md:w-auto flex gap-2 justify-end items-center">
+          <ProductSort />
           <MobileFilters 
             categories={categories}
             subcategories={subcategories}
@@ -139,6 +143,11 @@ export default async function ProductsPage({
         <div className="flex-1">
           {products.length > 0 ? (
             <>
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {meta.total} {meta.total === 1 ? 'producto encontrado' : 'productos encontrados'}
+                </p>
+              </div>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-8">
                 {products.map((product: Product, index: number) => (
                   <ProductCard 

@@ -100,6 +100,18 @@ export class ProductsController {
   @ApiQuery({ name: 'minPrice', required: false, type: Number })
   @ApiQuery({ name: 'maxPrice', required: false, type: Number })
   @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    type: String,
+    description: 'Field to sort by: createdAt, price, name',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    type: String,
+    description: 'Sort order: asc or desc',
+  })
+  @ApiQuery({
     name: 'includeInactive',
     required: false,
     type: Boolean,
@@ -114,6 +126,8 @@ export class ProductsController {
     @Query('brand') brand?: string,
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: string,
     @Query('includeInactive') includeInactive?: string,
   ) {
     return this.productsService.findAll(page, limit, {
@@ -123,6 +137,8 @@ export class ProductsController {
       brand,
       minPrice: minPrice ? Number(minPrice) : undefined,
       maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      sortBy: sortBy as 'createdAt' | 'price' | 'name' | undefined,
+      sortOrder: sortOrder as 'asc' | 'desc' | undefined,
       isAdmin: includeInactive === 'true',
     });
   }
