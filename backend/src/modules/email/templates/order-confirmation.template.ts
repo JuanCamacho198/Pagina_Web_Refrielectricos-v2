@@ -57,7 +57,6 @@ function formatDate(date: Date): string {
 export function getOrderConfirmationEmailTemplate({
   orderNumber,
   userName,
-  userEmail,
   items,
   subtotal,
   shippingCost,
