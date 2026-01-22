@@ -5,21 +5,34 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, Zap, Ticket, Image, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import type { Role } from '@/types/user';
 
-const menuItems = [
-  { name: 'Panel de Control', href: '/admin', icon: LayoutDashboard },
-  { name: 'Productos', href: '/admin/products', icon: Package },
-  { name: 'Pedidos', href: '/admin/orders', icon: ShoppingBag },
-  { name: 'Cupones', href: '/admin/coupons', icon: Ticket },
-  { name: 'Banners', href: '/admin/banners', icon: Image },
-  { name: 'Usuarios', href: '/admin/users', icon: Users },
-  { name: 'Auditoría', href: '/admin/audit-logs', icon: Shield },
-  { name: 'Configuración', href: '/admin/settings', icon: Settings },
+interface MenuItem {
+  name: string;
+  href: string;
+  icon: any;
+  allowedRoles: Role[];
+}
+
+const menuItems: MenuItem[] = [
+  { name: 'Panel de Control', href: '/admin', icon: LayoutDashboard, allowedRoles: ['ADMIN', 'EMPLOYEE'] },
+  { name: 'Productos', href: '/admin/products', icon: Package, allowedRoles: ['ADMIN', 'EMPLOYEE'] },
+  { name: 'Pedidos', href: '/admin/orders', icon: ShoppingBag, allowedRoles: ['ADMIN', 'EMPLOYEE'] },
+  { name: 'Cupones', href: '/admin/coupons', icon: Ticket, allowedRoles: ['ADMIN'] },
+  { name: 'Banners', href: '/admin/banners', icon: Image, allowedRoles: ['ADMIN'] },
+  { name: 'Usuarios', href: '/admin/users', icon: Users, allowedRoles: ['ADMIN'] },
+  { name: 'Auditoría', href: '/admin/audit-logs', icon: Shield, allowedRoles: ['ADMIN'] },
+  { name: 'Configuración', href: '/admin/settings', icon: Settings, allowedRoles: ['ADMIN'] },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+
+  // Filter menu items based on user role
+  const visibleMenuItems = menuItems.filter(item => 
+    user?.role && item.allowedRoles.includes(user.role)
+  );
 
   return (
     <aside className="w-72 bg-slate-900 border-r border-slate-800 text-slate-300 h-screen sticky top-0 flex flex-col font-sans transition-all duration-300 ease-in-out shadow-2xl z-50">
@@ -43,7 +56,7 @@ export default function AdminSidebar() {
         <div className="px-4 mb-2 text-xs font-mono font-semibold text-slate-500 uppercase tracking-widest">
           Menú Principal
         </div>
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link

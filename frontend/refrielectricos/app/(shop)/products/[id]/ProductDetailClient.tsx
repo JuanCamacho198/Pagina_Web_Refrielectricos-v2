@@ -117,7 +117,7 @@ export default function ProductDetailClient() {
           ]}
         />
         
-        {user?.role === 'admin' && (
+        {user?.role === 'ADMIN' && (
           <Link href={`/admin/products/${product.id}`}>
             <Button variant="outline" className="flex items-center gap-2">
               <Edit size={16} />

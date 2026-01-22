@@ -60,7 +60,7 @@ export class VariantsController {
 
   @Post(':productId/variants')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new variant for a product (Admin)' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
@@ -76,7 +76,7 @@ export class VariantsController {
 
   @Post(':productId/variants/bulk')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Bulk create variants for a product (Admin)' })
   @ApiParam({ name: 'productId', description: 'Product ID' })
@@ -90,7 +90,7 @@ export class VariantsController {
 
   @Patch('variants/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a variant (Admin)' })
   @ApiParam({ name: 'id', description: 'Variant ID' })
@@ -102,7 +102,7 @@ export class VariantsController {
 
   @Delete('variants/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'EMPLOYEE')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a variant (Admin)' })
   @ApiParam({ name: 'id', description: 'Variant ID' })

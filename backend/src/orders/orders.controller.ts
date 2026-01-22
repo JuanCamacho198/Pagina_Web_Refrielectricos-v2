@@ -49,7 +49,7 @@ export class OrdersController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.EMPLOYEE)
   findAll() {
     return this.ordersService.findAll();
   }
@@ -61,7 +61,7 @@ export class OrdersController {
 
   @Get('user/:userId')
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.EMPLOYEE)
   findAllByUser(@Param('userId') userId: string) {
     return this.ordersService.findAllByUser(userId);
   }
@@ -73,7 +73,7 @@ export class OrdersController {
 
   @Patch(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.EMPLOYEE)
   async update(
     @Param('id') id: string,
     @Body() updateOrderDto: UpdateOrderDto,

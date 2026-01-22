@@ -7,7 +7,7 @@ import { Role } from '../../generated/prisma/enums';
 
 @Controller('dashboard')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
+@Roles(Role.ADMIN, Role.EMPLOYEE)
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

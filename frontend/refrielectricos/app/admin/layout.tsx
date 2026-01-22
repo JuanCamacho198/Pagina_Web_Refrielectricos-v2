@@ -16,12 +16,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!isAuthenticated) {
       const currentPath = window.location.pathname;
       router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-    } else if (user && user.role !== 'ADMIN') {
+    } else if (user && user.role !== 'ADMIN' && user.role !== 'EMPLOYEE') {
       router.push('/forbidden');
     }
   }, [user, isAuthenticated, isLoading, router]);
 
-  if (isLoading || !user || user.role !== 'ADMIN') {
+  if (isLoading || !user || (user.role !== 'ADMIN' && user.role !== 'EMPLOYEE')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="flex flex-col items-center gap-4">
