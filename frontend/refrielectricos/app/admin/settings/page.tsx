@@ -48,6 +48,12 @@ interface StoreSettings {
   feature4Description?: string;
   feature4Icon?: string;
   feature4Enabled?: boolean;
+  navbarLogoSize?: number;
+  navbarText1?: string;
+  navbarText2?: string;
+  navbarText1Color?: string;
+  navbarText2Color?: string;
+  navbarTextSize?: string;
 }
 
 const EMOJI_OPTIONS = [
@@ -72,6 +78,15 @@ const ICON_OPTIONS = [
   { value: 'Gift', label: 'Regalo' },
   { value: 'Zap', label: 'Rayo' },
   { value: 'Heart', label: 'Corazón' },
+];
+
+const TEXT_SIZE_OPTIONS = [
+  { value: 'sm', label: 'Pequeño (sm)' },
+  { value: 'base', label: 'Base' },
+  { value: 'lg', label: 'Grande (lg)' },
+  { value: 'xl', label: 'Extra Grande (xl)' },
+  { value: '2xl', label: '2X Grande (2xl)' },
+  { value: '3xl', label: '3X Grande (3xl)' },
 ];
 
 export default function AdminSettingsPage() {
@@ -126,6 +141,12 @@ export default function AdminSettingsPage() {
     feature4Description: apiSettings?.feature4Description || 'Múltiples métodos de pago confiables',
     feature4Icon: apiSettings?.feature4Icon || 'CreditCard',
     feature4Enabled: apiSettings?.feature4Enabled ?? true,
+    navbarLogoSize: apiSettings?.navbarLogoSize || 50,
+    navbarText1: apiSettings?.navbarText1 || 'Refrielectricos',
+    navbarText2: apiSettings?.navbarText2 || 'G&E',
+    navbarText1Color: apiSettings?.navbarText1Color || '#2563EB',
+    navbarText2Color: apiSettings?.navbarText2Color || '#3B82F6',
+    navbarTextSize: apiSettings?.navbarTextSize || 'xl',
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -813,6 +834,169 @@ export default function AdminSettingsPage() {
                   onChange={handleChange}
                   className="md:col-span-1"
                 />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Navbar Customization */}
+        <Card>
+          <div className="flex items-center gap-2 mb-6">
+            <Layout className="h-5 w-5 text-blue-600" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Personalización del Navbar</h2>
+          </div>
+
+          <div className="space-y-6">
+            {/* Logo Size */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <h3 className="font-medium text-gray-900 dark:text-white mb-4">Tamaño del Logo</h3>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <Input
+                    type="number"
+                    label="Tamaño (píxeles)"
+                    name="navbarLogoSize"
+                    value={settings.navbarLogoSize || 50}
+                    onChange={handleChange}
+                    min="20"
+                    max="200"
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Rango: 20px - 200px (Recomendado: 40-80px)
+                  </p>
+                </div>
+                <div className="flex items-center justify-center w-32 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                  <div 
+                    className="bg-blue-600 rounded-full flex items-center justify-center text-white font-bold"
+                    style={{
+                      width: `${Math.min(settings.navbarLogoSize || 50, 80)}px`,
+                      height: `${Math.min(settings.navbarLogoSize || 50, 80)}px`,
+                      fontSize: `${Math.min((settings.navbarLogoSize || 50) / 3, 24)}px`
+                    }}
+                  >
+                    LOGO
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Text Customization */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <h3 className="font-medium text-gray-900 dark:text-white mb-4">Texto del Navbar</h3>
+              
+              <div className="space-y-4">
+                {/* Text Size */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tamaño del Texto
+                  </label>
+                  <select
+                    name="navbarTextSize"
+                    value={settings.navbarTextSize || 'xl'}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {TEXT_SIZE_OPTIONS.map(size => (
+                      <option key={size.value} value={size.value}>{size.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* First Text Part */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Texto Principal"
+                    name="navbarText1"
+                    value={settings.navbarText1 || 'Refrielectricos'}
+                    onChange={handleChange}
+                    placeholder="Refrielectricos"
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Color del Texto Principal
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        name="navbarText1Color"
+                        value={settings.navbarText1Color || '#2563EB'}
+                        onChange={handleChange}
+                        className="h-10 w-20 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        name="navbarText1Color"
+                        value={settings.navbarText1Color || '#2563EB'}
+                        onChange={handleChange}
+                        placeholder="#2563EB"
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Second Text Part */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Texto Secundario"
+                    name="navbarText2"
+                    value={settings.navbarText2 || 'G&E'}
+                    onChange={handleChange}
+                    placeholder="G&E"
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Color del Texto Secundario
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        name="navbarText2Color"
+                        value={settings.navbarText2Color || '#3B82F6'}
+                        onChange={handleChange}
+                        className="h-10 w-20 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        name="navbarText2Color"
+                        value={settings.navbarText2Color || '#3B82F6'}
+                        onChange={handleChange}
+                        placeholder="#3B82F6"
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Preview */}
+                <div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Vista Previa:</p>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="rounded-full bg-blue-600 flex items-center justify-center text-white font-bold"
+                      style={{
+                        width: `${Math.min(settings.navbarLogoSize || 50, 48)}px`,
+                        height: `${Math.min(settings.navbarLogoSize || 50, 48)}px`,
+                        fontSize: `${Math.min((settings.navbarLogoSize || 50) / 3, 16)}px`
+                      }}
+                    >
+                      L
+                    </div>
+                    <span 
+                      className={`font-extrabold tracking-tight text-${settings.navbarTextSize || 'xl'}`}
+                      style={{ color: settings.navbarText1Color || '#2563EB' }}
+                    >
+                      {settings.navbarText1 || 'Refrielectricos'}
+                    </span>
+                    <span 
+                      className={`font-extrabold tracking-tight text-${settings.navbarTextSize || 'xl'} ml-1`}
+                      style={{ color: settings.navbarText2Color || '#3B82F6' }}
+                    >
+                      {settings.navbarText2 || 'G&E'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

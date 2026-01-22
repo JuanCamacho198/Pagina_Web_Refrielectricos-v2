@@ -329,6 +329,14 @@ model StoreSettings {
   feature4Icon           String   @default("CreditCard")
   feature4Enabled        Boolean  @default(true)
   
+  // Navbar Customization
+  navbarLogoSize         Int      @default(50) // Logo size in pixels (default: 50px)
+  navbarText1            String   @default("Refrielectricos") // First part of navbar text
+  navbarText2            String   @default("G&E") // Second part of navbar text
+  navbarText1Color       String   @default("#2563EB") // Blue-600 (Tailwind default)
+  navbarText2Color       String   @default("#3B82F6") // Blue-500 (Tailwind default)
+  navbarTextSize         String   @default("xl") // Text size: sm, base, lg, xl, 2xl, 3xl
+  
   // Social Media Links
   facebookUrl            String?
   instagramUrl           String?

@@ -173,16 +173,28 @@ export default function Navbar() {
               <Image 
                 src="/icons/logoRefri.svg" 
                 alt="Refrielectricos Logo" 
-                width={50} 
-                height={50} 
-                className={`transition-all duration-300 ${isScrolled ? 'w-10 h-10 md:w-12 md:h-12' : 'w-12 h-12 md:w-14 md:h-14'}`}
+                width={storeSettings?.navbarLogoSize || 50}
+                height={storeSettings?.navbarLogoSize || 50}
+                className={`transition-all duration-300 ${isScrolled ? 'scale-90' : 'scale-100'}`}
+                style={{
+                  width: `${isScrolled ? (storeSettings?.navbarLogoSize || 50) * 0.9 : (storeSettings?.navbarLogoSize || 50)}px`,
+                  height: `${isScrolled ? (storeSettings?.navbarLogoSize || 50) * 0.9 : (storeSettings?.navbarLogoSize || 50)}px`,
+                }}
                 priority
               />
-              <span className={`font-extrabold tracking-tight leading-none whitespace-nowrap block transition-all duration-300 ${
-                isScrolled ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'
-              }`}>
-                <span className="text-blue-600 drop-shadow-sm">Refrielectricos</span>
-                <span className="text-blue-500 drop-shadow-sm ml-1">G&E</span>
+              <span className={`font-extrabold tracking-tight leading-none whitespace-nowrap block transition-all duration-300 text-${storeSettings?.navbarTextSize || 'xl'}`}>
+                <span 
+                  className="drop-shadow-sm"
+                  style={{ color: storeSettings?.navbarText1Color || '#2563EB' }}
+                >
+                  {storeSettings?.navbarText1 || 'Refrielectricos'}
+                </span>
+                <span 
+                  className="drop-shadow-sm ml-1"
+                  style={{ color: storeSettings?.navbarText2Color || '#3B82F6' }}
+                >
+                  {storeSettings?.navbarText2 || 'G&E'}
+                </span>
               </span>
             </Link>
 

@@ -1,4 +1,12 @@
-import { IsString, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsIn,
+} from 'class-validator';
 
 export class UpdateSettingsDto {
   @IsOptional()
@@ -145,4 +153,32 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsBoolean()
   feature4Enabled?: boolean;
+
+  // Navbar Customization
+  @IsOptional()
+  @IsInt()
+  @Min(20)
+  @Max(200)
+  navbarLogoSize?: number;
+
+  @IsOptional()
+  @IsString()
+  navbarText1?: string;
+
+  @IsOptional()
+  @IsString()
+  navbarText2?: string;
+
+  @IsOptional()
+  @IsString()
+  navbarText1Color?: string;
+
+  @IsOptional()
+  @IsString()
+  navbarText2Color?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['sm', 'base', 'lg', 'xl', '2xl', '3xl'])
+  navbarTextSize?: string;
 }
