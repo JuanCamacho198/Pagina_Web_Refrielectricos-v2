@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Save, Globe, Mail, Bell, Truck, RefreshCw } from 'lucide-react';
+import { Save, Globe, Mail, Bell, Truck, RefreshCw, Layout } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
@@ -32,6 +32,22 @@ interface StoreSettings {
   instagramUrl?: string;
   tiktokUrl?: string;
   twitterUrl?: string;
+  feature1Title?: string;
+  feature1Description?: string;
+  feature1Icon?: string;
+  feature1Enabled?: boolean;
+  feature2Title?: string;
+  feature2Description?: string;
+  feature2Icon?: string;
+  feature2Enabled?: boolean;
+  feature3Title?: string;
+  feature3Description?: string;
+  feature3Icon?: string;
+  feature3Enabled?: boolean;
+  feature4Title?: string;
+  feature4Description?: string;
+  feature4Icon?: string;
+  feature4Enabled?: boolean;
 }
 
 const EMOJI_OPTIONS = [
@@ -43,6 +59,19 @@ const EMOJI_OPTIONS = [
   { value: '💰', label: '💰 Dinero' },
   { value: '🏷️', label: '🏷️ Etiqueta' },
   { value: '📦', label: '📦 Paquete' },
+];
+
+const ICON_OPTIONS = [
+  { value: 'Truck', label: 'Camión' },
+  { value: 'ShieldCheck', label: 'Escudo' },
+  { value: 'Headphones', label: 'Audífonos' },
+  { value: 'CreditCard', label: 'Tarjeta' },
+  { value: 'Package', label: 'Paquete' },
+  { value: 'BadgeCheck', label: 'Insignia' },
+  { value: 'Clock', label: 'Reloj' },
+  { value: 'Gift', label: 'Regalo' },
+  { value: 'Zap', label: 'Rayo' },
+  { value: 'Heart', label: 'Corazón' },
 ];
 
 export default function AdminSettingsPage() {
@@ -81,6 +110,22 @@ export default function AdminSettingsPage() {
     instagramUrl: apiSettings?.instagramUrl || '',
     tiktokUrl: apiSettings?.tiktokUrl || '',
     twitterUrl: apiSettings?.twitterUrl || '',
+    feature1Title: apiSettings?.feature1Title || 'Envío Gratis',
+    feature1Description: apiSettings?.feature1Description || 'En pedidos superiores a $300.000',
+    feature1Icon: apiSettings?.feature1Icon || 'Truck',
+    feature1Enabled: apiSettings?.feature1Enabled ?? true,
+    feature2Title: apiSettings?.feature2Title || 'Garantía Asegurada',
+    feature2Description: apiSettings?.feature2Description || 'Productos 100% originales y garantizados',
+    feature2Icon: apiSettings?.feature2Icon || 'ShieldCheck',
+    feature2Enabled: apiSettings?.feature2Enabled ?? true,
+    feature3Title: apiSettings?.feature3Title || 'Soporte Técnico',
+    feature3Description: apiSettings?.feature3Description || 'Asesoría experta para tus compras',
+    feature3Icon: apiSettings?.feature3Icon || 'Headphones',
+    feature3Enabled: apiSettings?.feature3Enabled ?? true,
+    feature4Title: apiSettings?.feature4Title || 'Pago Seguro',
+    feature4Description: apiSettings?.feature4Description || 'Múltiples métodos de pago confiables',
+    feature4Icon: apiSettings?.feature4Icon || 'CreditCard',
+    feature4Enabled: apiSettings?.feature4Enabled ?? true,
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -552,6 +597,223 @@ export default function AdminSettingsPage() {
                   }`}
                 />
               </button>
+            </div>
+          </div>
+        </Card>
+
+        {/* Home Features Section */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+            <Layout size={20} className="text-blue-600" />
+            Características del Home
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            Configura las 4 características que se muestran en la página principal
+          </p>
+
+          <div className="space-y-6">
+            {/* Feature 1 */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-medium text-gray-900 dark:text-white">Característica 1</h3>
+                <button
+                  type="button"
+                  onClick={() => handleToggle('feature1Enabled')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    settings.feature1Enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                      settings.feature1Enabled ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Icono
+                  </label>
+                  <select
+                    name="feature1Icon"
+                    value={settings.feature1Icon}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {ICON_OPTIONS.map(icon => (
+                      <option key={icon.value} value={icon.value}>{icon.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <Input
+                  label="Título"
+                  name="feature1Title"
+                  value={settings.feature1Title || ''}
+                  onChange={handleChange}
+                  className="md:col-span-1"
+                />
+                <Input
+                  label="Descripción"
+                  name="feature1Description"
+                  value={settings.feature1Description || ''}
+                  onChange={handleChange}
+                  className="md:col-span-1"
+                />
+              </div>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-medium text-gray-900 dark:text-white">Característica 2</h3>
+                <button
+                  type="button"
+                  onClick={() => handleToggle('feature2Enabled')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    settings.feature2Enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                      settings.feature2Enabled ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Icono
+                  </label>
+                  <select
+                    name="feature2Icon"
+                    value={settings.feature2Icon}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {ICON_OPTIONS.map(icon => (
+                      <option key={icon.value} value={icon.value}>{icon.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <Input
+                  label="Título"
+                  name="feature2Title"
+                  value={settings.feature2Title || ''}
+                  onChange={handleChange}
+                  className="md:col-span-1"
+                />
+                <Input
+                  label="Descripción"
+                  name="feature2Description"
+                  value={settings.feature2Description || ''}
+                  onChange={handleChange}
+                  className="md:col-span-1"
+                />
+              </div>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-medium text-gray-900 dark:text-white">Característica 3</h3>
+                <button
+                  type="button"
+                  onClick={() => handleToggle('feature3Enabled')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    settings.feature3Enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                      settings.feature3Enabled ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Icono
+                  </label>
+                  <select
+                    name="feature3Icon"
+                    value={settings.feature3Icon}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {ICON_OPTIONS.map(icon => (
+                      <option key={icon.value} value={icon.value}>{icon.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <Input
+                  label="Título"
+                  name="feature3Title"
+                  value={settings.feature3Title || ''}
+                  onChange={handleChange}
+                  className="md:col-span-1"
+                />
+                <Input
+                  label="Descripción"
+                  name="feature3Description"
+                  value={settings.feature3Description || ''}
+                  onChange={handleChange}
+                  className="md:col-span-1"
+                />
+              </div>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-medium text-gray-900 dark:text-white">Característica 4</h3>
+                <button
+                  type="button"
+                  onClick={() => handleToggle('feature4Enabled')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    settings.feature4Enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
+                      settings.feature4Enabled ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Icono
+                  </label>
+                  <select
+                    name="feature4Icon"
+                    value={settings.feature4Icon}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {ICON_OPTIONS.map(icon => (
+                      <option key={icon.value} value={icon.value}>{icon.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <Input
+                  label="Título"
+                  name="feature4Title"
+                  value={settings.feature4Title || ''}
+                  onChange={handleChange}
+                  className="md:col-span-1"
+                />
+                <Input
+                  label="Descripción"
+                  name="feature4Description"
+                  value={settings.feature4Description || ''}
+                  onChange={handleChange}
+                  className="md:col-span-1"
+                />
+              </div>
             </div>
           </div>
         </Card>

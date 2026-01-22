@@ -80,4 +80,69 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   twitterUrl?: string;
+
+  // Home Features
+  @IsOptional()
+  @IsString()
+  feature1Title?: string;
+
+  @IsOptional()
+  @IsString()
+  feature1Description?: string;
+
+  @IsOptional()
+  @IsString()
+  feature1Icon?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  feature1Enabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  feature2Title?: string;
+
+  @IsOptional()
+  @IsString()
+  feature2Description?: string;
+
+  @IsOptional()
+  @IsString()
+  feature2Icon?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  feature2Enabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  feature3Title?: string;
+
+  @IsOptional()
+  @IsString()
+  feature3Description?: string;
+
+  @IsOptional()
+  @IsString()
+  feature3Icon?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  feature3Enabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  feature4Title?: string;
+
+  @IsOptional()
+  @IsString()
+  feature4Description?: string;
+
+  @IsOptional()
+  @IsString()
+  feature4Icon?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  feature4Enabled?: boolean;
 }

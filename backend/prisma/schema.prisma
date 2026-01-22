@@ -308,6 +308,27 @@ model StoreSettings {
   customBannerTextColor  String   @default("#FFFFFF") // White default
   customBannerIsAnimated Boolean  @default(true) // For scrolling effect
   
+  // Home Features
+  feature1Title          String   @default("Envío Gratis")
+  feature1Description    String   @default("En pedidos superiores a $300.000")
+  feature1Icon           String   @default("Truck")
+  feature1Enabled        Boolean  @default(true)
+  
+  feature2Title          String   @default("Garantía Asegurada")
+  feature2Description    String   @default("Productos 100% originales y garantizados")
+  feature2Icon           String   @default("ShieldCheck")
+  feature2Enabled        Boolean  @default(true)
+  
+  feature3Title          String   @default("Soporte Técnico")
+  feature3Description    String   @default("Asesoría experta para tus compras")
+  feature3Icon           String   @default("Headphones")
+  feature3Enabled        Boolean  @default(true)
+  
+  feature4Title          String   @default("Pago Seguro")
+  feature4Description    String   @default("Múltiples métodos de pago confiables")
+  feature4Icon           String   @default("CreditCard")
+  feature4Enabled        Boolean  @default(true)
+  
   // Social Media Links
   facebookUrl            String?
   instagramUrl           String?
