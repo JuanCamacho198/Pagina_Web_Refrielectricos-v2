@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useCallback, ReactNode } from 'rea
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'loading';
 
 export interface Toast {
   id: string;
@@ -39,11 +39,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     
     setToasts((prev) => [...prev, newToast]);
 
-    // Auto remove after 3 seconds unless it's a loading toast (which has no timeout)
-    if (type !== 'info') { // Assuming 'info' here is just a placeholder, but actually we should handle loading separately
-       setTimeout(() => {
+    // Auto remove all toast types with appropriate durations, except loading
+    if (type !== 'loading') {
+      const duration = type === 'error' ? 5000 : type === 'warning' ? 4000 : 3000;
+      setTimeout(() => {
         removeToast(id);
-      }, 3000);
+      }, duration);
     }
   }, [removeToast]);
 
@@ -81,8 +82,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const loading = useCallback((message: string) => {
     const id = Math.random().toString(36).substring(2, 9);
-    // We'll treat loading as info for now but without timeout
-    const newToast = { id, message, type: 'info' as ToastType }; 
+    const newToast = { id, message, type: 'loading' as ToastType }; 
     setToasts((prev) => [...prev, newToast]);
     return id;
   }, []);
@@ -121,7 +121,7 @@ function ToastContainer({ toasts, removeToast }: { toasts: Toast[], removeToast:
             {
               'border-green-500/50 bg-green-50 dark:bg-green-900/20': toast.type === 'success',
               'border-red-500/50 bg-red-50 dark:bg-red-900/20': toast.type === 'error',
-              'border-blue-500/50 bg-blue-50 dark:bg-blue-900/20': toast.type === 'info',
+              'border-blue-500/50 bg-blue-50 dark:bg-blue-900/20': toast.type === 'info' || toast.type === 'loading',
               'border-yellow-500/50 bg-yellow-50 dark:bg-yellow-900/20': toast.type === 'warning',
             }
           )}
@@ -129,6 +129,11 @@ function ToastContainer({ toasts, removeToast }: { toasts: Toast[], removeToast:
           {toast.type === 'success' && <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />}
           {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />}
           {toast.type === 'info' && <Info className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+          {toast.type === 'loading' && (
+            <div className="w-5 h-5">
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 dark:border-blue-400 border-t-transparent" />
+            </div>
+          )}
           {toast.type === 'warning' && <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />}
           
           <p className="text-sm font-medium">{toast.message}</p>
