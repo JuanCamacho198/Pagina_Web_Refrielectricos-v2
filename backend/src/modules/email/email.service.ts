@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import { getWelcomeEmailTemplate } from './templates/welcome.template';
+import { getOrderConfirmationEmailTemplate } from './templates/order-confirmation.template';
 
 @Injectable()
 export class EmailService {
@@ -90,6 +92,100 @@ export class EmailService {
         error,
       );
       throw error;
+    }
+  }
+
+  /**
+   * Send welcome email after email verification
+   */
+  async sendWelcomeEmail(email: string, name: string): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn(
+        `Skipping welcome email to ${email} (Resend not configured)`,
+      );
+      return;
+    }
+
+    try {
+      const htmlContent = getWelcomeEmailTemplate({
+        userName: name,
+        userEmail: email,
+        frontendUrl: this.frontendUrl,
+      });
+
+      await this.resend.emails.send({
+        from: this.fromEmail,
+        to: email,
+        subject: '¡Bienvenido a Refrielectricos G&E! 🎉',
+        html: htmlContent,
+      });
+
+      this.logger.log(`Welcome email sent to ${email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send welcome email to ${email}`, error);
+      // Don't throw - we don't want to fail verification if email fails
+      // Just log the error
+    }
+  }
+
+  /**
+   * Send order confirmation email
+   */
+  async sendOrderConfirmationEmail(orderData: {
+    orderNumber: string;
+    userName: string;
+    userEmail: string;
+    items: Array<{
+      productName: string;
+      variantName?: string;
+      quantity: number;
+      price: number;
+      imageUrl?: string;
+    }>;
+    subtotal: number;
+    shippingCost: number;
+    discount?: number;
+    total: number;
+    shippingAddress: {
+      name: string;
+      phone: string;
+      address: string;
+      city: string;
+      state: string;
+      zip?: string;
+    };
+    orderDate: Date;
+    estimatedDelivery?: string;
+  }): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn(
+        `Skipping order confirmation email to ${orderData.userEmail} (Resend not configured)`,
+      );
+      return;
+    }
+
+    try {
+      const htmlContent = getOrderConfirmationEmailTemplate({
+        ...orderData,
+        frontendUrl: this.frontendUrl,
+      });
+
+      await this.resend.emails.send({
+        from: this.fromEmail,
+        to: orderData.userEmail,
+        subject: `Pedido Confirmado #${orderData.orderNumber} - Refrielectricos G&E`,
+        html: htmlContent,
+      });
+
+      this.logger.log(
+        `Order confirmation email sent to ${orderData.userEmail} for order ${orderData.orderNumber}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send order confirmation email to ${orderData.userEmail}`,
+        error,
+      );
+      // Don't throw - we don't want to fail order creation if email fails
     }
   }
 

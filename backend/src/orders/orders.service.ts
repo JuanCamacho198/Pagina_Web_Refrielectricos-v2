@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CouponsService } from '../coupons/coupons.service';
+import { EmailService } from '../modules/email/email.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import type { Product, Order } from '../../generated/prisma/client';
@@ -12,6 +13,7 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
     private readonly couponsService: CouponsService,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<any> {
@@ -138,6 +140,58 @@ export class OrdersService {
         userId,
         createdOrder.id as string,
       );
+    }
+
+    // Enviar correo de confirmación del pedido
+    try {
+      // Obtener los items con información de productos para el email
+      const orderWithProducts = await this.prisma.order.findUnique({
+        where: { id: createdOrder.id },
+        include: {
+          items: {
+            include: {
+              product: true,
+              variant: true,
+            },
+          },
+        },
+      });
+
+      if (orderWithProducts) {
+        // Preparar datos para el email
+        const emailItems = orderWithProducts.items.map((item) => ({
+          productName: item.product.name,
+          variantName: item.variantName || undefined,
+          quantity: item.quantity,
+          price: item.price,
+          imageUrl: item.product.image_url || undefined,
+        }));
+
+        await this.emailService.sendOrderConfirmationEmail({
+          orderNumber: createdOrder.id,
+          userName: user.name || 'Cliente',
+          userEmail: user.email,
+          items: emailItems,
+          subtotal,
+          shippingCost: 0, // TODO: Calcular costo de envío si aplica
+          discount: discountAmount > 0 ? discountAmount : undefined,
+          total,
+          shippingAddress: {
+            name: address.fullName,
+            phone: address.phone,
+            address:
+              `${address.addressLine1} ${address.addressLine2 || ''}`.trim(),
+            city: address.city,
+            state: address.state,
+            zip: address.zipCode || undefined,
+          },
+          orderDate: createdOrder.createdAt,
+          estimatedDelivery: undefined, // TODO: Calcular fecha estimada
+        });
+      }
+    } catch (error) {
+      // Log error pero no fallar la creación de la orden
+      console.error('Failed to send order confirmation email:', error);
     }
 
     return createdOrder as Order;

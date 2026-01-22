@@ -259,6 +259,20 @@ export class AuthService {
             },
           });
           this.logger.log(`Created new user via Google: ${user.email}`);
+
+          // Send welcome email for new Google users
+          try {
+            await this.emailService.sendWelcomeEmail(
+              user.email,
+              user.name || 'Usuario',
+            );
+          } catch (error) {
+            this.logger.error(
+              `Failed to send welcome email to ${user.email}`,
+              error,
+            );
+            // Don't fail login if welcome email fails
+          }
         }
       }
 
@@ -394,6 +408,17 @@ export class AuthService {
     });
 
     this.logger.log(`Email verified for user: ${user.email}`);
+
+    // Send welcome email after successful verification
+    try {
+      await this.emailService.sendWelcomeEmail(
+        user.email,
+        user.name || 'Usuario',
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send welcome email to ${user.email}`, error);
+      // Don't fail verification if welcome email fails
+    }
 
     return { message: 'Correo verificado correctamente' };
   }
