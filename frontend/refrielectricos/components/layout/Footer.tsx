@@ -4,49 +4,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Send, Music2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { useState, useEffect } from 'react';
-import api from '@/lib/api';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 
 export default function Footer() {
-  const [phoneNumber, setPhoneNumber] = useState('+57 300 123 4567');
-  const [supportEmail, setSupportEmail] = useState('contacto@refrielectricos.com');
-  const [address, setAddress] = useState('Calle 123 # 45 - 67, Bogotá, Colombia');
-  const [facebookUrl, setFacebookUrl] = useState('');
-  const [instagramUrl, setInstagramUrl] = useState('');
-  const [tiktokUrl, setTiktokUrl] = useState('');
-  const [twitterUrl, setTwitterUrl] = useState('');
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const { data } = await api.get('/settings');
-        if (data?.phoneCountryCode && data?.phoneNumber) {
-          setPhoneNumber(`${data.phoneCountryCode} ${data.phoneNumber}`);
-        }
-        if (data?.supportEmail) {
-          setSupportEmail(data.supportEmail);
-        }
-        if (data?.address) {
-          setAddress(data.address);
-        }
-        if (data?.facebookUrl) {
-          setFacebookUrl(data.facebookUrl);
-        }
-        if (data?.instagramUrl) {
-          setInstagramUrl(data.instagramUrl);
-        }
-        if (data?.tiktokUrl) {
-          setTiktokUrl(data.tiktokUrl);
-        }
-        if (data?.twitterUrl) {
-          setTwitterUrl(data.twitterUrl);
-        }
-      } catch (error) {
-        console.error('Error fetching settings:', error);
-      }
-    };
-    fetchSettings();
-  }, []);
+  const { settings } = useStoreSettings();
+  
+  const phoneNumber = `${settings.phoneCountryCode} ${settings.phoneNumber}`;
+  const supportEmail = settings.supportEmail;
+  const address = settings.address || 'Calle 123 # 45 - 67, Bogotá, Colombia';
+  const storeName = settings.storeName;
+  const facebookUrl = settings.facebookUrl;
+  const instagramUrl = settings.instagramUrl;
+  const tiktokUrl = settings.tiktokUrl;
+  const twitterUrl = settings.twitterUrl;
 
   return (
     <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-16 pb-8 transition-colors duration-300 mt-auto">
@@ -185,7 +155,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-500 dark:text-gray-500 text-center md:text-left">
-            © {new Date().getFullYear()} Refrielectricos G&E S.A.S. Todos los derechos reservados.
+            © {new Date().getFullYear()} {storeName}. Todos los derechos reservados.
           </p>
           <div className="flex gap-6 text-sm text-gray-500 dark:text-gray-500">
             <Link href="/privacy" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">

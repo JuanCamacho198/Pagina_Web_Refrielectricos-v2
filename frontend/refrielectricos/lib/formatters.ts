@@ -3,19 +3,31 @@
  * These are pure functions extracted from the application for testing
  */
 
-// Price formatting
-export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('es-CO', {
+// Currency configuration map
+const CURRENCY_CONFIG: Record<string, { locale: string; symbol: string }> = {
+  COP: { locale: 'es-CO', symbol: '$' },
+  USD: { locale: 'en-US', symbol: '$' },
+  EUR: { locale: 'es-ES', symbol: '€' },
+  MXN: { locale: 'es-MX', symbol: '$' },
+};
+
+// Price formatting with dynamic currency support
+export function formatPrice(price: number, currency: string = 'COP'): string {
+  const config = CURRENCY_CONFIG[currency] || CURRENCY_CONFIG.COP;
+  
+  return new Intl.NumberFormat(config.locale, {
     style: 'currency',
-    currency: 'COP',
+    currency: currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(price);
 }
 
 // Simplified price format (no currency symbol, just formatted number)
-export function formatPriceSimple(price: number): string {
-  return new Intl.NumberFormat('es-CO', {
+export function formatPriceSimple(price: number, currency: string = 'COP'): string {
+  const config = CURRENCY_CONFIG[currency] || CURRENCY_CONFIG.COP;
+  
+  return new Intl.NumberFormat(config.locale, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(price);
