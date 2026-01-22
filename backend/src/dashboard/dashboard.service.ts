@@ -6,30 +6,113 @@ export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getStats() {
+    // Calculate date ranges for trend comparison
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59,
+    );
+
     const [
       totalUsers,
       totalProducts,
       totalOrders,
-      paidOrders,
+      allOrders,
       lowStockProducts,
+      usersThisMonth,
+      usersLastMonth,
+      ordersThisMonth,
+      ordersLastMonth,
+      productsActive,
     ] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.product.count(),
       this.prisma.order.count(),
       this.prisma.order.findMany({
-        where: {
-          status: { in: ['PAID', 'PENDING'] }, // Include PENDING for demo purposes
-        },
-        select: { total: true, createdAt: true },
+        select: { total: true, createdAt: true, status: true },
       }),
       this.prisma.product.count({
         where: { stock: { lte: 5 } },
       }),
+      // Users this month
+      this.prisma.user.count({
+        where: { createdAt: { gte: startOfThisMonth } },
+      }),
+      // Users last month
+      this.prisma.user.count({
+        where: {
+          createdAt: {
+            gte: startOfLastMonth,
+            lte: endOfLastMonth,
+          },
+        },
+      }),
+      // Orders this month
+      this.prisma.order.count({
+        where: { createdAt: { gte: startOfThisMonth } },
+      }),
+      // Orders last month
+      this.prisma.order.count({
+        where: {
+          createdAt: {
+            gte: startOfLastMonth,
+            lte: endOfLastMonth,
+          },
+        },
+      }),
+      // Active products
+      this.prisma.product.count({
+        where: { isActive: true },
+      }),
     ]);
+
+    // Calculate revenue from paid orders only
+    const paidOrders = allOrders.filter(
+      (order) => order.status === 'PAID' || order.status === 'PENDING',
+    );
 
     const totalRevenue = paidOrders.reduce(
       (acc, order) => acc + order.total,
       0,
+    );
+
+    // Revenue this month
+    const revenueThisMonth = allOrders
+      .filter(
+        (order) =>
+          order.createdAt >= startOfThisMonth &&
+          (order.status === 'PAID' || order.status === 'PENDING'),
+      )
+      .reduce((acc, order) => acc + order.total, 0);
+
+    // Revenue last month
+    const revenueLastMonth = allOrders
+      .filter(
+        (order) =>
+          order.createdAt >= startOfLastMonth &&
+          order.createdAt <= endOfLastMonth &&
+          (order.status === 'PAID' || order.status === 'PENDING'),
+      )
+      .reduce((acc, order) => acc + order.total, 0);
+
+    // Calculate trends (percentage change)
+    const calculateTrend = (current: number, previous: number): number => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return ((current - previous) / previous) * 100;
+    };
+
+    const usersTrend = calculateTrend(usersThisMonth, usersLastMonth);
+    const ordersTrend = calculateTrend(ordersThisMonth, ordersLastMonth);
+    const revenueTrend = calculateTrend(revenueThisMonth, revenueLastMonth);
+    const productsTrend = calculateTrend(
+      productsActive,
+      totalProducts - productsActive,
     );
 
     // 1. Revenue History (Last 6 months)
@@ -93,11 +176,37 @@ export class DashboardService {
     );
 
     return {
-      totalUsers,
-      totalProducts,
-      totalOrders,
-      totalRevenue,
+      // Current totals
+      users: totalUsers,
+      products: productsActive,
+      orders: totalOrders,
+      revenue: totalRevenue,
+
+      // Additional metrics
       lowStockProducts,
+      totalProducts,
+
+      // Trends (month over month)
+      trends: {
+        users: {
+          value: usersTrend,
+          isPositive: usersTrend >= 0,
+        },
+        orders: {
+          value: ordersTrend,
+          isPositive: ordersTrend >= 0,
+        },
+        revenue: {
+          value: revenueTrend,
+          isPositive: revenueTrend >= 0,
+        },
+        products: {
+          value: productsTrend,
+          isPositive: productsTrend >= 0,
+        },
+      },
+
+      // Charts data
       revenueByMonth,
       orderStatusDistribution,
       recentOrders,

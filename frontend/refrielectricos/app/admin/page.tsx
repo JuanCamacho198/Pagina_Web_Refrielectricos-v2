@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { Package, ShoppingBag, Users, DollarSign, TrendingUp, ArrowUpRight, Activity, RefreshCw, Filter, Download, Zap } from 'lucide-react';
+import { Package, ShoppingBag, Users, DollarSign, TrendingUp, ArrowUpRight, Activity, RefreshCw, Filter, Download, Zap, AlertTriangle, TrendingDown } from 'lucide-react';
 import api from '@/lib/api';
 import DashboardSkeleton from '@/components/features/admin/dashboard/DashboardSkeleton';
 
@@ -29,6 +29,14 @@ interface DashboardStats {
   orders: number;
   users: number;
   revenue: number;
+  lowStockProducts: number;
+  totalProducts: number;
+  trends: {
+    users: { value: number; isPositive: boolean };
+    orders: { value: number; isPositive: boolean };
+    revenue: { value: number; isPositive: boolean };
+    products: { value: number; isPositive: boolean };
+  };
   revenueByMonth: { name: string; total: number }[];
   orderStatusDistribution: { name: string; value: number }[];
   topProducts: { id: string; name: string; sold: number }[];
@@ -61,6 +69,14 @@ export default function AdminDashboard() {
     orders: 0,
     users: 0,
     revenue: 0,
+    lowStockProducts: 0,
+    totalProducts: 0,
+    trends: {
+      users: { value: 0, isPositive: true },
+      orders: { value: 0, isPositive: true },
+      revenue: { value: 0, isPositive: true },
+      products: { value: 0, isPositive: true },
+    },
     revenueByMonth: [],
     orderStatusDistribution: [],
     topProducts: [],
@@ -70,6 +86,11 @@ export default function AdminDashboard() {
   const formatNumber = (value: unknown): string => {
     const num = typeof value === 'number' ? value : 0;
     return num.toLocaleString();
+  };
+
+  const formatTrend = (trend: { value: number; isPositive: boolean }): string => {
+    const sign = trend.isPositive ? '+' : '';
+    return `${sign}${trend.value.toFixed(1)}%`;
   };
 
   return (
@@ -117,39 +138,62 @@ export default function AdminDashboard() {
           title="Ingresos Totales" 
           value={`$${formatNumber(stats.revenue)}`} 
           icon={DollarSign} 
-          trend="+12.5%"
-          trendUp={true}
+          trend={formatTrend(stats.trends.revenue)}
+          trendUp={stats.trends.revenue.isPositive}
           colorScheme="emerald"
-          subtitle="Ingreso bruto mensual"
+          subtitle="Ingreso bruto acumulado"
         />
         <StatsCard 
           title="Pedidos Totales" 
           value={formatNumber(stats.orders)} 
           icon={ShoppingBag} 
-          trend="+8.2%"
-          trendUp={true}
+          trend={formatTrend(stats.trends.orders)}
+          trendUp={stats.trends.orders.isPositive}
           colorScheme="blue"
-          subtitle="Transacciones exitosas"
+          subtitle="Transacciones completadas"
         />
         <StatsCard 
           title="Productos Activos" 
           value={formatNumber(stats.products)} 
           icon={Package} 
-          trend="+2.1%"
-          trendUp={true}
+          trend={formatTrend(stats.trends.products)}
+          trendUp={stats.trends.products.isPositive}
           colorScheme="violet"
-          subtitle="En catálogo"
+          subtitle={`${stats.totalProducts} total en catálogo`}
         />
         <StatsCard 
           title="Total Usuarios" 
           value={formatNumber(stats.users)} 
           icon={Users} 
-          trend="+5.7%"
-          trendUp={true}
+          trend={formatTrend(stats.trends.users)}
+          trendUp={stats.trends.users.isPositive}
           colorScheme="amber"
           subtitle="Cuentas registradas"
         />
       </div>
+
+      {/* Secondary Stats - Alert Cards */}
+      {stats.lowStockProducts > 0 && (
+        <div className="bg-linear-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 border-2 border-orange-200 dark:border-orange-900/40 rounded-2xl p-6 flex items-center gap-4 shadow-sm">
+          <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
+            <AlertTriangle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-orange-900 dark:text-orange-100">
+              ⚠️ Productos con bajo inventario
+            </h3>
+            <p className="text-sm text-orange-700 dark:text-orange-300">
+              {stats.lowStockProducts} producto{stats.lowStockProducts !== 1 ? 's' : ''} con stock ≤ 5 unidades
+            </p>
+          </div>
+          <a 
+            href="/admin/products?filter=lowStock" 
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold transition-colors"
+          >
+            Ver productos
+          </a>
+        </div>
+      )}
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -249,6 +293,9 @@ const colorSchemes = {
 function StatsCard({ title, value, icon: Icon, trend, trendUp, colorScheme, subtitle }: StatsCardProps) {
   const scheme = colorSchemes[colorScheme];
   
+  // Don't show trend if it's 0%
+  const showTrend = trend && trend !== '+0.0%' && trend !== '-0.0%' && trend !== '0.0%';
+  
   return (
     <div className="group relative overflow-hidden rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-black/30 hover:-translate-y-1">
       <div className={`absolute top-0 right-0 w-24 h-24 bg-linear-to-br ${scheme.gradient} opacity-5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 transition-all duration-500 group-hover:scale-150 group-hover:opacity-10`} />
@@ -258,9 +305,9 @@ function StatsCard({ title, value, icon: Icon, trend, trendUp, colorScheme, subt
           <div className={`p-3.5 rounded-2xl ${scheme.iconBg} ${scheme.icon} transition-transform duration-300 group-hover:rotate-6 shadow-sm`}>
             <Icon className="h-6 w-6" />
           </div>
-          {trend && (
+          {showTrend && (
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${scheme.trendBg} ${scheme.trend}`}>
-              {trendUp ? <TrendingUp className="h-3.5 w-3.5" /> : <ArrowUpRight className="h-3.5 w-3.5 rotate-90" />}
+              {trendUp ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
               {trend}
             </div>
           )}
