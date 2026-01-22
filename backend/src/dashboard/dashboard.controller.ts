@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -12,7 +12,22 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get('stats')
-  getStats() {
-    return this.dashboardService.getStats();
+  getStats(
+    @Query('period') period?: 'day' | 'week' | 'month' | 'quarter' | 'year',
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('compare') compare?: 'true' | 'false',
+  ) {
+    return this.dashboardService.getStats({
+      period: period || 'month',
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+      compare: compare === 'true',
+    });
+  }
+
+  @Get('notifications')
+  getNotifications() {
+    return this.dashboardService.getNotifications();
   }
 }
