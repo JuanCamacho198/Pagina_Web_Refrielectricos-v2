@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Shield, Trash2, Search, Mail, Calendar, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { User, Shield, Trash2, Search, Mail, Calendar, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RefreshCw, Download } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { format } from 'date-fns';
@@ -9,6 +9,7 @@ import { es } from 'date-fns/locale';
 import { useToast } from '@/context/ToastContext';
 import { Skeleton } from '@/components/ui/Skeleton';
 import Button from '@/components/ui/Button';
+import ExportModal from '@/components/admin/ExportModal';
 
 interface UserData {
   id: string;
@@ -29,6 +30,7 @@ export default function AdminUsersPage() {
   const itemsPerPage = 10;
   const { addToast } = useToast();
   const queryClient = useQueryClient();
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const { data: users = [], isLoading, isFetching, refetch } = useQuery({
     queryKey: ['admin-users'],
@@ -154,16 +156,27 @@ export default function AdminUsersPage() {
             Total: {users.length} usuarios
           </p>
         </div>
-        <button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-            {isFetching ? 'Actualizando...' : 'Actualizar'}
-          </span>
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsExportModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            <Download className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              Exportar
+            </span>
+          </button>
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              {isFetching ? 'Actualizando...' : 'Actualizar'}
+            </span>
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -350,6 +363,12 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        type="users"
+      />
     </div>
   );
 }

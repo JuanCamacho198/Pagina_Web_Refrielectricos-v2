@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, ToggleLeft, ToggleRight, Download } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Image from 'next/image';
 import { useAdminProducts, useDeleteProduct } from '@/hooks/useProducts';
 import { useToast } from '@/context/ToastContext';
 import { BulkActionsBar } from '@/components/admin/BulkActionsBar';
+import ExportModal from '@/components/admin/ExportModal';
 
 type SortKey = 'name' | 'price' | 'stock' | 'isActive';
 type SortDirection = 'asc' | 'desc';
@@ -29,6 +30,7 @@ export default function AdminProductsPage() {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'name', direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
@@ -129,18 +131,33 @@ export default function AdminProductsPage() {
     return sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
   };
 
+  // Get unique categories and brands for export modal
+  const uniqueCategories = Array.from(new Set(products.map(p => p.category).filter(Boolean))) as string[];
+  const uniqueBrands = Array.from(new Set(products.map(p => p.brand).filter(Boolean))) as string[];
+
   if (isLoading) return <div>Cargando productos...</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Productos</h1>
-        <Link href="/admin/products/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Nuevo Producto
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsExportModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            <Download className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              Exportar
+            </span>
+          </button>
+          <Link href="/admin/products/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Producto
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -349,6 +366,14 @@ export default function AdminProductsPage() {
             loading: isDeleting,
           },
         ]}
+      />
+
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        type="products"
+        categories={uniqueCategories}
+        brands={uniqueBrands}
       />
     </div>
   );

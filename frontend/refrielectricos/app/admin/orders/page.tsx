@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Eye, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Trash2, Check, RefreshCw } from 'lucide-react';
+import { Eye, Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Trash2, Check, RefreshCw, Download } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ import Button from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
 import { useDeleteOrder, useBulkDeleteOrders } from '@/hooks/useOrders';
 import { BulkActionsBar } from '@/components/admin/BulkActionsBar';
+import ExportModal from '@/components/admin/ExportModal';
 
 type SortKey = 'id' | 'createdAt' | 'total' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -30,6 +31,7 @@ export default function AdminOrdersPage() {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const { data: orders = [], isLoading, isFetching, refetch } = useQuery({
     queryKey: ['admin-orders'],
@@ -198,16 +200,27 @@ const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pedidos</h1>
-        <button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-            {isFetching ? 'Actualizando...' : 'Actualizar'}
-          </span>
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsExportModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            <Download className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              Exportar
+            </span>
+          </button>
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 text-gray-500 ${isFetching ? 'animate-spin' : ''}`} />
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              {isFetching ? 'Actualizando...' : 'Actualizar'}
+            </span>
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -412,6 +425,12 @@ const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
             loading: bulkDeleteMutation.isPending
           }
         ]}
+      />
+
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        type="orders"
       />
     </div>
   );
