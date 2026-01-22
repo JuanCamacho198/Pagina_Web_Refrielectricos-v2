@@ -148,12 +148,13 @@ export default function HeroCarousel() {
                 src={currentSlide.imageUrl}
                 alt={currentSlide.title}
                 fill
-                sizes="100vw"
-                quality={60}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
+                quality={75}
                 placeholder="blur"
                 blurDataURL={BLUR_DATA_URL}
                 className="object-cover opacity-60 mix-blend-overlay"
                 priority
+                fetchPriority="high"
               />
             </div>
             {/* Background Pattern */}

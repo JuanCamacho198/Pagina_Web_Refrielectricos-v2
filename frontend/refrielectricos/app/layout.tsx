@@ -43,6 +43,13 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {/* Preload LCP Image - Hero Carousel */}
+        <link
+          rel="preload"
+          as="image"
+          href="/images/carrusel2.jpg"
+          fetchPriority="high"
+        />
         {/* Preconnect para mejorar LCP - Backend API */}
         <link
           rel="preconnect"
