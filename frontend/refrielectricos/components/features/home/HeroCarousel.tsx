@@ -1,13 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/ui/Button';
-import api from '@/lib/api';
 
 // Blur placeholders base64 para carga instantánea (10x10px)
 const BLUR_DATA_URL = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAKAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABgUH/8QAIhAAAgEDBAMBAAAAAAAAAAAAAQIDBAURAAYSIRMxQVH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBf/EABkRAAIDAQAAAAAAAAAAAAAAAAECAAMRIf/aAAwDAQACEQMRAD8AqbWsdPcLlULUTSwxxKrfu8ckEfoOsHONa3cdg26noquop6d4p6eB5Y3EjHkQpIyDwIP7p0aNJKBmYkruULWTPZ//2Q==";
@@ -23,21 +21,13 @@ interface Banner {
   position: number;
 }
 
-export default function HeroCarousel() {
+interface HeroCarouselProps {
+  banners: Banner[];
+}
+
+export default function HeroCarousel({ banners }: HeroCarouselProps) {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(0);
-
-  // Fetch banners from API
-  const { data: banners, isLoading } = useQuery({
-    queryKey: ['home-banners'],
-    queryFn: async () => {
-      const { data } = await api.get<Banner[]>('/banners', {
-        params: { activeOnly: 'true' },
-      });
-      return data;
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
 
   const slides = banners || [];
 
@@ -85,17 +75,6 @@ export default function HeroCarousel() {
   const swipePower = (offset: number, velocity: number) => {
     return Math.abs(offset) * velocity;
   };
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="relative w-full max-w-7xl mx-auto">
-        <div className="relative h-100 md:h-125 w-full overflow-hidden rounded-2xl shadow-lg bg-gray-900 flex items-center justify-center">
-          <p className="text-white text-lg">Cargando banners...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Show empty state if no banners
   if (slides.length === 0) {

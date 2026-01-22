@@ -5,6 +5,7 @@ import FeaturesSection from '@/components/features/home/FeaturesSection';
 import ProductCarousel from '@/components/features/home/ProductCarousel';
 import Button from '@/components/ui/Button';
 import { useProducts } from '@/hooks/useProducts';
+import { MOCK_FEATURES } from '@/data/mock-data';
 
 export default function StageConceptPage() {
   const { data: products = [], isLoading: loading } = useProducts();
@@ -15,7 +16,7 @@ export default function StageConceptPage() {
       <StageHero />
 
       {/* Existing Homepage Content */}
-      <FeaturesSection />
+      <FeaturesSection features={MOCK_FEATURES} />
 
       {loading ? (
         <div className="py-8 container mx-auto">
