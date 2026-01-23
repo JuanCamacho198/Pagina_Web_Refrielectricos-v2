@@ -50,3 +50,13 @@ body {
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+.animate-marquee-fast {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 12s linear infinite;
+}
+
+.animate-marquee-fast:hover {
+  animation-play-state: paused;
+}

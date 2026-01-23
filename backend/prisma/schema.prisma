@@ -307,6 +307,7 @@ model StoreSettings {
   customBannerBgColor    String   @default("#EF4444") // Red default
   customBannerTextColor  String   @default("#FFFFFF") // White default
   customBannerIsAnimated Boolean  @default(true) // For scrolling effect
+  customBannerStyle      String   @default("diagonal") // Banner decoration style: diagonal, christmas, waves, geometric, gradient, dots
   
   // Home Features
   feature1Title          String   @default("Envío Gratis")

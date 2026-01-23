@@ -88,7 +88,7 @@ export const metadata: Metadata = {
   description: "Tienda especializada en repuestos de refrigeración, aire acondicionado y electricidad. Envíos a todo el país.",
   keywords: ['refrigeración', 'electricidad', 'repuestos', 'aire acondicionado', 'herramientas'],
   icons: {
-    icon: '/globe.svg',
+    icon: '/images/RefriLogo.png',
   },
   openGraph: {
     type: 'website',

@@ -29,6 +29,7 @@ interface StoreSettings {
   customBannerBgColor: string;
   customBannerTextColor: string;
   customBannerIsAnimated: boolean;
+  customBannerStyle?: string;
   facebookUrl?: string;
   instagramUrl?: string;
   tiktokUrl?: string;
@@ -139,6 +140,62 @@ const IconComponent = ({ iconName, className = 'h-6 w-6' }: { iconName: string; 
   
   const Icon = IconMap[iconName] || TruckIcon;
   return <Icon className={className} />;
+};
+
+// Helper function to generate banner background pattern
+const getBannerBackgroundPattern = (style: string, bgColor: string) => {
+  switch (style) {
+    case 'diagonal':
+      return `repeating-linear-gradient(
+        45deg,
+        ${bgColor},
+        ${bgColor} 20px,
+        rgba(255, 255, 255, 0.1) 20px,
+        rgba(255, 255, 255, 0.1) 40px
+      )`;
+    
+    case 'christmas':
+      return `repeating-linear-gradient(
+        90deg,
+        ${bgColor} 0px,
+        ${bgColor} 30px,
+        rgba(255, 255, 255, 0.15) 30px,
+        rgba(255, 255, 255, 0.15) 35px,
+        #DC2626 35px,
+        #DC2626 65px,
+        rgba(255, 255, 255, 0.15) 65px,
+        rgba(255, 255, 255, 0.15) 70px
+      )`;
+    
+    case 'waves':
+      return `radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 60% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 100% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              ${bgColor}`;
+    
+    case 'geometric':
+      return `repeating-linear-gradient(
+        0deg,
+        ${bgColor},
+        ${bgColor} 10px,
+        rgba(255, 255, 255, 0.08) 10px,
+        rgba(255, 255, 255, 0.08) 20px
+      )`;
+    
+    case 'gradient':
+      const rgb = bgColor.match(/\w\w/g)?.map((x: string) => parseInt(x, 16));
+      const lighterColor = rgb 
+        ? `rgb(${Math.min(rgb[0] + 40, 255)}, ${Math.min(rgb[1] + 40, 255)}, ${Math.min(rgb[2] + 40, 255)})`
+        : bgColor;
+      return `linear-gradient(90deg, ${bgColor} 0%, ${lighterColor} 50%, ${bgColor} 100%)`;
+    
+    case 'dots':
+      return `radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+              ${bgColor}`;
+    
+    default:
+      return bgColor;
+  }
 };
 
 export default function AdminSettingsPage() {
@@ -570,7 +627,7 @@ export default function AdminSettingsPage() {
             <Card className="p-6">
               <h2 className="text-lg font-semibold mb-6 flex items-center gap-2 text-gray-900 dark:text-white">
                 <Globe size={20} className="text-blue-600" />
-                Banner Personalizado (Navideño/Promocional)
+                Banner Personalizado (Promocional)
               </h2>
               
               <div className="space-y-4">
@@ -612,6 +669,29 @@ export default function AdminSettingsPage() {
                       }`}
                     />
                   </button>
+                </div>
+
+                {/* Banner Style Selector */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Estilo Decorativo del Banner
+                  </label>
+                  <select
+                    name="customBannerStyle"
+                    value={settings.customBannerStyle || 'diagonal'}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="diagonal">Rayas Diagonales - Moderno y dinámico</option>
+                    <option value="christmas">Bastones Navideños - Rojo y blanco</option>
+                    <option value="waves">Ondas Suaves - Elegante y fluido</option>
+                    <option value="geometric">Líneas Geométricas - Limpio y profesional</option>
+                    <option value="gradient">Degradado Brillante - Vibrante y llamativo</option>
+                    <option value="dots">Puntos - Sutil y moderno</option>
+                  </select>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Elige el patrón decorativo que mejor se adapte a tu promoción
+                  </p>
                 </div>
 
                 <Input
@@ -678,19 +758,44 @@ export default function AdminSettingsPage() {
                 <div className="mt-4">
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Vista previa en tiempo real:</p>
                   <div 
-                    className="w-full py-2 px-4 text-center text-sm font-medium rounded-lg shadow-sm overflow-hidden relative"
+                    className="w-full py-2.5 px-4 text-center text-sm font-bold rounded-lg shadow-md overflow-hidden relative"
                     style={{ 
-                      backgroundColor: settings.customBannerBgColor, 
-                      color: settings.customBannerTextColor 
+                      background: getBannerBackgroundPattern(
+                        settings.customBannerStyle || 'diagonal',
+                        settings.customBannerBgColor
+                      ),
+                      backgroundSize: settings.customBannerStyle === 'dots' ? '15px 15px' : 'auto',
+                      color: settings.customBannerTextColor,
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                     }}
                   >
-                    {settings.customBannerIsAnimated ? (
-                       <div className="animate-marquee whitespace-nowrap">
-                         {settings.customBannerText}
-                       </div>
-                    ) : (
-                      settings.customBannerText
-                    )}
+                    {/* Top decorative border */}
+                    <div 
+                      className="absolute top-0 left-0 right-0 h-1"
+                      style={{
+                        background: `linear-gradient(90deg, transparent, ${settings.customBannerTextColor}40, transparent)`,
+                      }}
+                    />
+                    
+                    {/* Bottom decorative border */}
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 h-1"
+                      style={{
+                        background: `linear-gradient(90deg, transparent, ${settings.customBannerTextColor}40, transparent)`,
+                      }}
+                    />
+
+                    <div className="relative z-10">
+                      {settings.customBannerIsAnimated ? (
+                         <div className="animate-marquee-fast whitespace-nowrap inline-block">
+                           <span className="mx-6">{settings.customBannerText}</span>
+                           <span className="mx-6">{settings.customBannerText}</span>
+                           <span className="mx-6">{settings.customBannerText}</span>
+                         </div>
+                      ) : (
+                        settings.customBannerText
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

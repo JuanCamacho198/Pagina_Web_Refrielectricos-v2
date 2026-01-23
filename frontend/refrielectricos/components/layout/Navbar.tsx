@@ -58,29 +58,110 @@ export default function Navbar() {
     staleTime: 1000 * 60 * 60,
   });
 
-  // Custom Banner Component
+  // Custom Banner Component with decorative styles
   const CustomBanner = () => {
     if (!isFetched || !storeSettings?.customBannerEnabled) return null;
 
+    const bannerStyle = storeSettings.customBannerStyle || 'diagonal';
+    const bgColor = storeSettings.customBannerBgColor || '#EF4444';
+    const textColor = storeSettings.customBannerTextColor || '#FFFFFF';
+
+    // Generate background pattern based on style
+    const getBackgroundPattern = () => {
+      switch (bannerStyle) {
+        case 'diagonal':
+          return `repeating-linear-gradient(
+            45deg,
+            ${bgColor},
+            ${bgColor} 20px,
+            rgba(255, 255, 255, 0.1) 20px,
+            rgba(255, 255, 255, 0.1) 40px
+          )`;
+        
+        case 'christmas':
+          return `repeating-linear-gradient(
+            90deg,
+            ${bgColor} 0px,
+            ${bgColor} 30px,
+            rgba(255, 255, 255, 0.15) 30px,
+            rgba(255, 255, 255, 0.15) 35px,
+            #DC2626 35px,
+            #DC2626 65px,
+            rgba(255, 255, 255, 0.15) 65px,
+            rgba(255, 255, 255, 0.15) 70px
+          )`;
+        
+        case 'waves':
+          return `radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 60% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 100% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                  ${bgColor}`;
+        
+        case 'geometric':
+          return `repeating-linear-gradient(
+            0deg,
+            ${bgColor},
+            ${bgColor} 10px,
+            rgba(255, 255, 255, 0.08) 10px,
+            rgba(255, 255, 255, 0.08) 20px
+          )`;
+        
+        case 'gradient':
+          // Create a lighter shade for gradient
+          const rgb = bgColor.match(/\w\w/g)?.map((x: string) => parseInt(x, 16));
+          const lighterColor = rgb 
+            ? `rgb(${Math.min(rgb[0] + 40, 255)}, ${Math.min(rgb[1] + 40, 255)}, ${Math.min(rgb[2] + 40, 255)})`
+            : bgColor;
+          return `linear-gradient(90deg, ${bgColor} 0%, ${lighterColor} 50%, ${bgColor} 100%)`;
+        
+        case 'dots':
+          return `radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+                  ${bgColor}`;
+        
+        default:
+          return bgColor;
+      }
+    };
+
     return (
       <div 
-        className="w-full py-2 px-4 text-center text-sm font-bold shadow-sm relative overflow-hidden z-50"
+        className="w-full py-2.5 px-4 text-center text-sm font-bold shadow-md relative overflow-hidden z-50"
         style={{ 
-          backgroundColor: storeSettings.customBannerBgColor || '#EF4444', 
-          color: storeSettings.customBannerTextColor || '#FFFFFF' 
+          background: getBackgroundPattern(),
+          backgroundSize: bannerStyle === 'dots' ? '15px 15px' : 'auto',
+          color: textColor,
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
         }}
       >
+        {/* Top decorative border */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-1"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${textColor}40, transparent)`,
+          }}
+        />
+        
+        {/* Bottom decorative border */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-1"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${textColor}40, transparent)`,
+          }}
+        />
+
         {storeSettings.customBannerIsAnimated ? (
-          <div className="animate-marquee whitespace-nowrap inline-block">
-            <span className="mx-4">{storeSettings.customBannerText}</span>
-            <span className="mx-4">{storeSettings.customBannerText}</span>
-            <span className="mx-4">{storeSettings.customBannerText}</span>
-            <span className="mx-4">{storeSettings.customBannerText}</span>
+          <div className="animate-marquee-fast whitespace-nowrap inline-block">
+            <span className="mx-6">{storeSettings.customBannerText}</span>
+            <span className="mx-6">{storeSettings.customBannerText}</span>
+            <span className="mx-6">{storeSettings.customBannerText}</span>
+            <span className="mx-6">{storeSettings.customBannerText}</span>
+            <span className="mx-6">{storeSettings.customBannerText}</span>
+            <span className="mx-6">{storeSettings.customBannerText}</span>
           </div>
         ) : (
-          <div className="container mx-auto">
+          <div className="container mx-auto relative z-10">
             {storeSettings.customBannerLink ? (
-              <Link href={storeSettings.customBannerLink} className="hover:underline">
+              <Link href={storeSettings.customBannerLink} className="hover:underline transition-all">
                 {storeSettings.customBannerText}
               </Link>
             ) : (
@@ -213,7 +294,7 @@ export default function Navbar() {
               <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium border border-blue-100 dark:border-blue-800 animate-in fade-in zoom-in duration-300">
                 <span className="text-base">{storeSettings.freeShippingEmoji || '🚚'}</span>
                 <span className="whitespace-nowrap max-w-[200px] truncate">
-                  {storeSettings.freeShippingText || 'Envío gratis > $100k'}
+                  {storeSettings.freeShippingBannerText || 'Envío gratis > $100k'}
                 </span>
               </div>
             )}

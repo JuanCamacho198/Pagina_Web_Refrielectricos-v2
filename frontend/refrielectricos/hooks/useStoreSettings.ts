@@ -19,6 +19,7 @@ export interface StoreSettings {
   customBannerBgColor: string;
   customBannerTextColor: string;
   customBannerIsAnimated: boolean;
+  customBannerStyle?: string;
   facebookUrl?: string;
   instagramUrl?: string;
   tiktokUrl?: string;
@@ -67,6 +68,7 @@ const defaultSettings: StoreSettings = {
   customBannerBgColor: '#EF4444',
   customBannerTextColor: '#FFFFFF',
   customBannerIsAnimated: true,
+  customBannerStyle: 'diagonal',
   facebookUrl: '',
   instagramUrl: '',
   tiktokUrl: '',
