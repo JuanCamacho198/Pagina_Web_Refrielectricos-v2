@@ -301,4 +301,150 @@ export class EmailService {
       </html>
     `;
   }
+
+  /**
+   * Send new order notification to admin
+   */
+  async sendNewOrderNotificationToAdmin(orderData: {
+    orderNumber: string;
+    userName: string;
+    userEmail: string;
+    total: number;
+    itemCount: number;
+    adminEmail: string;
+  }): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn(
+        'Skipping admin order notification (Resend not configured)',
+      );
+      return;
+    }
+
+    try {
+      const htmlContent = this.getAdminOrderNotificationTemplate(orderData);
+
+      await this.resend.emails.send({
+        from: this.fromEmail,
+        to: orderData.adminEmail,
+        subject: `🔔 Nuevo Pedido #${orderData.orderNumber} - Refrielectricos G&E`,
+        html: htmlContent,
+      });
+
+      this.logger.log(
+        `Admin notification sent for order ${orderData.orderNumber} to ${orderData.adminEmail}`,
+      );
+    } catch (error) {
+      this.logger.error('Failed to send admin order notification', error);
+      // Don't throw - we don't want to fail order creation if email fails
+    }
+  }
+
+  /**
+   * Admin order notification template
+   */
+  private getAdminOrderNotificationTemplate(orderData: {
+    orderNumber: string;
+    userName: string;
+    userEmail: string;
+    total: number;
+    itemCount: number;
+  }): string {
+    const formatPrice = (price: number) => {
+      return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(price);
+    };
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .badge { background-color: #fbbf24; color: #92400e; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+            .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+            .info-box { background-color: white; border-left: 4px solid #2563eb; padding: 16px; margin: 16px 0; border-radius: 4px; }
+            .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+            .info-row:last-child { border-bottom: none; }
+            .label { font-weight: 600; color: #6b7280; }
+            .value { color: #111827; }
+            .total { background-color: #dbeafe; padding: 16px; border-radius: 8px; text-align: center; margin: 20px 0; }
+            .total-amount { font-size: 32px; font-weight: bold; color: #1e40af; }
+            .button { 
+              display: inline-block; 
+              padding: 14px 28px; 
+              background-color: #2563eb; 
+              color: white !important; 
+              text-decoration: none; 
+              border-radius: 8px;
+              margin: 20px 0;
+              font-weight: 600;
+            }
+            .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <span class="badge">🔔 NUEVO PEDIDO</span>
+              <h1 style="margin: 16px 0 8px 0; font-size: 28px;">Pedido #${orderData.orderNumber}</h1>
+              <p style="margin: 0; opacity: 0.9;">Acabas de recibir un nuevo pedido</p>
+            </div>
+            
+            <div class="content">
+              <div class="info-box">
+                <h3 style="margin-top: 0; color: #111827;">📦 Información del Pedido</h3>
+                <div class="info-row">
+                  <span class="label">Número de Pedido:</span>
+                  <span class="value"><strong>#${orderData.orderNumber}</strong></span>
+                </div>
+                <div class="info-row">
+                  <span class="label">Cliente:</span>
+                  <span class="value">${orderData.userName}</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">Email:</span>
+                  <span class="value">${orderData.userEmail}</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">Productos:</span>
+                  <span class="value">${orderData.itemCount} artículo(s)</span>
+                </div>
+              </div>
+
+              <div class="total">
+                <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">TOTAL DEL PEDIDO</p>
+                <div class="total-amount">${formatPrice(orderData.total)}</div>
+              </div>
+
+              <div style="text-align: center;">
+                <a href="${this.frontendUrl}/admin/orders" class="button">
+                  Ver Detalles del Pedido
+                </a>
+              </div>
+
+              <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin-top: 20px; border-radius: 4px;">
+                <p style="margin: 0; color: #92400e; font-size: 14px;">
+                  <strong>⚡ Acción Requerida:</strong> Revisa el pedido y actualiza su estado en el panel de administración.
+                </p>
+              </div>
+            </div>
+            
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Refrielectricos G&E. Todos los derechos reservados.</p>
+              <p style="margin-top: 8px; font-size: 11px; color: #9ca3af;">
+                Este es un correo automático. Por favor no respondas a este mensaje.
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  }
 }

@@ -171,7 +171,7 @@ export default function Navbar() {
               className="shrink-0 flex items-center gap-2 hover:scale-105 transition-transform duration-200"
             >
               <Image 
-                src="/icons/logoRefri.svg" 
+                src={storeSettings?.navbarLogoUrl || "/images/RefriLogo.png"} 
                 alt="Refrielectricos Logo" 
                 width={storeSettings?.navbarLogoSize || 50}
                 height={storeSettings?.navbarLogoSize || 50}
@@ -182,7 +182,12 @@ export default function Navbar() {
                 }}
                 priority
               />
-              <span className={`font-extrabold tracking-tight leading-none whitespace-nowrap block transition-all duration-300 text-${storeSettings?.navbarTextSize || 'xl'}`}>
+              <span 
+                className={`font-extrabold tracking-tight leading-none whitespace-nowrap block transition-all duration-300 text-${storeSettings?.navbarTextSize || 'xl'}`}
+                style={{ 
+                  fontFamily: storeSettings?.navbarFont ? `var(--font-${storeSettings.navbarFont.toLowerCase().replace(/ /g, '-')}, ${storeSettings.navbarFont})` : 'var(--font-roboto)'
+                }}
+              >
                 <span 
                   className="drop-shadow-sm"
                   style={{ color: storeSettings?.navbarText1Color || '#2563EB' }}

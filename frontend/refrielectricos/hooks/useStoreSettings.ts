@@ -39,12 +39,14 @@ export interface StoreSettings {
   feature4Description?: string;
   feature4Icon?: string;
   feature4Enabled?: boolean;
+  navbarLogoUrl?: string;
   navbarLogoSize?: number;
   navbarText1?: string;
   navbarText2?: string;
   navbarText1Color?: string;
   navbarText2Color?: string;
   navbarTextSize?: string;
+  navbarFont?: string;
 }
 
 const defaultSettings: StoreSettings = {
@@ -85,12 +87,14 @@ const defaultSettings: StoreSettings = {
   feature4Description: 'Múltiples métodos de pago confiables',
   feature4Icon: 'CreditCard',
   feature4Enabled: true,
+  navbarLogoUrl: undefined,
   navbarLogoSize: 50,
   navbarText1: 'Refrielectricos',
   navbarText2: 'G&E',
   navbarText1Color: '#2563EB',
   navbarText2Color: '#3B82F6',
   navbarTextSize: 'xl',
+  navbarFont: 'Roboto',
 };
 
 /**

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Save, Globe, Mail, Bell, Truck, RefreshCw, Layout, Palette, Share2, Building2 } from 'lucide-react';
+import Image from 'next/image';
+import { Save, Globe, Mail, Bell, Truck, RefreshCw, Layout, Palette, Share2, Building2, Upload, X, Truck as TruckIcon, ShieldCheck, Headphones, CreditCard, Package, BadgeCheck, Clock, Gift, Zap, Heart } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
@@ -48,12 +49,14 @@ interface StoreSettings {
   feature4Description?: string;
   feature4Icon?: string;
   feature4Enabled?: boolean;
+  navbarLogoUrl?: string;
   navbarLogoSize?: number;
   navbarText1?: string;
   navbarText2?: string;
   navbarText1Color?: string;
   navbarText2Color?: string;
   navbarTextSize?: string;
+  navbarFont?: string;
 }
 
 type TabType = 'general' | 'contact' | 'shipping' | 'appearance' | 'social' | 'system';
@@ -79,16 +82,16 @@ const EMOJI_OPTIONS = [
 ];
 
 const ICON_OPTIONS = [
-  { value: 'Truck', label: 'Camión' },
-  { value: 'ShieldCheck', label: 'Escudo' },
-  { value: 'Headphones', label: 'Audífonos' },
-  { value: 'CreditCard', label: 'Tarjeta' },
-  { value: 'Package', label: 'Paquete' },
-  { value: 'BadgeCheck', label: 'Insignia' },
-  { value: 'Clock', label: 'Reloj' },
-  { value: 'Gift', label: 'Regalo' },
-  { value: 'Zap', label: 'Rayo' },
-  { value: 'Heart', label: 'Corazón' },
+  { value: 'Truck', label: 'Camión', icon: TruckIcon },
+  { value: 'ShieldCheck', label: 'Escudo', icon: ShieldCheck },
+  { value: 'Headphones', label: 'Audífonos', icon: Headphones },
+  { value: 'CreditCard', label: 'Tarjeta', icon: CreditCard },
+  { value: 'Package', label: 'Paquete', icon: Package },
+  { value: 'BadgeCheck', label: 'Insignia', icon: BadgeCheck },
+  { value: 'Clock', label: 'Reloj', icon: Clock },
+  { value: 'Gift', label: 'Regalo', icon: Gift },
+  { value: 'Zap', label: 'Rayo', icon: Zap },
+  { value: 'Heart', label: 'Corazón', icon: Heart },
 ];
 
 const TEXT_SIZE_OPTIONS = [
@@ -100,6 +103,18 @@ const TEXT_SIZE_OPTIONS = [
   { value: '3xl', label: '3X Grande (3xl)' },
 ];
 
+const FONT_OPTIONS = [
+  { value: 'Roboto', label: 'Roboto', style: 'font-sans' },
+  { value: 'Inter', label: 'Inter', style: 'font-sans' },
+  { value: 'Poppins', label: 'Poppins', style: 'font-sans' },
+  { value: 'Montserrat', label: 'Montserrat', style: 'font-sans' },
+  { value: 'Open Sans', label: 'Open Sans', style: 'font-sans' },
+  { value: 'Lato', label: 'Lato', style: 'font-sans' },
+  { value: 'Raleway', label: 'Raleway', style: 'font-sans' },
+  { value: 'Playfair Display', label: 'Playfair Display', style: 'font-serif' },
+  { value: 'Merriweather', label: 'Merriweather', style: 'font-serif' },
+];
+
 const CURRENCY_OPTIONS = [
   { value: 'COP', label: 'COP - Peso Colombiano', symbol: '$' },
   { value: 'USD', label: 'USD - Dólar Estadounidense', symbol: '$' },
@@ -107,9 +122,30 @@ const CURRENCY_OPTIONS = [
   { value: 'MXN', label: 'MXN - Peso Mexicano', symbol: '$' },
 ];
 
+// Helper to render icon component
+const IconComponent = ({ iconName, className = 'h-6 w-6' }: { iconName: string; className?: string }) => {
+  const IconMap: Record<string, any> = {
+    Truck: TruckIcon,
+    ShieldCheck,
+    Headphones,
+    CreditCard,
+    Package,
+    BadgeCheck,
+    Clock,
+    Gift,
+    Zap,
+    Heart,
+  };
+  
+  const Icon = IconMap[iconName] || TruckIcon;
+  return <Icon className={className} />;
+};
+
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const { addToast } = useToast();
   const queryClient = useQueryClient();
 
@@ -160,12 +196,14 @@ export default function AdminSettingsPage() {
     feature4Description: apiSettings?.feature4Description || 'Múltiples métodos de pago confiables',
     feature4Icon: apiSettings?.feature4Icon || 'CreditCard',
     feature4Enabled: apiSettings?.feature4Enabled ?? true,
+    navbarLogoUrl: apiSettings?.navbarLogoUrl || undefined,
     navbarLogoSize: apiSettings?.navbarLogoSize || 50,
     navbarText1: apiSettings?.navbarText1 || 'Refrielectricos',
     navbarText2: apiSettings?.navbarText2 || 'G&E',
     navbarText1Color: apiSettings?.navbarText1Color || '#2563EB',
     navbarText2Color: apiSettings?.navbarText2Color || '#3B82F6',
     navbarTextSize: apiSettings?.navbarTextSize || 'xl',
+    navbarFont: apiSettings?.navbarFont || 'Roboto',
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -201,6 +239,56 @@ export default function AdminSettingsPage() {
         [fieldName]: !newValue,
       }));
     }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      addToast('Por favor selecciona una imagen válida', 'error');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      addToast('La imagen no debe superar 5MB', 'error');
+      return;
+    }
+
+    setIsUploadingLogo(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const { data } = await api.post('/files/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      queryClient.setQueryData(['store-settings'], (old: StoreSettings | undefined) => ({
+        ...old || settings,
+        navbarLogoUrl: data.url,
+      }));
+
+      addToast('Logo subido correctamente', 'success');
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      addToast('Error al subir el logo', 'error');
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    queryClient.setQueryData(['store-settings'], (old: StoreSettings | undefined) => ({
+      ...old || settings,
+      navbarLogoUrl: undefined,
+    }));
+    addToast('Logo eliminado. Recuerda guardar los cambios', 'info');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -610,8 +698,8 @@ export default function AdminSettingsPage() {
           </div>
         )}
 
-        {/* Appearance Tab */}
-        {activeTab === 'appearance' && (
+        {/* Appearance Tab - CONTINÚA EN SIGUIENTE MENSAJE */}
+{activeTab === 'appearance' && (
           <div className="space-y-6">
             {/* Navbar Customization */}
             <Card className="p-6">
@@ -621,13 +709,84 @@ export default function AdminSettingsPage() {
               </h2>
 
               <div className="space-y-6">
+                {/* Logo Upload Section */}
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <h3 className="font-medium text-gray-900 dark:text-white mb-4">Tamaño del Logo</h3>
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
+                  <h3 className="font-medium text-gray-900 dark:text-white mb-4">Logo del Navbar</h3>
+                  
+                  <div className="space-y-4">
+                    {/* Current Logo Preview */}
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-32 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden">
+                          {settings.navbarLogoUrl ? (
+                            <Image
+                              src={settings.navbarLogoUrl}
+                              alt="Logo Preview"
+                              width={120}
+                              height={120}
+                              className="object-contain"
+                            />
+                          ) : (
+                            <Image
+                              src="/images/RefriLogo.png"
+                              alt="Default Logo"
+                              width={120}
+                              height={120}
+                              className="object-contain"
+                            />
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                          {settings.navbarLogoUrl ? 'Logo personalizado' : 'Logo por defecto'}
+                        </p>
+                      </div>
+                      
+                      <div className="flex-1">
+                        <input
+                          ref={logoInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                        />
+                        
+                        <div className="space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => logoInputRef.current?.click()}
+                            disabled={isUploadingLogo}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            <Upload className="h-4 w-4" />
+                            {isUploadingLogo ? 'Subiendo...' : 'Subir Logo Personalizado'}
+                          </button>
+                          
+                          {settings.navbarLogoUrl && (
+                            <button
+                              type="button"
+                              onClick={handleRemoveLogo}
+                              className="ml-2 inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                              Eliminar Logo
+                            </button>
+                          )}
+                        </div>
+                        
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                          Formatos: PNG, JPG, SVG. Tamaño máximo: 5MB
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Recomendado: 200x200px con fondo transparente
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Logo Size */}
+                    <div>
                       <Input
                         type="number"
-                        label="Tamaño (píxeles)"
+                        label="Tamaño del Logo (píxeles)"
                         name="navbarLogoSize"
                         value={settings.navbarLogoSize || 50}
                         onChange={handleChange}
@@ -638,25 +797,34 @@ export default function AdminSettingsPage() {
                         Rango: 20px - 200px (Recomendado: 40-80px)
                       </p>
                     </div>
-                    <div className="flex items-center justify-center w-32 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                      <div 
-                        className="bg-blue-600 rounded-full flex items-center justify-center text-white font-bold"
-                        style={{
-                          width: `${Math.min(settings.navbarLogoSize || 50, 80)}px`,
-                          height: `${Math.min(settings.navbarLogoSize || 50, 80)}px`,
-                          fontSize: `${Math.min((settings.navbarLogoSize || 50) / 3, 24)}px`
-                        }}
-                      >
-                        LOGO
-                      </div>
-                    </div>
                   </div>
                 </div>
 
+                {/* Text Customization */}
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                   <h3 className="font-medium text-gray-900 dark:text-white mb-4">Texto del Navbar</h3>
                   
                   <div className="space-y-4">
+                    {/* Font Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Fuente del Texto
+                      </label>
+                      <select
+                        name="navbarFont"
+                        value={settings.navbarFont || 'Roboto'}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        {FONT_OPTIONS.map(font => (
+                          <option key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                            {font.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Text Size */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Tamaño del Texto
@@ -673,6 +841,7 @@ export default function AdminSettingsPage() {
                       </select>
                     </div>
 
+                    {/* First Text Part */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Input
                         label="Texto Principal"
@@ -705,6 +874,7 @@ export default function AdminSettingsPage() {
                       </div>
                     </div>
 
+                    {/* Second Text Part */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Input
                         label="Texto Secundario"
@@ -737,31 +907,52 @@ export default function AdminSettingsPage() {
                       </div>
                     </div>
 
-                    <div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Vista Previa:</p>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="rounded-full bg-blue-600 flex items-center justify-center text-white font-bold"
-                          style={{
-                            width: `${Math.min(settings.navbarLogoSize || 50, 48)}px`,
-                            height: `${Math.min(settings.navbarLogoSize || 50, 48)}px`,
-                            fontSize: `${Math.min((settings.navbarLogoSize || 50) / 3, 16)}px`
-                          }}
-                        >
-                          L
+                    {/* Enhanced Preview */}
+                    <div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg border-2 border-gray-200 dark:border-gray-600">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 font-medium">Vista Previa en Tiempo Real:</p>
+                      <div className="flex items-center gap-3 bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                        {/* Logo Preview */}
+                        <div className="flex-shrink-0">
+                          {settings.navbarLogoUrl ? (
+                            <Image
+                              src={settings.navbarLogoUrl}
+                              alt="Logo"
+                              width={settings.navbarLogoSize || 50}
+                              height={settings.navbarLogoSize || 50}
+                              className="object-contain"
+                            />
+                          ) : (
+                            <Image
+                              src="/images/RefriLogo.png"
+                              alt="Default Logo"
+                              width={settings.navbarLogoSize || 50}
+                              height={settings.navbarLogoSize || 50}
+                              className="object-contain"
+                            />
+                          )}
                         </div>
-                        <span 
-                          className={`font-extrabold tracking-tight text-${settings.navbarTextSize || 'xl'}`}
-                          style={{ color: settings.navbarText1Color || '#2563EB' }}
-                        >
-                          {settings.navbarText1 || 'Refrielectricos'}
-                        </span>
-                        <span 
-                          className={`font-extrabold tracking-tight text-${settings.navbarTextSize || 'xl'} ml-1`}
-                          style={{ color: settings.navbarText2Color || '#3B82F6' }}
-                        >
-                          {settings.navbarText2 || 'G&E'}
-                        </span>
+                        
+                        {/* Text Preview */}
+                        <div className="flex items-baseline gap-1">
+                          <span 
+                            className={`font-extrabold tracking-tight text-${settings.navbarTextSize || 'xl'}`}
+                            style={{ 
+                              color: settings.navbarText1Color || '#2563EB',
+                              fontFamily: settings.navbarFont || 'Roboto'
+                            }}
+                          >
+                            {settings.navbarText1 || 'Refrielectricos'}
+                          </span>
+                          <span 
+                            className={`font-extrabold tracking-tight text-${settings.navbarTextSize || 'xl'}`}
+                            style={{ 
+                              color: settings.navbarText2Color || '#3B82F6',
+                              fontFamily: settings.navbarFont || 'Roboto'
+                            }}
+                          >
+                            {settings.navbarText2 || 'G&E'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -769,7 +960,7 @@ export default function AdminSettingsPage() {
               </div>
             </Card>
 
-            {/* Home Features */}
+            {/* Home Features with Preview */}
             <Card className="p-6">
               <h2 className="text-lg font-semibold mb-6 flex items-center gap-2 text-gray-900 dark:text-white">
                 <Layout size={20} className="text-blue-600" />
@@ -798,7 +989,8 @@ export default function AdminSettingsPage() {
                         />
                       </button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div className="md:col-span-1">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Icono
@@ -828,6 +1020,29 @@ export default function AdminSettingsPage() {
                         onChange={handleChange}
                         className="md:col-span-1"
                       />
+                    </div>
+
+                    {/* Feature Preview */}
+                    <div className="mt-4 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-blue-200 dark:border-gray-600">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Vista Previa:</p>
+                      <div className="flex items-start gap-4 bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                            <IconComponent 
+                              iconName={settings[`feature${num}Icon` as keyof StoreSettings] as string || 'Truck'}
+                              className="h-6 w-6 text-blue-600 dark:text-blue-400"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                            {settings[`feature${num}Title` as keyof StoreSettings] || `Título ${num}`}
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {settings[`feature${num}Description` as keyof StoreSettings] || `Descripción de la característica ${num}`}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}

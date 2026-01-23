@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { 
+  Roboto, 
+  Inter, 
+  Poppins, 
+  Montserrat, 
+  Open_Sans, 
+  Lato, 
+  Raleway, 
+  Playfair_Display, 
+  Merriweather 
+} from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/context/ToastContext";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -11,6 +21,62 @@ const roboto = Roboto({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-roboto',
+});
+
+const inter = Inter({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const poppins = Poppins({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-poppins',
+});
+
+const montserrat = Montserrat({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-montserrat',
+});
+
+const openSans = Open_Sans({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-open-sans',
+});
+
+const lato = Lato({
+  weight: ['300', '400', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-lato',
+});
+
+const raleway = Raleway({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-raleway',
+});
+
+const playfairDisplay = Playfair_Display({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-playfair-display',
+});
+
+const merriweather = Merriweather({
+  weight: ['300', '400', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-merriweather',
 });
 
 export const metadata: Metadata = {
@@ -69,7 +135,7 @@ export default function RootLayout({
         {/* Google Identity Services */}
         <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
-      <body className={`${roboto.variable} font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}>
+      <body className={`${roboto.variable} ${inter.variable} ${poppins.variable} ${montserrat.variable} ${openSans.variable} ${lato.variable} ${raleway.variable} ${playfairDisplay.variable} ${merriweather.variable} font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

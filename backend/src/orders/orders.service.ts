@@ -194,6 +194,29 @@ export class OrdersService {
       console.error('Failed to send order confirmation email:', error);
     }
 
+    // Enviar notificación al admin si está habilitada
+    try {
+      // Obtener configuración de la tienda
+      const settings = await this.prisma.storeSettings.findUnique({
+        where: { id: 'store-settings' },
+      });
+
+      // Si las notificaciones están habilitadas, enviar email al admin
+      if (settings?.emailNotifications && settings?.supportEmail) {
+        await this.emailService.sendNewOrderNotificationToAdmin({
+          orderNumber: createdOrder.id,
+          userName: user.name || 'Cliente',
+          userEmail: user.email,
+          total,
+          itemCount: orderItemsData.length,
+          adminEmail: settings.supportEmail,
+        });
+      }
+    } catch (error) {
+      // Log error pero no fallar la creación de la orden
+      console.error('Failed to send admin notification email:', error);
+    }
+
     return createdOrder as Order;
   }
 
