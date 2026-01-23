@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { User, Shield, Trash2, Search, Mail, Calendar, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RefreshCw, Download } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -15,7 +15,7 @@ interface UserData {
   id: string;
   name: string;
   email: string;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'EMPLOYEE' | 'ADMIN';
   provider?: 'LOCAL' | 'GOOGLE';
   createdAt: string;
 }
@@ -23,10 +23,18 @@ interface UserData {
 type SortKey = 'name' | 'email' | 'role' | 'createdAt' | 'provider';
 type SortDirection = 'asc' | 'desc';
 
+// Role color mapping
+const ROLE_COLORS = {
+  USER: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  EMPLOYEE: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  ADMIN: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+};
+
 export default function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'createdAt', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
+  const [roleDropdownOpen, setRoleDropdownOpen] = useState<string | null>(null);
   const itemsPerPage = 10;
   const { addToast } = useToast();
   const queryClient = useQueryClient();
@@ -41,15 +49,37 @@ export default function AdminUsersPage() {
     staleTime: 1000 * 60,
   });
 
-  const handleRoleChange = async (userId: string, newRole: 'USER' | 'ADMIN') => {
-    if (!confirm(`¿Cambiar rol de usuario a ${newRole}?`)) return;
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[data-role-dropdown]')) {
+        setRoleDropdownOpen(null);
+      }
+    };
+
+    if (roleDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [roleDropdownOpen]);
+
+  const handleRoleChange = async (userId: string, newRole: 'USER' | 'EMPLOYEE' | 'ADMIN') => {
+    const roleLabels = {
+      USER: 'Usuario',
+      EMPLOYEE: 'Empleado',
+      ADMIN: 'Administrador'
+    };
+
+    if (!confirm(`¿Cambiar rol de usuario a ${roleLabels[newRole]}?`)) return;
     
     try {
       await api.patch(`/users/${userId}`, { role: newRole });
       queryClient.setQueryData(['admin-users'], (old: UserData[] | undefined) => 
         old?.map(u => u.id === userId ? { ...u, role: newRole } : u)
       );
-      addToast(`Rol actualizado a ${newRole}`, 'success');
+      addToast(`Rol actualizado a ${roleLabels[newRole]}`, 'success');
+      setRoleDropdownOpen(null);
     } catch (error) {
       console.error('Error updating role:', error);
       addToast('Error al actualizar el rol', 'error');
@@ -254,13 +284,49 @@ export default function AdminUsersPage() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    user.role === 'ADMIN' 
-                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
-                      : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                  }`}>
-                    {user.role}
-                  </span>
+                  <div className="relative" data-role-dropdown>
+                    <button
+                      onClick={() => setRoleDropdownOpen(roleDropdownOpen === user.id ? null : user.id)}
+                      className={`px-3 py-1 inline-flex items-center gap-1.5 text-xs leading-5 font-semibold rounded-full transition-all hover:shadow-md ${ROLE_COLORS[user.role]}`}
+                    >
+                      <Shield size={12} />
+                      {user.role === 'USER' && 'Usuario'}
+                      {user.role === 'EMPLOYEE' && 'Empleado'}
+                      {user.role === 'ADMIN' && 'Administrador'}
+                      <ChevronDown size={12} className={`transition-transform ${roleDropdownOpen === user.id ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Role Selection Dropdown */}
+                    {roleDropdownOpen === user.id && (
+                      <div className="absolute z-50 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 animate-in fade-in zoom-in-95 duration-100">
+                        <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Cambiar rol a:</p>
+                        </div>
+                        {(['USER', 'EMPLOYEE', 'ADMIN'] as const).map((role) => (
+                          <button
+                            key={role}
+                            onClick={() => handleRoleChange(user.id, role)}
+                            disabled={user.role === role}
+                            className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 transition-colors ${
+                              user.role === role
+                                ? 'bg-gray-50 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                : 'hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-200'
+                            }`}
+                          >
+                            <Shield size={14} />
+                            <span className="flex-1">
+                              {role === 'USER' && 'Usuario'}
+                              {role === 'EMPLOYEE' && 'Empleado'}
+                              {role === 'ADMIN' && 'Administrador'}
+                            </span>
+                            {user.role === role && (
+                              <span className="text-xs text-gray-400">(Actual)</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full items-center gap-1 ${
@@ -290,28 +356,16 @@ export default function AdminUsersPage() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                  <div className="flex justify-center gap-2">
-                    <Button 
-                      variant="ghost"
-                      size="sm"
-                      className="gap-1"
-                      onClick={() => handleRoleChange(user.id, user.role === 'ADMIN' ? 'USER' : 'ADMIN')}
-                      title={user.role === 'ADMIN' ? 'Degradar a Usuario' : 'Promover a Admin'}
-                    >
-                      <Shield size={14} />
-                      <span>{user.role === 'ADMIN' ? 'Degradar' : 'Promover'}</span>
-                    </Button>
-                    <Button 
-                      variant="ghost"
-                      size="sm"
-                      className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
-                      onClick={() => handleDelete(user.id)}
-                      title="Eliminar Usuario"
-                    >
-                      <Trash2 size={14} />
-                      <span>Eliminar</span>
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                    onClick={() => handleDelete(user.id)}
+                    title="Eliminar Usuario"
+                  >
+                    <Trash2 size={14} />
+                    <span>Eliminar</span>
+                  </Button>
                 </td>
               </tr>
             ))}

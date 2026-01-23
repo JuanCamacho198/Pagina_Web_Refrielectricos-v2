@@ -109,6 +109,16 @@ export default async function ProductsPage({
     ? structure.find((c) => c.name === selectedCategory)?.subcategories || []
     : [];
 
+  // Check if any filters are active
+  const hasActiveFilters = !!(
+    resolvedParams.search ||
+    resolvedParams.category ||
+    resolvedParams.subcategory ||
+    resolvedParams.brand ||
+    resolvedParams.minPrice ||
+    resolvedParams.maxPrice
+  );
+
   return (
     <>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -145,7 +155,11 @@ export default async function ProductsPage({
             <>
               <div className="flex justify-between items-center mb-4">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {meta.total} {meta.total === 1 ? 'producto encontrado' : 'productos encontrados'}
+                  {hasActiveFilters ? (
+                    <>{meta.total} {meta.total === 1 ? 'producto encontrado' : 'productos encontrados'}</>
+                  ) : (
+                    <>{meta.total} {meta.total === 1 ? 'producto disponible' : 'productos disponibles'}</>
+                  )}
                 </p>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-8">
